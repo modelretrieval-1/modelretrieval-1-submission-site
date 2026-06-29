@@ -58,6 +58,24 @@
     {% endif %}
 
     <form class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <legend>Submission period</legend>
+        {% for period in periods %}
+          <label>
+            <input
+              name="submission_period"
+              type="radio"
+              value="{{ period.name }}"
+              {% if selected_period == period.name %}checked{% endif %}
+              required
+            >
+            {{ period.name|capitalize }}
+            <span class="hint">
+              Deadline: {{ period.deadline_at_jst }} JST{% if period.is_open_override %}; reopened by organizer{% endif %}
+            </span>
+          </label>
+        {% endfor %}
+      </fieldset>
       <label>
         Submission file
         <input name="file" type="file" accept=".txt" required>

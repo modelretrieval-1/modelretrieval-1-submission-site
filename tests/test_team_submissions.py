@@ -156,6 +156,9 @@ def test_team_can_open_upload_page_for_eligible_subtask():
 
         assert response.status_code == 200
         assert "Upload Subtask A Submission" in response.text
+        assert "Submission period" in response.text
+        assert 'value="normal"' in response.text
+        assert 'value="late"' in response.text
 
 
 def test_team_cannot_open_upload_page_for_ineligible_subtask():
@@ -181,6 +184,7 @@ def test_non_txt_submission_is_rejected_and_persisted():
 
         response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.csv", b"not trec", "text/csv")},
         )
 
@@ -205,6 +209,7 @@ def test_oversized_submission_is_rejected_and_persisted():
 
         response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", b"12345", "text/plain")},
         )
 
@@ -226,6 +231,7 @@ def test_missing_active_ground_truth_is_rejected_and_persisted():
 
         response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
         )
 
@@ -248,6 +254,7 @@ def test_invalid_trec_submission_is_rejected_and_persisted():
 
         response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", b"q1 BAD m1 1 2.0 run1\n", "text/plain")},
         )
 
@@ -275,6 +282,7 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
 
         response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
         )
 
@@ -329,6 +337,7 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
 
         response = client.post(
             "/team/submissions/B/new",
+            data={"submission_period": "normal"},
             files={
                 "file": (
                     "submission.txt",
@@ -378,10 +387,12 @@ def test_rejected_upload_can_be_followed_by_valid_upload():
 
         rejected_response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", b"q1 BAD m1 1 2.0 run1\n", "text/plain")},
         )
         valid_response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
         )
 
@@ -411,10 +422,12 @@ def test_second_successful_upload_for_same_subtask_period_shows_friendly_error()
 
         first_response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
         )
         second_response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "normal"},
             files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
         )
 
@@ -440,21 +453,17 @@ def test_second_successful_upload_for_same_subtask_period_shows_friendly_error()
         assert metric_count == 3
 
 
-def test_upload_after_normal_deadline_uses_late_period_when_late_is_open():
+def test_team_can_submit_to_selected_late_period_when_late_is_open():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
         organizer, team = seed_accounts(settings)
         activate_subtask_a_ground_truth(settings, organizer.id)
-        set_periods(
-            settings,
-            normal_deadline="2026-01-01 00:00:00",
-            late_deadline="2099-01-01 00:00:00",
-        )
         client = TestClient(create_app(settings))
         login(client, "team-001", team.password)
 
         response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "late"},
             files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
         )
 
@@ -473,7 +482,7 @@ def test_upload_after_normal_deadline_uses_late_period_when_late_is_open():
         assert period["name"] == "late"
 
 
-def test_upload_after_all_deadlines_is_blocked_without_storing_submission():
+def test_selecting_closed_normal_is_rejected_even_when_late_is_open():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
         organizer, team = seed_accounts(settings)
@@ -481,8 +490,59 @@ def test_upload_after_all_deadlines_is_blocked_without_storing_submission():
         set_periods(
             settings,
             normal_deadline="2026-01-01 00:00:00",
+            late_deadline="2099-01-01 00:00:00",
+        )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert response.status_code == 200
+        assert "The normal submission period is closed." in response.text
+
+        with connect(settings.database_path) as connection:
+            submission_count = connection.execute("SELECT COUNT(*) FROM submissions").fetchone()[0]
+
+        assert submission_count == 0
+
+
+def test_selecting_closed_late_is_rejected_even_when_normal_is_open():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        set_periods(
+            settings,
+            normal_deadline="2099-01-01 00:00:00",
             late_deadline="2026-01-02 00:00:00",
         )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "late"},
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert response.status_code == 200
+        assert "The late submission period is closed." in response.text
+
+        with connect(settings.database_path) as connection:
+            submission_count = connection.execute("SELECT COUNT(*) FROM submissions").fetchone()[0]
+
+        assert submission_count == 0
+
+
+def test_missing_submission_period_is_rejected_without_storing_submission():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
         client = TestClient(create_app(settings))
         login(client, "team-001", team.password)
 
@@ -492,7 +552,7 @@ def test_upload_after_all_deadlines_is_blocked_without_storing_submission():
         )
 
         assert response.status_code == 200
-        assert "Submissions are closed for this task." in response.text
+        assert "Choose a submission period." in response.text
 
         with connect(settings.database_path) as connection:
             submission_count = connection.execute("SELECT COUNT(*) FROM submissions").fetchone()[0]
@@ -500,7 +560,30 @@ def test_upload_after_all_deadlines_is_blocked_without_storing_submission():
         assert submission_count == 0
 
 
-def test_open_override_allows_upload_after_deadline():
+def test_invalid_submission_period_is_rejected_without_storing_submission():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "final"},
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert response.status_code == 200
+        assert "Choose normal or late submission." in response.text
+
+        with connect(settings.database_path) as connection:
+            submission_count = connection.execute("SELECT COUNT(*) FROM submissions").fetchone()[0]
+
+        assert submission_count == 0
+
+
+def test_when_both_periods_are_reopened_selected_period_is_used():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
         organizer, team = seed_accounts(settings)
@@ -510,12 +593,14 @@ def test_open_override_allows_upload_after_deadline():
             normal_deadline="2026-01-01 00:00:00",
             late_deadline="2026-01-02 00:00:00",
             normal_override=True,
+            late_override=True,
         )
         client = TestClient(create_app(settings))
         login(client, "team-001", team.password)
 
         response = client.post(
             "/team/submissions/A/new",
+            data={"submission_period": "late"},
             files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
         )
 
@@ -531,4 +616,4 @@ def test_open_override_allows_upload_after_deadline():
                 """
             ).fetchone()
 
-        assert period["name"] == "normal"
+        assert period["name"] == "late"

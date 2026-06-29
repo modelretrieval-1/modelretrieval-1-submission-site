@@ -412,6 +412,29 @@ def get_open_submission_period(
     return None
 
 
+def get_submission_period_by_name(
+    connection: sqlite3.Connection,
+    period_name: str,
+) -> SubmissionPeriod | None:
+    row = connection.execute(
+        """
+        SELECT id, name, starts_at_jst, deadline_at_jst, is_open_override
+        FROM submission_periods
+        WHERE name = ?
+        """,
+        (period_name,),
+    ).fetchone()
+    if row is None:
+        return None
+    return SubmissionPeriod(
+        id=row["id"],
+        name=row["name"],
+        starts_at_jst=row["starts_at_jst"],
+        deadline_at_jst=row["deadline_at_jst"],
+        is_open_override=bool(row["is_open_override"]),
+    )
+
+
 def list_submission_periods(connection: sqlite3.Connection) -> tuple[SubmissionPeriod, ...]:
     rows = connection.execute(
         """

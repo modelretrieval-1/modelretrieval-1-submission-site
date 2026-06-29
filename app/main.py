@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import FastAPI, File, Form, Request, UploadFile, status
@@ -33,6 +34,7 @@ from app.evaluation import (
     persist_evaluation_results,
 )
 from app.ground_truth import (
+    JST,
     activate_ground_truth_version,
     create_ground_truth_version,
     get_active_ground_truth_requirements,
@@ -46,8 +48,9 @@ from app.storage import ensure_storage
 from app.submissions import (
     SubmissionValidationError,
     create_submission_attempt,
-    get_open_submission_period,
+    get_submission_period_by_name,
     has_successful_submission,
+    is_submission_period_open,
     list_submission_periods,
     parse_jst_datetime,
     persist_submission_runs,
@@ -237,14 +240,20 @@ def render_submission_upload(
     errors: tuple[SubmissionValidationError, ...] = (),
     metrics=(),
     success: str | None = None,
+    selected_period: str = "normal",
 ) -> HTMLResponse:
+    app_settings: Settings = request.app.state.settings
+    with connect(app_settings.database_path) as connection:
+        periods = list_submission_periods(connection)
     return templates.TemplateResponse(
         request,
         "team_submission_upload.html",
         {
-            "app_name": request.app.state.settings.app_name,
+            "app_name": app_settings.app_name,
             "account": account,
             "subtask": subtask,
+            "periods": periods,
+            "selected_period": selected_period,
             "errors": errors,
             "metrics": metrics,
             "success": success,
@@ -350,6 +359,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         request: Request,
         subtask: str,
         file: Annotated[UploadFile, File()],
+        submission_period: Annotated[str, Form()] = "",
     ) -> Response:
         account, redirect_response = require_team(request)
         if redirect_response is not None:
@@ -373,17 +383,47 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         )
 
         with connect(app_settings.database_path) as connection:
-            period = get_open_submission_period(connection)
+            selected_period = submission_period.strip().lower()
+            if not selected_period:
+                return render_submission_upload(
+                    request,
+                    account=account,
+                    subtask=subtask,
+                    selected_period=selected_period,
+                    errors=(
+                        SubmissionValidationError(
+                            field_name="submission_period",
+                            error_code="missing_submission_period",
+                            message="Choose a submission period.",
+                        ),
+                    ),
+                )
+            period = get_submission_period_by_name(connection, selected_period)
             if period is None:
                 return render_submission_upload(
                     request,
                     account=account,
                     subtask=subtask,
+                    selected_period=selected_period,
                     errors=(
                         SubmissionValidationError(
-                            field_name="file",
+                            field_name="submission_period",
+                            error_code="invalid_submission_period",
+                            message="Choose normal or late submission.",
+                        ),
+                    ),
+                )
+            if not is_submission_period_open(period, now_jst=datetime.now(JST)):
+                return render_submission_upload(
+                    request,
+                    account=account,
+                    subtask=subtask,
+                    selected_period=selected_period,
+                    errors=(
+                        SubmissionValidationError(
+                            field_name="submission_period",
                             error_code="submission_period_closed",
-                            message="Submissions are closed for this task.",
+                            message=f"The {period.name} submission period is closed.",
                         ),
                     ),
                 )
@@ -505,6 +545,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
                 request,
                 account=account,
                 subtask=subtask,
+                selected_period=selected_period,
                 errors=validation_errors,
             )
 
@@ -512,6 +553,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
             request,
             account=account,
             subtask=subtask,
+            selected_period=selected_period,
             metrics=metrics,
             success="Submission accepted and evaluated.",
         )
