@@ -10,6 +10,8 @@ Recommended stack:
 
 - FastAPI.
 - Jinja2 server-rendered templates.
+- Bootstrap 5 for UI components and layout.
+- Local project CSS for task-specific visual polish.
 - SQLite.
 - Local filesystem storage.
 - uv for Python dependency and virtual environment management.
@@ -376,7 +378,7 @@ Current implementation status:
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
-- Next item: production deployment documentation.
+- Next item: UI modernization before production deployment documentation.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -470,19 +472,48 @@ Deliverables:
 
 Status:
 
-- Next/current sprint.
+- Complete for the planned organizer-operations scope.
 - Participant-selected submission period change request is complete.
 - Organizer submissions table and detail view is complete.
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
-- Next continue with production deployment documentation.
+- Next continue with UI modernization before production deployment documentation.
 
 Demo:
 
 - Organizer reviews all submissions and exports leaderboard.
 
-### Sprint 5: Production Hardening
+### Sprint 5: UI Modernization
+
+Deliverables:
+
+- Bootstrap 5 integration for server-rendered pages.
+- Improved role-aware global navigation.
+- Improved form layout, labels, helper text, validation messages, and action placement.
+- Improved admin tables, filters, badges, and empty states.
+- Improved participant dashboard, upload, validation-error, and result pages.
+- Accessibility pass for labels, focus states, color-independent status text, and responsive layout.
+
+Technical decisions:
+
+- Keep FastAPI and Jinja2 templates.
+- Use Bootstrap 5 as the component/layout foundation.
+- Keep custom styling in `app/static/app.css`.
+- Do not introduce React, Vue, or a frontend build pipeline in this phase.
+- Use minimal JavaScript only where Bootstrap components require it or where progressive enhancement clearly improves usability.
+
+Demo:
+
+- Organizer can navigate between admin pages from a consistent navbar.
+- Team can use the dashboard and upload flow with clearer forms and statuses.
+- Organizer can scan submissions and leaderboard pages with improved filters and tables.
+
+Status:
+
+- Next/current sprint.
+
+### Sprint 6: Production Hardening
 
 Deliverables:
 

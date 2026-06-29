@@ -23,7 +23,7 @@ Completed implementation:
 
 Current sprint target:
 
-- Production deployment documentation.
+- UI modernization for navigation, forms, tables, status states, and page layout.
 
 ## Users and Roles
 
@@ -219,11 +219,28 @@ The system should retain:
 - Submission files do not need encryption at rest.
 - Participant-visible scores stay visible after evaluation. The system does not support participant re-upload after a successful submission.
 
+## UI and Frontend Requirements
+
+The application should remain a server-rendered FastAPI/Jinja2 app. The UI modernization should improve clarity and usability without introducing a single-page application framework or frontend build pipeline.
+
+Approved UI direction:
+
+- Use Bootstrap 5 for the core CSS/component foundation.
+- Use a small local stylesheet for project-specific spacing, density, status colors, and task branding.
+- Use Bootstrap components for navigation, forms, tables, alerts, badges, button groups, dropdowns, and responsive layout.
+- Keep pages operational and scan-friendly, especially organizer pages that contain filters, submissions, validation errors, and leaderboard data.
+- Avoid marketing-style layouts, decorative hero sections, and visual noise.
+- Prefer accessible semantic HTML, visible labels, clear focus states, and readable validation messages.
+- Use consistent status badges for submission states, period states, subtasks, and evaluation states.
+- Keep JavaScript minimal and optional. Use Bootstrap's bundled JavaScript only where needed for navigation or simple components.
+- Do not introduce React, Vue, or a separate frontend build step for this phase.
+
 ## Recommended Technical Stack
 
 Use a lightweight server-rendered web application:
 
 - Backend/web framework: FastAPI with Jinja2 templates.
+- UI/component foundation: Bootstrap 5 with local project CSS.
 - Database: SQLite.
 - File storage: server local filesystem for submissions, ground truth, and exported bundles.
 - Public deployment: VPS-hosted application with a reverse proxy and HTTPS.

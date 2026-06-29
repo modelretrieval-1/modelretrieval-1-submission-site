@@ -17,7 +17,9 @@ Implemented through the latest Sprint 4 slice:
 - Leaderboard CSV export.
 - Submission bundle download.
 
-Next story: production deployment documentation.
+Next story: UI modernization using Bootstrap 5 and project-specific CSS.
+
+Follow-on story: production deployment documentation.
 
 ## Participant Team Stories
 

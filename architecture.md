@@ -14,12 +14,14 @@ The implemented stack matches this recommendation:
 - `uv`, Pytest, and Ruff are configured.
 - Participant validation, evaluation, score display, deadline controls, selected-period uploads, organizer submission review, private leaderboard, leaderboard CSV export, and submission bundle download are implemented.
 
-The next implementation focus is production deployment documentation and hardening.
+The next implementation focus is UI modernization. Production deployment documentation and hardening should follow after the UI slice.
 
 Recommended stack:
 
 - FastAPI for the backend.
 - Jinja2 templates for server-rendered pages.
+- Bootstrap 5 for UI components and layout.
+- Local project CSS for task-specific visual polish.
 - uv for Python dependency management and reproducible installs.
 - SQLite for relational data.
 - Local filesystem storage for uploaded submissions, ground truth, validation logs, and export bundles.

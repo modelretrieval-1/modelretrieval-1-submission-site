@@ -14,7 +14,8 @@ Scrum implementation is underway.
 - Sprint 1: complete for the planned v1 account scope.
 - Sprint 2: complete for the planned validation-core scope.
 - Sprint 3: complete for the planned evaluation and participant-result scope.
-- Sprint 4: next/current sprint, focused on organizer operations.
+- Sprint 4: complete for the planned organizer-operations scope.
+- Sprint 5: next/current sprint, focused on UI modernization before production deployment documentation.
 
 ## Current Stack
 
@@ -22,6 +23,7 @@ Scrum implementation is underway.
 - uv
 - FastAPI
 - Jinja2
+- Bootstrap 5 planned for UI modernization
 - SQLite
 - Local filesystem storage
 - Pytest
@@ -162,6 +164,9 @@ Key decisions already made:
 - Records are retained forever.
 - No email notifications.
 - VPS deployment.
+- Keep the frontend server-rendered with FastAPI/Jinja2.
+- Use Bootstrap 5 plus a small local CSS layer for the next UI modernization slice.
+- Do not introduce React, Vue, or a frontend build pipeline for this phase.
 
 ## Completed Latest Story
 
@@ -816,9 +821,28 @@ Status:
 
 ## Next Recommended Story
 
-Add production deployment documentation.
+Modernize the server-rendered UI with Bootstrap 5 and project-specific CSS.
 
 Target behavior:
+
+- Improve global navigation with role-aware links and active page state.
+- Improve form layout, labels, help text, validation messages, and action placement.
+- Improve organizer tables, filters, and status badges.
+- Improve participant dashboard, upload form, validation-error display, and score display.
+- Keep FastAPI/Jinja2 as the frontend architecture.
+- Avoid a single-page app framework or build pipeline.
+
+Suggested tests:
+
+- Keep existing integration tests green.
+- Add focused HTML/response assertions only where navigation or page structure changes affect behavior.
+- Run a manual browser smoke check for login, team upload, admin teams, ground truth, periods, submissions, and leaderboard.
+
+Follow-on story:
+
+- Add production deployment documentation.
+
+Follow-on target behavior:
 
 - Document VPS deployment steps.
 - Provide systemd service guidance.
@@ -826,7 +850,7 @@ Target behavior:
 - Document persistent storage and SQLite backup/restore approach.
 - Document first organizer creation and operational checklist.
 
-Suggested tests:
+Follow-on suggested tests:
 
 - Keep automated suite green.
 - Add smoke-test/deployment checklist where appropriate.

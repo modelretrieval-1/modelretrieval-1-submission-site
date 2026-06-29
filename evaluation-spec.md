@@ -29,7 +29,9 @@ Implemented behavior:
 - Organizer private leaderboard view shows evaluated run rows with metrics and period filters.
 - Organizer leaderboard rows can be exported as CSV with the current filters.
 
-Next implementation focus: production deployment documentation.
+Next implementation focus: UI modernization using Bootstrap 5 and project-specific CSS.
+
+Follow-on focus: production deployment documentation.
 
 ## Subtask A: Language Model Retrieval
 

@@ -27,7 +27,37 @@ Implemented through the latest Sprint 4 slice:
 - Leaderboard CSV export.
 - Submission bundle download.
 
-Next story: production deployment documentation.
+Next story: UI modernization using Bootstrap 5 and project-specific CSS.
+
+## UI Modernization Direction
+
+The next UI iteration should improve the existing server-rendered pages rather than replace the frontend architecture.
+
+Decision:
+
+- Keep FastAPI and Jinja2 templates.
+- Add Bootstrap 5 as the primary CSS/component foundation.
+- Keep a local `app/static/app.css` file for project-specific polish.
+- Do not add React, Vue, or a separate JavaScript build pipeline in this phase.
+- Use minimal JavaScript, limited to Bootstrap components or small progressive enhancements.
+
+Design goals:
+
+- Make the application feel like a reliable operations console for a research task.
+- Improve navigation so teams and organizers always know where they are.
+- Make upload, account, team, ground-truth, period, submission, and leaderboard forms easier to scan and submit.
+- Make organizer tables denser, clearer, and easier to filter.
+- Make validation errors and evaluation results visually distinct.
+- Preserve accessibility through semantic HTML, form labels, focus states, and color-independent status text.
+
+Core visual system:
+
+- Top navigation with role-aware links and active page state.
+- Constrained main content width with consistent vertical rhythm.
+- Bootstrap forms, inputs, selects, file inputs, buttons, alerts, tables, badges, cards only where they frame a specific object or repeated item.
+- Status badges for `rejected`, `accepted`, `evaluated`, `evaluation_failed`, `normal`, `late`, `open`, `closed`, and `reopened`.
+- Compact filter toolbars for organizer submissions and leaderboard pages.
+- Clear primary and secondary actions on every form.
 
 ## Roles
 
@@ -68,6 +98,12 @@ Required states:
 - Signed-out confirmation.
 - Session expired.
 
+UI modernization notes:
+
+- Use a compact centered login form.
+- Keep the service name and task context visible.
+- Use Bootstrap form controls and alert styling for invalid credentials or signed-out messages.
+
 ### Change Password
 
 URL:
@@ -90,6 +126,11 @@ Required states:
 - Success.
 - Current password incorrect.
 - New password confirmation mismatch.
+
+UI modernization notes:
+
+- Use consistent form grouping, password fields, and success/error alerts.
+- Place submit and cancel/navigation actions predictably at the bottom of the form.
 
 ## Participant Team Flow
 
@@ -127,6 +168,12 @@ Actions:
 - Upload Subtask B submission.
 - View results.
 - Logout.
+
+UI modernization notes:
+
+- Present registered subtasks and normal/late periods as compact status sections.
+- Use badges for period and submission status.
+- Make upload actions visually available only when the selected subtask/period can accept a successful submission.
 
 ### Upload Submission
 
@@ -176,6 +223,13 @@ Required states:
 - Evaluation succeeded.
 - Evaluation failed due to organizer/system configuration.
 
+UI modernization notes:
+
+- Group subtask, period, and file inputs in one clear form.
+- Show period deadlines and reopen status near the period selector.
+- Use Bootstrap file input, helper text, and alert components.
+- Keep the validation rules visible but compact.
+
 ### Validation Error Result
 
 URL:
@@ -208,6 +262,12 @@ Behavior:
 - Show total error count.
 - Make clear that failed validation attempts do not count as successful submissions.
 - Provide a link back to upload again if the period is still open.
+
+UI modernization notes:
+
+- Use an error summary alert followed by a readable table.
+- Keep line number, field, code, and message columns easy to scan.
+- Use status badges for severity and submission state.
 
 ### Participant Results
 
@@ -246,6 +306,11 @@ Behavior:
 - Participants can only view their own submissions.
 - Scores remain visible after evaluation.
 - No re-upload action appears after successful submission.
+
+UI modernization notes:
+
+- Use a concise metadata summary and a score table.
+- Highlight official metric columns without hiding secondary metrics.
 
 ## Organizer Flow
 
