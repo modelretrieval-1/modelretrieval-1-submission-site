@@ -1,5 +1,9 @@
-from app.ground_truth import GroundTruthRequirements
+from datetime import datetime
+
+from app.ground_truth import JST, GroundTruthRequirements
 from app.submissions import (
+    SubmissionPeriod,
+    is_submission_period_open,
     parse_trec_eval,
     validate_query_model_completeness,
     validate_submission_against_requirements,
@@ -295,3 +299,48 @@ def test_validate_submission_against_requirements_reports_completeness_errors():
     assert not result.is_valid
     assert result.ground_truth_version_id == 42
     assert result.errors[0].error_code == "missing_doc_id"
+
+
+def test_submission_period_is_open_until_deadline_in_jst():
+    period = SubmissionPeriod(
+        id=1,
+        name="normal",
+        starts_at_jst=None,
+        deadline_at_jst="2026-08-01 15:00:00",
+        is_open_override=False,
+    )
+
+    assert is_submission_period_open(
+        period,
+        now_jst=datetime(2026, 8, 1, 15, 0, 0, tzinfo=JST),
+    )
+    assert not is_submission_period_open(
+        period,
+        now_jst=datetime(2026, 8, 1, 15, 0, 1, tzinfo=JST),
+    )
+
+
+def test_submission_period_respects_start_time_and_override():
+    period = SubmissionPeriod(
+        id=2,
+        name="late",
+        starts_at_jst="2026-08-02 00:00:00",
+        deadline_at_jst="2026-10-15 23:59:00",
+        is_open_override=False,
+    )
+    override_period = SubmissionPeriod(
+        id=3,
+        name="normal",
+        starts_at_jst="2026-08-02 00:00:00",
+        deadline_at_jst="2026-08-01 15:00:00",
+        is_open_override=True,
+    )
+
+    assert not is_submission_period_open(
+        period,
+        now_jst=datetime(2026, 8, 1, 16, 0, 0, tzinfo=JST),
+    )
+    assert is_submission_period_open(
+        override_period,
+        now_jst=datetime(2027, 1, 1, 0, 0, 0, tzinfo=JST),
+    )

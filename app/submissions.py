@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass, field
+from datetime import datetime
 from itertools import groupby
 from pathlib import Path
 
 from app.config import Settings
-from app.ground_truth import GroundTruthRequirements, jst_now_text, safe_filename, sha256_bytes
+from app.ground_truth import JST, GroundTruthRequirements, jst_now_text, safe_filename, sha256_bytes
 
 MAX_RUNS_PER_SUBTASK = 5
 EXPECTED_FIELD_COUNT = 6
@@ -59,7 +60,9 @@ class SubmissionValidationResult:
 class SubmissionPeriod:
     id: int
     name: str
+    starts_at_jst: str | None
     deadline_at_jst: str
+    is_open_override: bool
 
 
 @dataclass(frozen=True)
@@ -384,10 +387,61 @@ def store_submission_file(
     return StoredSubmissionFile(path=destination, sha256=digest, size_bytes=len(content))
 
 
+def parse_jst_datetime(value: str) -> datetime:
+    return datetime.strptime(value, "%Y-%m-%d %H:%M:%S").replace(tzinfo=JST)
+
+
+def is_submission_period_open(period: SubmissionPeriod, *, now_jst: datetime) -> bool:
+    if period.is_open_override:
+        return True
+    if period.starts_at_jst is not None and now_jst < parse_jst_datetime(period.starts_at_jst):
+        return False
+    return now_jst <= parse_jst_datetime(period.deadline_at_jst)
+
+
+def get_open_submission_period(
+    connection: sqlite3.Connection,
+    *,
+    now_jst: datetime | None = None,
+) -> SubmissionPeriod | None:
+    current_jst = now_jst or datetime.now(JST)
+    periods = list_submission_periods(connection)
+    for period in periods:
+        if is_submission_period_open(period, now_jst=current_jst):
+            return period
+    return None
+
+
+def list_submission_periods(connection: sqlite3.Connection) -> tuple[SubmissionPeriod, ...]:
+    rows = connection.execute(
+        """
+        SELECT id, name, starts_at_jst, deadline_at_jst, is_open_override
+        FROM submission_periods
+        ORDER BY
+          CASE name
+            WHEN 'normal' THEN 1
+            WHEN 'late' THEN 2
+            ELSE 3
+          END,
+          id
+        """
+    ).fetchall()
+    return tuple(
+        SubmissionPeriod(
+            id=row["id"],
+            name=row["name"],
+            starts_at_jst=row["starts_at_jst"],
+            deadline_at_jst=row["deadline_at_jst"],
+            is_open_override=bool(row["is_open_override"]),
+        )
+        for row in rows
+    )
+
+
 def get_normal_submission_period(connection: sqlite3.Connection) -> SubmissionPeriod:
     row = connection.execute(
         """
-        SELECT id, name, deadline_at_jst
+        SELECT id, name, starts_at_jst, deadline_at_jst, is_open_override
         FROM submission_periods
         WHERE name = 'normal'
         """
@@ -397,7 +451,9 @@ def get_normal_submission_period(connection: sqlite3.Connection) -> SubmissionPe
     return SubmissionPeriod(
         id=row["id"],
         name=row["name"],
+        starts_at_jst=row["starts_at_jst"],
         deadline_at_jst=row["deadline_at_jst"],
+        is_open_override=bool(row["is_open_override"]),
     )
 
 

@@ -60,7 +60,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-101 passed
+106 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -583,7 +583,7 @@ Status:
 - The database partial unique index remains the backstop for this rule.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Enforce submission periods and JST deadlines.
 
@@ -600,6 +600,35 @@ Suggested tests:
 - Upload after the normal deadline and before the late deadline uses the late period.
 - Upload after the late deadline is rejected when no override is enabled.
 - `is_open_override` permits upload after a closed deadline.
+
+Status:
+
+- Complete.
+- Implemented JST deadline parsing and open-period selection.
+- Uploads now use the normal period before the normal deadline.
+- Uploads use the late period after normal closes while late is open.
+- Uploads are blocked with a friendly `submission_period_closed` error after all periods close.
+- `is_open_override` permits a period to be used after its deadline.
+- Closed-period uploads are blocked before storing the submitted file.
+- Implemented tests in `tests/test_submissions.py` and `tests/test_team_submissions.py`.
+
+## Next Recommended Story
+
+Add organizer submission-period controls.
+
+Target behavior:
+
+- Organizer can view normal and late period deadlines.
+- Organizer can edit period deadlines.
+- Organizer can toggle `is_open_override`.
+- Team dashboard and upload flow should reflect changed period availability.
+
+Suggested tests:
+
+- Organizer can view submission periods.
+- Organizer can update normal and late deadlines.
+- Organizer can toggle reopen override.
+- Team users cannot access period controls.
 
 ## Docs To Read First In A New Session
 

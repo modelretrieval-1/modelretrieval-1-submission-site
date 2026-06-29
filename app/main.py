@@ -46,7 +46,7 @@ from app.storage import ensure_storage
 from app.submissions import (
     SubmissionValidationError,
     create_submission_attempt,
-    get_normal_submission_period,
+    get_open_submission_period,
     has_successful_submission,
     persist_submission_runs,
     persist_validation_errors,
@@ -346,18 +346,32 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
             )
         )
 
-        stored_file = None
-        if not guard_errors:
-            stored_file = store_submission_file(
-                app_settings,
-                internal_team_id=account.id,
-                subtask=subtask,
-                filename=filename,
-                content=content,
-            )
-
         with connect(app_settings.database_path) as connection:
-            period = get_normal_submission_period(connection)
+            period = get_open_submission_period(connection)
+            if period is None:
+                return render_submission_upload(
+                    request,
+                    account=account,
+                    subtask=subtask,
+                    errors=(
+                        SubmissionValidationError(
+                            field_name="file",
+                            error_code="submission_period_closed",
+                            message="Submissions are closed for this task.",
+                        ),
+                    ),
+                )
+
+            stored_file = None
+            if not guard_errors:
+                stored_file = store_submission_file(
+                    app_settings,
+                    internal_team_id=account.id,
+                    subtask=subtask,
+                    filename=filename,
+                    content=content,
+                )
+
             requirements = (
                 get_active_ground_truth_requirements(connection, subtask)  # type: ignore[arg-type]
                 if not guard_errors

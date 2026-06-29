@@ -369,8 +369,8 @@ Current implementation status:
 - Implemented Sprint 1 items: password hashing, generated passwords, organizer/team account primitives, signed cookie sessions, login/logout, minimal team dashboard, minimal organizer dashboard, organizer team management UI, organizer user management UI, organizer password change page, and tests.
 - Sprint 2 validation-core scope is complete.
 - Implemented Sprint 2 items: organizer ground-truth upload page, local filesystem storage, SHA-256 metadata, upload history, organizer-only access, ground-truth CSV format validation, ground-truth version activation, TREC_EVAL parser with field-level validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, active ground-truth requirement extraction, combined validation against active ground truth, participant submission upload UI, validation failure persistence, accepted submission/run persistence, and tests.
-- Sprint 3 has started with metric calculation, evaluation persistence, participant score display, and one-successful-submission enforcement complete.
-- Next item: enforce submission periods and JST deadlines.
+- Sprint 3 has started with metric calculation, evaluation persistence, participant score display, one-successful-submission enforcement, and JST deadline enforcement complete.
+- Next item: add organizer submission-period controls.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -450,8 +450,8 @@ Demo:
 Status:
 
 - In progress.
-- Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, unit tests with known expected values, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, `evaluated` status updates, upload-page score display, team-dashboard latest score summaries, and one-successful-submission enforcement with friendly errors.
-- Next: enforce submission periods and JST deadlines.
+- Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, unit tests with known expected values, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, `evaluated` status updates, upload-page score display, team-dashboard latest score summaries, one-successful-submission enforcement with friendly errors, and JST deadline/open-period enforcement.
+- Next: add organizer submission-period controls.
 
 ### Sprint 4: Organizer Operations
 

@@ -104,6 +104,34 @@ def valid_submission_content() -> bytes:
     )
 
 
+def set_periods(
+    settings: Settings,
+    *,
+    normal_deadline: str,
+    late_deadline: str,
+    normal_override: bool = False,
+    late_override: bool = False,
+) -> None:
+    with connect(settings.database_path) as connection:
+        connection.execute(
+            """
+            UPDATE submission_periods
+            SET deadline_at_jst = ?, is_open_override = ?
+            WHERE name = 'normal'
+            """,
+            (normal_deadline, int(normal_override)),
+        )
+        connection.execute(
+            """
+            UPDATE submission_periods
+            SET deadline_at_jst = ?, is_open_override = ?
+            WHERE name = 'late'
+            """,
+            (late_deadline, int(late_override)),
+        )
+        connection.commit()
+
+
 def test_team_dashboard_links_to_submission_upload():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
@@ -410,3 +438,97 @@ def test_second_successful_upload_for_same_subtask_period_shows_friendly_error()
 
         assert statuses == ["evaluated", "rejected"]
         assert metric_count == 3
+
+
+def test_upload_after_normal_deadline_uses_late_period_when_late_is_open():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        set_periods(
+            settings,
+            normal_deadline="2026-01-01 00:00:00",
+            late_deadline="2099-01-01 00:00:00",
+        )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/team/submissions/A/new",
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert response.status_code == 200
+        assert "Submission accepted and evaluated." in response.text
+
+        with connect(settings.database_path) as connection:
+            period = connection.execute(
+                """
+                SELECT submission_periods.name
+                FROM submissions
+                JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+                """
+            ).fetchone()
+
+        assert period["name"] == "late"
+
+
+def test_upload_after_all_deadlines_is_blocked_without_storing_submission():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        set_periods(
+            settings,
+            normal_deadline="2026-01-01 00:00:00",
+            late_deadline="2026-01-02 00:00:00",
+        )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/team/submissions/A/new",
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert response.status_code == 200
+        assert "Submissions are closed for this task." in response.text
+
+        with connect(settings.database_path) as connection:
+            submission_count = connection.execute("SELECT COUNT(*) FROM submissions").fetchone()[0]
+
+        assert submission_count == 0
+
+
+def test_open_override_allows_upload_after_deadline():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        set_periods(
+            settings,
+            normal_deadline="2026-01-01 00:00:00",
+            late_deadline="2026-01-02 00:00:00",
+            normal_override=True,
+        )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/team/submissions/A/new",
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert response.status_code == 200
+        assert "Submission accepted and evaluated." in response.text
+
+        with connect(settings.database_path) as connection:
+            period = connection.execute(
+                """
+                SELECT submission_periods.name
+                FROM submissions
+                JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+                """
+            ).fetchone()
+
+        assert period["name"] == "normal"
