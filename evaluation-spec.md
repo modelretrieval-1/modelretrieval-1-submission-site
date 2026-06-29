@@ -21,8 +21,9 @@ Already implemented before or during Sprint 3:
 - Accepted submissions store `RunID` metadata in `runs`.
 - `evaluation_results` exists in the database schema.
 - Pure metric helpers for nDCG and MRR are implemented and unit tested.
+- Accepted submissions are evaluated immediately and metric rows are persisted.
 
-Sprint 3 should next implement result persistence and participant score display.
+Sprint 3 should next implement participant score display.
 
 ## Subtask A: Language Model Retrieval
 

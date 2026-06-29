@@ -60,7 +60,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-98 passed
+99 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -81,7 +81,7 @@ Foundation:
 - `app/main.py`: also includes team submission upload routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
-- `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, and Subtask B evaluation helpers.
+- `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation, ground-truth metric loading, evaluation result persistence, and evaluation status helpers.
 
 Accounts and sessions:
 
@@ -500,7 +500,7 @@ Status:
 - Implemented `dcg`, `ndcg_at`, `mean_reciprocal_rank`, `evaluate_subtask_a`, and `evaluate_subtask_b`.
 - Implemented tests in `tests/test_evaluation.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Evaluate accepted submissions and persist metric results.
 
@@ -518,6 +518,35 @@ Suggested tests:
 - Subtask A accepted submission stores `ndcg@1`, `ndcg@3`, and `ndcg@5`.
 - Subtask B accepted submission stores `mrr`.
 - Evaluation failure leaves a clear status and does not lose the submission file.
+
+Status:
+
+- Complete.
+- Active Subtask A ground truth is loaded into relevance maps.
+- Active Subtask B ground truth is loaded into relevant-model maps.
+- Valid uploads are evaluated immediately after run metadata is persisted.
+- Metric rows are written to `evaluation_results`.
+- Successful evaluation updates submissions to `evaluated`.
+- Missing evaluation setup can mark submissions as `evaluation_failed`.
+- Implemented integration tests in `tests/test_team_submissions.py`.
+
+## Next Recommended Story
+
+Show participant scores after evaluated submissions.
+
+Target behavior:
+
+- After a successful upload, show each submitted RunID and its metrics.
+- Team dashboard should show the latest evaluated submission status per registered subtask.
+- Participants should only see their own scores.
+- Keep private leaderboard work for Sprint 4.
+
+Suggested tests:
+
+- Successful Subtask A upload response shows `ndcg@1`, `ndcg@3`, and `ndcg@5`.
+- Successful Subtask B upload response shows `mrr`.
+- Team dashboard links to or summarizes the team's evaluated submission.
+- Team users cannot access another team's results.
 
 ## Docs To Read First In A New Session
 

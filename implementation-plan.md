@@ -369,8 +369,8 @@ Current implementation status:
 - Implemented Sprint 1 items: password hashing, generated passwords, organizer/team account primitives, signed cookie sessions, login/logout, minimal team dashboard, minimal organizer dashboard, organizer team management UI, organizer user management UI, organizer password change page, and tests.
 - Sprint 2 validation-core scope is complete.
 - Implemented Sprint 2 items: organizer ground-truth upload page, local filesystem storage, SHA-256 metadata, upload history, organizer-only access, ground-truth CSV format validation, ground-truth version activation, TREC_EVAL parser with field-level validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, active ground-truth requirement extraction, combined validation against active ground truth, participant submission upload UI, validation failure persistence, accepted submission/run persistence, and tests.
-- Sprint 3 has started with metric calculation complete.
-- Next item: evaluate accepted submissions and persist metric results.
+- Sprint 3 has started with metric calculation and evaluation persistence complete.
+- Next item: show participant scores after evaluated submissions.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -450,8 +450,8 @@ Demo:
 Status:
 
 - In progress.
-- Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, and unit tests with known expected values.
-- Next: wire accepted submission evaluation to active ground truth and persist metric rows.
+- Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, unit tests with known expected values, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, and `evaluated` status updates.
+- Next: show participant scores after evaluated submissions.
 
 ### Sprint 4: Organizer Operations
 

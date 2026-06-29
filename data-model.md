@@ -24,9 +24,10 @@ Implemented tables include `organizers`, `teams`, `team_subtasks`, `submission_p
 Participant upload attempts currently use:
 
 - `rejected` for failed validation attempts.
-- `accepted` for valid submissions awaiting Sprint 3 evaluation.
+- `accepted` only transiently before successful evaluation persistence.
+- `evaluated` for valid submissions with persisted metric rows.
 
-Sprint 3 will start writing `evaluation_results` and using `evaluated` / `evaluation_failed` statuses.
+Sprint 3 now writes `evaluation_results` and uses `evaluated` / `evaluation_failed` statuses.
 
 ## organizers
 

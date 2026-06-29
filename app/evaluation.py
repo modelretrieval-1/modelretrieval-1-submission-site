@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import sqlite3
 from collections import defaultdict
+from csv import DictReader
 from dataclasses import dataclass
 from math import log2
+from pathlib import Path
 
+from app.accounts import Subtask
+from app.ground_truth import GroundTruthVersion, jst_now_text
 from app.submissions import ParsedSubmission, SubmissionLine
 
 
@@ -112,6 +117,124 @@ def evaluate_subtask_b(
         )
 
     return tuple(metrics)
+
+
+def load_subtask_a_relevance(
+    ground_truth_version: GroundTruthVersion,
+) -> dict[tuple[str, str], float]:
+    rows = DictReader(
+        Path(ground_truth_version.stored_file_path).read_text(encoding="utf-8-sig").splitlines()
+    )
+    relevance: dict[tuple[str, str], float] = {}
+    for row in rows:
+        topic_id = (row.get("task_id") or "").strip()
+        doc_id = (row.get("model_id") or "").strip()
+        relevance_score = (row.get("relevance_score") or "").strip()
+        if topic_id and doc_id and relevance_score:
+            relevance[(topic_id, doc_id)] = float(relevance_score)
+    return relevance
+
+
+def load_subtask_b_relevant_docs(
+    ground_truth_version: GroundTruthVersion,
+) -> dict[str, str]:
+    rows = DictReader(
+        Path(ground_truth_version.stored_file_path).read_text(encoding="utf-8-sig").splitlines()
+    )
+    relevant_docs: dict[str, str] = {}
+    for row in rows:
+        topic_id = (row.get("image_id") or "").strip()
+        doc_id = (row.get("model_id") or "").strip()
+        if topic_id and doc_id:
+            relevant_docs[topic_id] = doc_id
+    return relevant_docs
+
+
+def evaluate_submission(
+    parsed: ParsedSubmission,
+    *,
+    subtask: Subtask,
+    ground_truth_version: GroundTruthVersion,
+) -> tuple[RunMetric, ...]:
+    if subtask == "A":
+        return evaluate_subtask_a(
+            parsed,
+            load_subtask_a_relevance(ground_truth_version),
+        )
+    return evaluate_subtask_b(
+        parsed,
+        load_subtask_b_relevant_docs(ground_truth_version),
+    )
+
+
+def persist_evaluation_results(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+    ground_truth_version_id: int,
+    metrics: tuple[RunMetric, ...],
+) -> None:
+    run_rows = connection.execute(
+        """
+        SELECT id, run_id
+        FROM runs
+        WHERE submission_id = ?
+        """,
+        (submission_id,),
+    ).fetchall()
+    run_database_ids = {row["run_id"]: row["id"] for row in run_rows}
+    missing_run_ids = sorted(
+        {metric.run_id for metric in metrics}
+        - set(run_database_ids)
+    )
+    if missing_run_ids:
+        raise ValueError(f"Missing run rows for RunID(s): {', '.join(missing_run_ids)}")
+
+    connection.executemany(
+        """
+        INSERT INTO evaluation_results (
+          submission_id,
+          run_id,
+          ground_truth_version_id,
+          metric_name,
+          metric_value,
+          created_at_jst
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                submission_id,
+                run_database_ids[metric.run_id],
+                ground_truth_version_id,
+                metric.metric_name,
+                metric.metric_value,
+                jst_now_text(),
+            )
+            for metric in metrics
+        ],
+    )
+    connection.execute(
+        """
+        UPDATE submissions
+        SET status = 'evaluated'
+        WHERE id = ?
+        """,
+        (submission_id,),
+    )
+    connection.commit()
+
+
+def mark_evaluation_failed(connection: sqlite3.Connection, *, submission_id: int) -> None:
+    connection.execute(
+        """
+        UPDATE submissions
+        SET status = 'evaluation_failed'
+        WHERE id = ?
+        """,
+        (submission_id,),
+    )
+    connection.commit()
 
 
 def _lines_by_run_topic(

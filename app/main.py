@@ -25,10 +25,16 @@ from app.accounts import (
 )
 from app.config import Settings, settings
 from app.db import connect, initialize_database
+from app.evaluation import (
+    evaluate_submission,
+    mark_evaluation_failed,
+    persist_evaluation_results,
+)
 from app.ground_truth import (
     activate_ground_truth_version,
     create_ground_truth_version,
     get_active_ground_truth_requirements,
+    get_ground_truth_version,
     list_ground_truth_versions,
     store_ground_truth_file,
     validate_ground_truth_content,
@@ -399,6 +405,24 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
                     submission_id=submission_id,
                     parsed=validation_result.parsed,
                 )
+                ground_truth_version = get_ground_truth_version(
+                    connection,
+                    validation_result.ground_truth_version_id,
+                )
+                if ground_truth_version is None:
+                    mark_evaluation_failed(connection, submission_id=submission_id)
+                else:
+                    metrics = evaluate_submission(
+                        validation_result.parsed,
+                        subtask=subtask,  # type: ignore[arg-type]
+                        ground_truth_version=ground_truth_version,
+                    )
+                    persist_evaluation_results(
+                        connection,
+                        submission_id=submission_id,
+                        ground_truth_version_id=ground_truth_version.id,
+                        metrics=metrics,
+                    )
 
         if validation_errors:
             return render_submission_upload(
@@ -412,7 +436,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
             request,
             account=account,
             subtask=subtask,
-            success="Submission accepted. Evaluation will be added in Sprint 3.",
+            success="Submission accepted and evaluated.",
         )
 
     @app.get("/admin", response_class=HTMLResponse)

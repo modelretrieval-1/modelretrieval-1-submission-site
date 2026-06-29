@@ -41,13 +41,14 @@ Completed foundation:
 - Rejected submission attempt persistence with validation errors.
 - Accepted submission persistence with run metadata.
 - Evaluation metric core for nDCG and MRR.
+- Accepted submission evaluation with persisted metric results.
 - Tests for settings, storage, database initialization, app startup, accounts, sessions, and login flow.
 
 Current test status:
 
 ```text
 uv run --extra dev pytest
-98 passed
+99 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -55,7 +56,7 @@ All checks passed
 
 Next recommended story:
 
-- Sprint 3: evaluate accepted submissions and persist metric results.
+- Sprint 3: show participant scores after evaluated submissions.
 
 ## Development Setup
 

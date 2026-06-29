@@ -65,6 +65,27 @@ def activate_subtask_a_ground_truth(settings: Settings, organizer_id: int) -> No
         assert activate_ground_truth_version(connection, version.id)
 
 
+def activate_subtask_b_ground_truth(settings: Settings, organizer_id: int) -> None:
+    content = b"image_id,model_id\nimage1,model-a\nimage2,model-b\n"
+    stored_file_path, file_sha256 = store_ground_truth_file(
+        settings,
+        subtask="B",
+        filename="b-ground-truth.csv",
+        content=content,
+    )
+    with connect(settings.database_path) as connection:
+        version = create_ground_truth_version(
+            connection,
+            subtask="B",
+            version_label="b-v1",
+            stored_file_path=stored_file_path,
+            file_sha256=file_sha256,
+            uploaded_by_organizer_id=organizer_id,
+            validation_status="validated",
+        )
+        assert activate_ground_truth_version(connection, version.id)
+
+
 def login(client: TestClient, user_id: str, password: str) -> None:
     response = client.post(
         "/login",
@@ -216,7 +237,7 @@ def test_invalid_trec_submission_is_rejected_and_persisted():
         assert error["error_code"] == "invalid_q0"
 
 
-def test_valid_submission_is_accepted_and_runs_are_persisted():
+def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
         organizer, team = seed_accounts(settings)
@@ -230,7 +251,7 @@ def test_valid_submission_is_accepted_and_runs_are_persisted():
         )
 
         assert response.status_code == 200
-        assert "Submission accepted." in response.text
+        assert "Submission accepted and evaluated." in response.text
 
         with connect(settings.database_path) as connection:
             submission = connection.execute(
@@ -239,9 +260,61 @@ def test_valid_submission_is_accepted_and_runs_are_persisted():
             run = connection.execute(
                 "SELECT run_id, line_count, query_count FROM runs"
             ).fetchone()
+            metrics = connection.execute(
+                """
+                SELECT evaluation_results.metric_name, evaluation_results.metric_value
+                FROM evaluation_results
+                JOIN runs ON runs.id = evaluation_results.run_id
+                WHERE runs.run_id = 'run1'
+                ORDER BY evaluation_results.metric_name
+                """
+            ).fetchall()
 
-        assert submission["status"] == "accepted"
+        assert submission["status"] == "evaluated"
         assert submission["ground_truth_version_id"] is not None
         assert run["run_id"] == "run1"
         assert run["line_count"] == 4
         assert run["query_count"] == 2
+        assert [metric["metric_name"] for metric in metrics] == ["ndcg@1", "ndcg@3", "ndcg@5"]
+        assert [metric["metric_value"] for metric in metrics] == [1.0, 1.0, 1.0]
+
+
+def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings, subtasks={"B"})
+        activate_subtask_b_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/team/submissions/B/new",
+            files={
+                "file": (
+                    "submission.txt",
+                    (
+                        b"image1 Q0 model-a 1 2.0 run1\n"
+                        b"image1 Q0 model-b 2 1.0 run1\n"
+                        b"image2 Q0 model-b 1 2.0 run1\n"
+                        b"image2 Q0 model-a 2 1.0 run1\n"
+                    ),
+                    "text/plain",
+                )
+            },
+        )
+
+        assert response.status_code == 200
+        assert "Submission accepted and evaluated." in response.text
+
+        with connect(settings.database_path) as connection:
+            submission = connection.execute("SELECT status FROM submissions").fetchone()
+            metric = connection.execute(
+                """
+                SELECT metric_name, metric_value
+                FROM evaluation_results
+                """
+            ).fetchone()
+
+        assert submission["status"] == "evaluated"
+        assert metric["metric_name"] == "mrr"
+        assert metric["metric_value"] == 1.0

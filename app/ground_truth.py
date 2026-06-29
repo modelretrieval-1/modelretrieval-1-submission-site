@@ -252,6 +252,45 @@ def get_active_ground_truth_version(
     )
 
 
+def get_ground_truth_version(
+    connection: sqlite3.Connection,
+    version_id: int,
+) -> GroundTruthVersion | None:
+    row = connection.execute(
+        """
+        SELECT
+          id,
+          subtask,
+          version_label,
+          stored_file_path,
+          file_sha256,
+          uploaded_by_organizer_id,
+          uploaded_at_jst,
+          is_active,
+          validation_status,
+          notes
+        FROM ground_truth_versions
+        WHERE id = ?
+        """,
+        (version_id,),
+    ).fetchone()
+    if row is None:
+        return None
+
+    return GroundTruthVersion(
+        id=row["id"],
+        subtask=row["subtask"],
+        version_label=row["version_label"],
+        stored_file_path=row["stored_file_path"],
+        file_sha256=row["file_sha256"],
+        uploaded_by_organizer_id=row["uploaded_by_organizer_id"],
+        uploaded_at_jst=row["uploaded_at_jst"],
+        is_active=bool(row["is_active"]),
+        validation_status=row["validation_status"],
+        notes=row["notes"],
+    )
+
+
 def get_active_ground_truth_requirements(
     connection: sqlite3.Connection,
     subtask: Subtask,
