@@ -43,13 +43,14 @@ Completed foundation:
 - Evaluation metric core for nDCG and MRR.
 - Accepted submission evaluation with persisted metric results.
 - Participant score display after evaluated submissions.
+- One successful submission per team/subtask/period enforcement.
 - Tests for settings, storage, database initialization, app startup, accounts, sessions, and login flow.
 
 Current test status:
 
 ```text
 uv run --extra dev pytest
-99 passed
+101 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -57,7 +58,7 @@ All checks passed
 
 Next recommended story:
 
-- Sprint 3: enforce one successful submission per team/subtask/period.
+- Sprint 3: enforce submission periods and JST deadlines.
 
 ## Development Setup
 

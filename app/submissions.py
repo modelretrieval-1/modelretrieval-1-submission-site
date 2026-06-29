@@ -450,6 +450,28 @@ def create_submission_attempt(
     return cursor.lastrowid
 
 
+def has_successful_submission(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+    subtask: str,
+    submission_period_id: int,
+) -> bool:
+    row = connection.execute(
+        """
+        SELECT 1
+        FROM submissions
+        WHERE team_id = ?
+          AND subtask = ?
+          AND submission_period_id = ?
+          AND status IN ('accepted', 'evaluated', 'evaluation_failed')
+        LIMIT 1
+        """,
+        (internal_team_id, subtask, submission_period_id),
+    ).fetchone()
+    return row is not None
+
+
 def persist_validation_errors(
     connection: sqlite3.Connection,
     *,

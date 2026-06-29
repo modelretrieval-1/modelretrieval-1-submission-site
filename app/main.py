@@ -47,6 +47,7 @@ from app.submissions import (
     SubmissionValidationError,
     create_submission_attempt,
     get_normal_submission_period,
+    has_successful_submission,
     persist_submission_runs,
     persist_validation_errors,
     store_submission_file,
@@ -362,6 +363,12 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
                 if not guard_errors
                 else None
             )
+            already_submitted = has_successful_submission(
+                connection,
+                internal_team_id=account.id,
+                subtask=subtask,
+                submission_period_id=period.id,
+            )
 
             if guard_errors:
                 validation_errors = guard_errors
@@ -384,6 +391,18 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
                         requirements,
                     )
                     validation_errors = validation_result.errors
+
+            if not validation_errors and already_submitted:
+                validation_errors = (
+                    SubmissionValidationError(
+                        field_name="file",
+                        error_code="successful_submission_exists",
+                        message=(
+                            "A successful submission already exists for this subtask "
+                            "and period."
+                        ),
+                    ),
+                )
 
             submission_id = create_submission_attempt(
                 connection,

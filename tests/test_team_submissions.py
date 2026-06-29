@@ -338,3 +338,75 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
         assert dashboard.status_code == 200
         assert "Subtask B" in dashboard.text
         assert "run1 mrr" in dashboard.text
+
+
+def test_rejected_upload_can_be_followed_by_valid_upload():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        rejected_response = client.post(
+            "/team/submissions/A/new",
+            files={"file": ("submission.txt", b"q1 BAD m1 1 2.0 run1\n", "text/plain")},
+        )
+        valid_response = client.post(
+            "/team/submissions/A/new",
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert rejected_response.status_code == 200
+        assert "Submission rejected." in rejected_response.text
+        assert valid_response.status_code == 200
+        assert "Submission accepted and evaluated." in valid_response.text
+
+        with connect(settings.database_path) as connection:
+            statuses = [
+                row["status"]
+                for row in connection.execute(
+                    "SELECT status FROM submissions ORDER BY id"
+                ).fetchall()
+            ]
+
+        assert statuses == ["rejected", "evaluated"]
+
+
+def test_second_successful_upload_for_same_subtask_period_shows_friendly_error():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        first_response = client.post(
+            "/team/submissions/A/new",
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+        second_response = client.post(
+            "/team/submissions/A/new",
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+
+        assert first_response.status_code == 200
+        assert "Submission accepted and evaluated." in first_response.text
+        assert second_response.status_code == 200
+        assert "A successful submission already exists for this subtask and period." in (
+            second_response.text
+        )
+
+        with connect(settings.database_path) as connection:
+            statuses = [
+                row["status"]
+                for row in connection.execute(
+                    "SELECT status FROM submissions ORDER BY id"
+                ).fetchall()
+            ]
+            metric_count = connection.execute(
+                "SELECT COUNT(*) FROM evaluation_results"
+            ).fetchone()[0]
+
+        assert statuses == ["evaluated", "rejected"]
+        assert metric_count == 3

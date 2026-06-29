@@ -60,7 +60,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-99 passed
+101 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -556,7 +556,7 @@ Status:
 - Team-visible result queries only use the signed-in team's submissions.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Enforce one successful submission per team/subtask/period.
 
@@ -573,6 +573,33 @@ Suggested tests:
 - A rejected upload followed by a valid upload still succeeds.
 - Different subtasks are tracked independently.
 - Different teams are tracked independently.
+
+Status:
+
+- Complete.
+- Implemented `has_successful_submission`.
+- Valid duplicate uploads now receive a friendly `successful_submission_exists` validation error.
+- Rejected attempts remain retryable.
+- The database partial unique index remains the backstop for this rule.
+- Implemented integration tests in `tests/test_team_submissions.py`.
+
+## Next Recommended Story
+
+Enforce submission periods and JST deadlines.
+
+Target behavior:
+
+- Determine whether normal or late period is currently open using server-side JST time.
+- Block uploads when no period is open unless organizer override is enabled.
+- Keep the current normal-period behavior as the default path for tests.
+- Show clear participant errors when submissions are closed.
+
+Suggested tests:
+
+- Upload before the normal deadline uses the normal period.
+- Upload after the normal deadline and before the late deadline uses the late period.
+- Upload after the late deadline is rejected when no override is enabled.
+- `is_open_override` permits upload after a closed deadline.
 
 ## Docs To Read First In A New Session
 
