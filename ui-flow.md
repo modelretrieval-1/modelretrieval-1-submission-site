@@ -24,8 +24,9 @@ Implemented through the latest Sprint 4 slice:
 - Participant score display after accepted uploads and latest team-dashboard score summaries.
 - Organizer submissions table and detail view.
 - Organizer private leaderboard view.
+- Leaderboard CSV export.
 
-Next story: leaderboard CSV export.
+Next story: submission bundle download.
 
 ## Roles
 

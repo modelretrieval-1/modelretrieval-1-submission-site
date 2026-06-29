@@ -28,8 +28,9 @@ Current upload behavior is implemented:
 - One successful submission is enforced per team, subtask, and selected submission turn.
 - Organizers can review submitted attempts and inspect validation errors or run metrics.
 - Organizers can view a private leaderboard of evaluated run metrics.
+- Organizers can export leaderboard rows as CSV.
 
-Next implementation focus: leaderboard CSV export.
+Next implementation focus: submission bundle download.
 
 ## Submission Turns
 

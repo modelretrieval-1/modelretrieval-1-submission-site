@@ -61,7 +61,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-123 passed
+126 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -83,6 +83,7 @@ Foundation:
 - `app/main.py`: also includes organizer submission-period control routes.
 - `app/main.py`: also includes organizer submission list and detail routes.
 - `app/main.py`: also includes organizer private leaderboard route.
+- `app/main.py`: also includes organizer leaderboard CSV export route.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.
@@ -752,7 +753,7 @@ Status:
 - Subtask B rows show `mrr`.
 - Implemented integration tests in `tests/test_admin_leaderboard.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Add leaderboard CSV export.
 
@@ -770,6 +771,35 @@ Suggested tests:
 - CSV export includes Subtask B MRR.
 - CSV export respects subtask and period filters.
 - Team users cannot download leaderboard CSV.
+
+Status:
+
+- Complete.
+- Implemented route: `GET /admin/leaderboard.csv`.
+- Leaderboard page includes an export link that preserves current filters.
+- CSV export includes team, subtask, period, RunID, metrics, and submitted timestamp.
+- CSV export respects subtask and period filters.
+- Team users are redirected away from the CSV export.
+- Implemented integration tests in `tests/test_admin_leaderboard.py`.
+
+## Next Recommended Story
+
+Add submission bundle download.
+
+Target behavior:
+
+- Organizer can download submitted files as a bundle.
+- Bundle can filter by subtask and submission period.
+- Bundle includes stored submission files and metadata.
+- Team users cannot access bundle downloads.
+
+Suggested tests:
+
+- Organizer can download a submission bundle.
+- Bundle includes submitted files.
+- Bundle includes metadata.
+- Bundle respects subtask and period filters.
+- Team users cannot download submission bundles.
 
 ## Docs To Read First In A New Session
 

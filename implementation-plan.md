@@ -374,7 +374,8 @@ Current implementation status:
 - Participant-selected normal/late submission period is complete.
 - Organizer submissions table and detail view is complete.
 - Organizer private leaderboard view is complete.
-- Next item: Sprint 4 leaderboard CSV export.
+- Leaderboard CSV export is complete.
+- Next item: Sprint 4 submission bundle download.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -472,7 +473,8 @@ Status:
 - Participant-selected submission period change request is complete.
 - Organizer submissions table and detail view is complete.
 - Organizer private leaderboard view is complete.
-- Next continue with leaderboard CSV export.
+- Leaderboard CSV export is complete.
+- Next continue with submission bundle download.
 
 Demo:
 

@@ -19,11 +19,11 @@ Completed implementation:
 - Sprint 1 accounts and team setup.
 - Sprint 2 ground-truth management, TREC_EVAL validation, participant upload UI, validation-failure persistence, and accepted submission/run persistence.
 - Sprint 3 evaluation metrics, participant score display, one-successful-submission enforcement, JST deadline enforcement, and organizer submission-period controls.
-- Sprint 4 participant-selected normal/late upload period, organizer submission review, and private leaderboard view.
+- Sprint 4 participant-selected normal/late upload period, organizer submission review, private leaderboard view, and leaderboard CSV export.
 
 Current sprint target:
 
-- Leaderboard CSV export.
+- Submission bundle download.
 
 ## Users and Roles
 

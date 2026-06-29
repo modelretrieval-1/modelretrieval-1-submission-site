@@ -27,8 +27,9 @@ Implemented behavior:
 - Organizer submission-period controls and participant-selected normal/late uploads are implemented.
 - Organizer submission detail views show run-level metric rows for evaluated submissions.
 - Organizer private leaderboard view shows evaluated run rows with metrics and period filters.
+- Organizer leaderboard rows can be exported as CSV with the current filters.
 
-Next implementation focus: leaderboard CSV export.
+Next implementation focus: submission bundle download.
 
 ## Subtask A: Language Model Retrieval
 
