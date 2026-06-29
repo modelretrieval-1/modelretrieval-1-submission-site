@@ -38,6 +38,8 @@ All submission windows and deadlines are enforced in JST.
 
 For each team, subtask, and submission turn, only one successful submission is allowed. Participants may retry until validation succeeds.
 
+Participants choose the submission turn explicitly during upload. The system validates the selected turn against its JST deadline and organizer reopen override. The system must not automatically assign normal or late based only on server time.
+
 Default deadlines in JST:
 
 - Normal submission: August 1, 2026 at 15:00.

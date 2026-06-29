@@ -371,7 +371,9 @@ Current implementation status:
 - Implemented Sprint 2 items: organizer ground-truth upload page, local filesystem storage, SHA-256 metadata, upload history, organizer-only access, ground-truth CSV format validation, ground-truth version activation, TREC_EVAL parser with field-level validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, active ground-truth requirement extraction, combined validation against active ground truth, participant submission upload UI, validation failure persistence, accepted submission/run persistence, and tests.
 - Sprint 3 is complete for the planned evaluation and participant-result scope.
 - Implemented Sprint 3 items: pure metric calculation helpers, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, participant score display, one-successful-submission enforcement, JST deadline/open-period enforcement, organizer submission-period controls, and tests.
-- Next item: Sprint 4 organizer submissions table and detail view.
+- Note: the implemented open-period behavior currently auto-selects normal or late. This is superseded by the new participant-selected period change request.
+- Change request before continuing Sprint 4: let participants choose normal or late submission during upload.
+- Following item: Sprint 4 organizer submissions table and detail view.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -466,7 +468,8 @@ Deliverables:
 Status:
 
 - Next/current sprint.
-- Start with organizer submissions table and detail view.
+- First handle the participant-selected submission period change request.
+- Then continue with organizer submissions table and detail view.
 
 Demo:
 

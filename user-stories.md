@@ -42,6 +42,7 @@ As a participant team, I want to upload my normal-period run file so that I can 
 
 Acceptance criteria:
 
+- The team explicitly selects the normal period when uploading.
 - Upload is allowed before the normal submission deadline in JST.
 - The default normal submission deadline is August 1, 2026 at 15:00 JST.
 - Invalid files are rejected immediately.
@@ -54,10 +55,23 @@ As a participant team, I want to upload my late-period run file so that I can pa
 
 Acceptance criteria:
 
+- The team explicitly selects the late period when uploading.
 - Upload is allowed before the late submission deadline in JST.
 - The default late submission deadline is October 15, 2026 at 23:59 JST.
 - The late period is tracked separately from the normal period.
 - One successful submission is allowed per team, subtask, and late period.
+
+### Choose Submission Period
+
+As a participant team, I want to choose normal or late submission during upload so that the submission is recorded under the intended turn.
+
+Acceptance criteria:
+
+- The upload form includes a submission-period selector.
+- The system records the selected period with the submission.
+- The system rejects a selected period if it is closed and no organizer override is active.
+- The system does not automatically switch a selected normal submission into late, or a selected late submission into normal.
+- If both periods are open because of organizer override, the participant's selected period is used.
 
 ### Understand Validation Errors
 

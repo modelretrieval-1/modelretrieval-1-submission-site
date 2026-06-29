@@ -607,10 +607,10 @@ Suggested tests:
 
 Status:
 
-- Complete.
+- Complete, but superseded by the participant-selected period change request below.
 - Implemented JST deadline parsing and open-period selection.
-- Uploads now use the normal period before the normal deadline.
-- Uploads use the late period after normal closes while late is open.
+- Current implementation automatically uses the normal period before the normal deadline.
+- Current implementation automatically uses the late period after normal closes while late is open.
 - Uploads are blocked with a friendly `submission_period_closed` error after all periods close.
 - `is_open_override` permits a period to be used after its deadline.
 - Closed-period uploads are blocked before storing the submitted file.
@@ -645,6 +645,35 @@ Status:
 - Implemented tests in `tests/test_admin_periods.py`.
 
 ## Next Recommended Story
+
+Let participants choose normal or late submission during upload.
+
+Context:
+
+- Product decision changed after `caf77ef` and `083c3a4`.
+- Current implementation automatically selects the first open period from server-side JST time.
+- Desired behavior is participant-selected period: the team explicitly chooses `normal` or `late`, and the system validates that selected period is open or reopened.
+- The system must not auto-switch a selected normal upload to late, or selected late upload to normal.
+
+Target behavior:
+
+- Team upload form includes a submission-period selector.
+- GET upload page shows normal and late periods with deadline/override status.
+- POST upload route accepts a selected period.
+- Selected period is validated against its JST deadline and `is_open_override`.
+- Successful submissions are recorded under the selected period.
+- Existing one-successful-submission rule applies to the selected period.
+
+Suggested tests:
+
+- Team can submit to selected normal period when normal is open.
+- Team can submit to selected late period when late is open.
+- Selecting closed normal is rejected even if late is open.
+- Selecting closed late is rejected even if normal is open.
+- If both periods are open via override, the selected period is used.
+- Missing/invalid period selection is rejected with a clear message.
+
+## Following Recommended Story
 
 Add organizer submissions table and detail view.
 

@@ -110,7 +110,8 @@ Default rows:
 Notes:
 
 - Organizers can reopen a closed period using `is_open_override`.
-- Submission rows should store the period used at upload time.
+- Submission rows store the participant-selected period used at upload time.
+- The system validates the selected period against the deadline and reopen override before accepting the upload.
 
 ## submissions
 

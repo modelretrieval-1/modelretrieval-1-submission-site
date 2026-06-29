@@ -130,12 +130,12 @@ URL:
 
 Purpose:
 
-- Let a team upload one `.txt` submission file for one registered subtask and one active submission period.
+- Let a team upload one `.txt` submission file for one registered subtask and one selected submission period.
 
 Inputs:
 
 - Subtask selector: A or B, limited to registered subtasks.
-- Submission period selector: normal or late, limited to currently open periods.
+- Submission period selector: normal or late.
 - File input accepting `.txt`.
 
 Rules shown near the form:
@@ -147,6 +147,8 @@ Rules shown near the form:
 - Every run must include all test queries.
 - Every query must include all candidate models.
 - After a successful submission, no re-upload is allowed for that subtask and period.
+- The selected period is used as submitted; the system does not auto-switch normal and late.
+- Closed periods are rejected unless organizer reopen override is active.
 
 Submit behavior:
 

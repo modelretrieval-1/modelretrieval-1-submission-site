@@ -82,6 +82,9 @@ Participants can submit until they have one successful submission per subtask pe
 
 For each team, subtask, and submission turn:
 
+- The participant must explicitly choose the submission turn, `normal` or `late`, when uploading.
+- The system must not automatically choose normal or late based only on the current time.
+- The selected submission turn must be open at upload time, or reopened by organizer override.
 - A team may continue retrying while submissions fail validation.
 - Once a submission succeeds, the system must prevent another successful submission for that same team, subtask, and turn.
 - If a team attempts to submit again after a successful submission, the system must show an error.

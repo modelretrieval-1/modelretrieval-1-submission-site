@@ -48,6 +48,7 @@ Resolved:
 - Organizers can reopen a closed submission period.
 - Late submissions use the same ground truth and appear in the same private admin leaderboard with a period filter.
 - Leaderboard rows should indicate normal or late.
+- Participants explicitly choose normal or late during upload; the system should not automatically choose the period.
 
 ## Evaluation
 

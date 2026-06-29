@@ -46,6 +46,7 @@ Completed foundation:
 - One successful submission per team/subtask/period enforcement.
 - Submission period and JST deadline enforcement.
 - Organizer submission-period controls.
+- Planned change: participant-selected normal/late submission period.
 - Tests for settings, storage, database initialization, app startup, accounts, sessions, and login flow.
 
 Current test status:
@@ -60,7 +61,7 @@ All checks passed
 
 Next recommended story:
 
-- Sprint 4: add organizer submissions table and detail view.
+- Change request: let participants choose normal or late submission during upload.
 
 ## Development Setup
 
