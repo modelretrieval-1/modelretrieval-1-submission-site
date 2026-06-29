@@ -72,6 +72,43 @@ class StoredSubmissionFile:
     size_bytes: int
 
 
+@dataclass(frozen=True)
+class AdminSubmissionSummary:
+    submission_id: int
+    team_public_id: str
+    team_display_name: str
+    subtask: str
+    period_name: str
+    status: str
+    original_filename: str
+    submitted_at_jst: str
+    validation_summary: str | None
+
+
+@dataclass(frozen=True)
+class AdminSubmissionDetail:
+    submission_id: int
+    team_public_id: str
+    team_display_name: str
+    subtask: str
+    period_name: str
+    status: str
+    original_filename: str
+    stored_file_path: str | None
+    file_sha256: str | None
+    file_size_bytes: int
+    submitted_at_jst: str
+    validation_summary: str | None
+    ground_truth_version_id: int | None
+
+
+@dataclass(frozen=True)
+class PersistedSubmissionRun:
+    run_id: str
+    line_count: int
+    query_count: int
+
+
 def parse_trec_eval(content: str, *, max_runs: int = MAX_RUNS_PER_SUBTASK) -> ParsedSubmission:
     lines: list[SubmissionLine] = []
     errors: list[SubmissionValidationError] = []
@@ -577,6 +614,164 @@ def has_successful_submission(
         (internal_team_id, subtask, submission_period_id),
     ).fetchone()
     return row is not None
+
+
+def list_admin_submission_summaries(
+    connection: sqlite3.Connection,
+    *,
+    team_public_id: str | None = None,
+    subtask: str | None = None,
+    period_name: str | None = None,
+    status: str | None = None,
+) -> tuple[AdminSubmissionSummary, ...]:
+    where_clauses = []
+    parameters: list[str] = []
+
+    if team_public_id:
+        where_clauses.append("teams.team_id = ?")
+        parameters.append(team_public_id)
+    if subtask:
+        where_clauses.append("submissions.subtask = ?")
+        parameters.append(subtask)
+    if period_name:
+        where_clauses.append("submission_periods.name = ?")
+        parameters.append(period_name)
+    if status:
+        where_clauses.append("submissions.status = ?")
+        parameters.append(status)
+
+    where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    rows = connection.execute(
+        f"""
+        SELECT
+          submissions.id,
+          teams.team_id,
+          teams.display_name,
+          submissions.subtask,
+          submission_periods.name AS period_name,
+          submissions.status,
+          submissions.original_filename,
+          submissions.submitted_at_jst,
+          submissions.validation_summary
+        FROM submissions
+        JOIN teams ON teams.id = submissions.team_id
+        JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+        {where_sql}
+        ORDER BY submissions.id DESC
+        """,
+        parameters,
+    ).fetchall()
+    return tuple(
+        AdminSubmissionSummary(
+            submission_id=row["id"],
+            team_public_id=row["team_id"],
+            team_display_name=row["display_name"],
+            subtask=row["subtask"],
+            period_name=row["period_name"],
+            status=row["status"],
+            original_filename=row["original_filename"],
+            submitted_at_jst=row["submitted_at_jst"],
+            validation_summary=row["validation_summary"],
+        )
+        for row in rows
+    )
+
+
+def get_admin_submission_detail(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+) -> AdminSubmissionDetail | None:
+    row = connection.execute(
+        """
+        SELECT
+          submissions.id,
+          teams.team_id,
+          teams.display_name,
+          submissions.subtask,
+          submission_periods.name AS period_name,
+          submissions.status,
+          submissions.original_filename,
+          submissions.stored_file_path,
+          submissions.file_sha256,
+          submissions.file_size_bytes,
+          submissions.submitted_at_jst,
+          submissions.validation_summary,
+          submissions.ground_truth_version_id
+        FROM submissions
+        JOIN teams ON teams.id = submissions.team_id
+        JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+        WHERE submissions.id = ?
+        """,
+        (submission_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return AdminSubmissionDetail(
+        submission_id=row["id"],
+        team_public_id=row["team_id"],
+        team_display_name=row["display_name"],
+        subtask=row["subtask"],
+        period_name=row["period_name"],
+        status=row["status"],
+        original_filename=row["original_filename"],
+        stored_file_path=row["stored_file_path"],
+        file_sha256=row["file_sha256"],
+        file_size_bytes=row["file_size_bytes"],
+        submitted_at_jst=row["submitted_at_jst"],
+        validation_summary=row["validation_summary"],
+        ground_truth_version_id=row["ground_truth_version_id"],
+    )
+
+
+def list_submission_validation_errors(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+) -> tuple[SubmissionValidationError, ...]:
+    rows = connection.execute(
+        """
+        SELECT line_number, field_name, error_code, message, severity
+        FROM validation_errors
+        WHERE submission_id = ?
+        ORDER BY id
+        """,
+        (submission_id,),
+    ).fetchall()
+    return tuple(
+        SubmissionValidationError(
+            line_number=row["line_number"],
+            field_name=row["field_name"],
+            error_code=row["error_code"],
+            message=row["message"],
+            severity=row["severity"],
+        )
+        for row in rows
+    )
+
+
+def list_submission_runs(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+) -> tuple[PersistedSubmissionRun, ...]:
+    rows = connection.execute(
+        """
+        SELECT run_id, line_count, query_count
+        FROM runs
+        WHERE submission_id = ?
+        ORDER BY run_id
+        """,
+        (submission_id,),
+    ).fetchall()
+    return tuple(
+        PersistedSubmissionRun(
+            run_id=row["run_id"],
+            line_count=row["line_count"],
+            query_count=row["query_count"],
+        )
+        for row in rows
+    )
 
 
 def persist_validation_errors(

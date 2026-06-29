@@ -48,10 +48,14 @@ from app.storage import ensure_storage
 from app.submissions import (
     SubmissionValidationError,
     create_submission_attempt,
+    get_admin_submission_detail,
     get_submission_period_by_name,
     has_successful_submission,
     is_submission_period_open,
+    list_admin_submission_summaries,
     list_submission_periods,
+    list_submission_runs,
+    list_submission_validation_errors,
     parse_jst_datetime,
     persist_submission_runs,
     persist_validation_errors,
@@ -228,6 +232,72 @@ def render_periods(
             "periods": periods,
             "error": error,
             "success": success,
+        },
+    )
+
+
+def render_admin_submissions(request: Request, *, account) -> HTMLResponse:
+    app_settings: Settings = request.app.state.settings
+    filters = {
+        "team_id": request.query_params.get("team_id", "").strip(),
+        "subtask": request.query_params.get("subtask", "").strip().upper(),
+        "period": request.query_params.get("period", "").strip().lower(),
+        "status": request.query_params.get("status", "").strip(),
+    }
+    subtask_filter = filters["subtask"] if filters["subtask"] in {"A", "B"} else ""
+    period_filter = filters["period"] if filters["period"] in {"normal", "late"} else ""
+    with connect(app_settings.database_path) as connection:
+        submissions = list_admin_submission_summaries(
+            connection,
+            team_public_id=filters["team_id"] or None,
+            subtask=subtask_filter or None,
+            period_name=period_filter or None,
+            status=filters["status"] or None,
+        )
+    return templates.TemplateResponse(
+        request,
+        "admin_submissions.html",
+        {
+            "app_name": app_settings.app_name,
+            "account": account,
+            "submissions": submissions,
+            "filters": {
+                "team_id": filters["team_id"],
+                "subtask": subtask_filter,
+                "period": period_filter,
+                "status": filters["status"],
+            },
+        },
+    )
+
+
+def render_admin_submission_detail(
+    request: Request,
+    *,
+    account,
+    submission_id: int,
+) -> HTMLResponse | None:
+    app_settings: Settings = request.app.state.settings
+    with connect(app_settings.database_path) as connection:
+        submission = get_admin_submission_detail(connection, submission_id=submission_id)
+        if submission is None:
+            return None
+        validation_errors = list_submission_validation_errors(
+            connection,
+            submission_id=submission_id,
+        )
+        runs = list_submission_runs(connection, submission_id=submission_id)
+        metrics = list_submission_results(connection, submission_id=submission_id)
+    return templates.TemplateResponse(
+        request,
+        "admin_submission_detail.html",
+        {
+            "app_name": app_settings.app_name,
+            "account": account,
+            "submission": submission,
+            "validation_errors": validation_errors,
+            "runs": runs,
+            "metrics": metrics,
         },
     )
 
@@ -668,6 +738,28 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         if redirect_response is not None:
             return redirect_response
         return render_periods(request, account=account)
+
+    @app.get("/admin/submissions", response_class=HTMLResponse)
+    def admin_submissions(request: Request) -> Response:
+        account, redirect_response = require_organizer(request)
+        if redirect_response is not None:
+            return redirect_response
+        return render_admin_submissions(request, account=account)
+
+    @app.get("/admin/submissions/{submission_id}", response_class=HTMLResponse)
+    def admin_submission_detail(request: Request, submission_id: int) -> Response:
+        account, redirect_response = require_organizer(request)
+        if redirect_response is not None:
+            return redirect_response
+
+        response = render_admin_submission_detail(
+            request,
+            account=account,
+            submission_id=submission_id,
+        )
+        if response is None:
+            return redirect("/admin/submissions")
+        return response
 
     @app.post("/admin/periods/{period_name}", response_class=HTMLResponse)
     async def update_period(request: Request, period_name: str) -> Response:

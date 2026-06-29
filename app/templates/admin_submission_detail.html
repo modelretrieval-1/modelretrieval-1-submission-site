@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Submission {{ submission.submission_id }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Submission {{ submission.submission_id }}</h1>
+        <p>{{ submission.team_display_name }} ({{ submission.team_public_id }})</p>
+      </div>
+      <div class="header-actions">
+        <a href="/admin/submissions">Submissions</a>
+        <a href="/admin">Dashboard</a>
+      </div>
+    </div>
+
+    <dl class="detail-list">
+      <dt>Subtask</dt>
+      <dd>{{ submission.subtask }}</dd>
+      <dt>Period</dt>
+      <dd>{{ submission.period_name }}</dd>
+      <dt>Status</dt>
+      <dd>{{ submission.status }}</dd>
+      <dt>File</dt>
+      <dd>{{ submission.original_filename }}</dd>
+      <dt>Submitted</dt>
+      <dd>{{ submission.submitted_at_jst }} JST</dd>
+      <dt>Size</dt>
+      <dd>{{ submission.file_size_bytes }} bytes</dd>
+      <dt>SHA-256</dt>
+      <dd>{{ submission.file_sha256 or "Not stored" }}</dd>
+      <dt>Stored Path</dt>
+      <dd>{{ submission.stored_file_path or "Not stored" }}</dd>
+      <dt>Ground Truth Version</dt>
+      <dd>{{ submission.ground_truth_version_id or "None" }}</dd>
+      <dt>Summary</dt>
+      <dd>{{ submission.validation_summary or "" }}</dd>
+    </dl>
+
+    <h2>Runs</h2>
+    {% if runs %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>RunID</th>
+              <th>Lines</th>
+              <th>Queries</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for run in runs %}
+              <tr>
+                <td>{{ run.run_id }}</td>
+                <td>{{ run.line_count }}</td>
+                <td>{{ run.query_count }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No run metadata recorded.</p>
+    {% endif %}
+
+    <h2>Metrics</h2>
+    {% if metrics %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>RunID</th>
+              <th>Metric</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for metric in metrics %}
+              <tr>
+                <td>{{ metric.run_id }}</td>
+                <td>{{ metric.metric_name }}</td>
+                <td>{{ "%.6f"|format(metric.metric_value) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No metrics recorded.</p>
+    {% endif %}
+
+    <h2>Validation Errors</h2>
+    {% if validation_errors %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Line</th>
+              <th>Field</th>
+              <th>Code</th>
+              <th>Severity</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for error in validation_errors %}
+              <tr>
+                <td>{{ error.line_number or "" }}</td>
+                <td>{{ error.field_name or "" }}</td>
+                <td>{{ error.error_code }}</td>
+                <td>{{ error.severity }}</td>
+                <td>{{ error.message }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No validation errors recorded.</p>
+    {% endif %}
+  </section>
+{% endblock %}

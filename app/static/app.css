@@ -189,3 +189,18 @@ th {
   margin: 0;
   padding-left: 18px;
 }
+
+.detail-list {
+  display: grid;
+  grid-template-columns: minmax(140px, max-content) 1fr;
+  gap: 8px 16px;
+}
+
+.detail-list dt {
+  font-weight: 700;
+}
+
+.detail-list dd {
+  margin: 0;
+  word-break: break-word;
+}
