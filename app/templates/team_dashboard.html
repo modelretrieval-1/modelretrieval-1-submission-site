@@ -22,6 +22,49 @@
       {% endfor %}
     </ul>
 
+    <h2>Latest Submissions</h2>
+    {% if submission_summaries %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Subtask</th>
+              <th>Status</th>
+              <th>File</th>
+              <th>Submitted</th>
+              <th>Scores</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for submission in submission_summaries %}
+              <tr>
+                <td>Subtask {{ submission.subtask }}</td>
+                <td>{{ submission.status }}</td>
+                <td>{{ submission.original_filename }}</td>
+                <td>{{ submission.submitted_at_jst }} JST</td>
+                <td>
+                  {% if submission.metrics %}
+                    <ul class="metric-list">
+                      {% for metric in submission.metrics %}
+                        <li>
+                          {{ metric.run_id }} {{ metric.metric_name }}:
+                          {{ "%.6f"|format(metric.metric_value) }}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    No scores yet
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No submissions yet.</p>
+    {% endif %}
+
     <h2>Deadlines</h2>
     <dl>
       <dt>Normal submission</dt>

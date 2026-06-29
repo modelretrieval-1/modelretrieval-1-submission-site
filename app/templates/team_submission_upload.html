@@ -33,6 +33,30 @@
       </div>
     {% endif %}
 
+    {% if metrics %}
+      <h2>Scores</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>RunID</th>
+              <th>Metric</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for metric in metrics %}
+              <tr>
+                <td>{{ metric.run_id }}</td>
+                <td>{{ metric.metric_name }}</td>
+                <td>{{ "%.6f"|format(metric.metric_value) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
     <form class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
       <label>
         Submission file

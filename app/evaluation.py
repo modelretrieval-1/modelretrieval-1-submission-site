@@ -19,6 +19,23 @@ class RunMetric:
     metric_value: float
 
 
+@dataclass(frozen=True)
+class EvaluationResult:
+    run_id: str
+    metric_name: str
+    metric_value: float
+
+
+@dataclass(frozen=True)
+class TeamSubmissionSummary:
+    submission_id: int
+    subtask: str
+    status: str
+    original_filename: str
+    submitted_at_jst: str
+    metrics: tuple[EvaluationResult, ...]
+
+
 def dcg(relevance_scores: list[float]) -> float:
     return sum(
         ((2**relevance_score) - 1) / log2(index + 2)
@@ -235,6 +252,70 @@ def mark_evaluation_failed(connection: sqlite3.Connection, *, submission_id: int
         (submission_id,),
     )
     connection.commit()
+
+
+def list_submission_results(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+) -> tuple[EvaluationResult, ...]:
+    rows = connection.execute(
+        """
+        SELECT
+          runs.run_id,
+          evaluation_results.metric_name,
+          evaluation_results.metric_value
+        FROM evaluation_results
+        JOIN runs ON runs.id = evaluation_results.run_id
+        WHERE evaluation_results.submission_id = ?
+        ORDER BY runs.run_id, evaluation_results.metric_name
+        """,
+        (submission_id,),
+    ).fetchall()
+    return tuple(
+        EvaluationResult(
+            run_id=row["run_id"],
+            metric_name=row["metric_name"],
+            metric_value=row["metric_value"],
+        )
+        for row in rows
+    )
+
+
+def list_latest_team_submission_summaries(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+) -> tuple[TeamSubmissionSummary, ...]:
+    rows = connection.execute(
+        """
+        SELECT
+          id,
+          subtask,
+          status,
+          original_filename,
+          submitted_at_jst
+        FROM submissions
+        WHERE team_id = ?
+        ORDER BY subtask, id DESC
+        """,
+        (internal_team_id,),
+    ).fetchall()
+    latest_by_subtask = {}
+    for row in rows:
+        latest_by_subtask.setdefault(row["subtask"], row)
+
+    return tuple(
+        TeamSubmissionSummary(
+            submission_id=row["id"],
+            subtask=row["subtask"],
+            status=row["status"],
+            original_filename=row["original_filename"],
+            submitted_at_jst=row["submitted_at_jst"],
+            metrics=list_submission_results(connection, submission_id=row["id"]),
+        )
+        for row in sorted(latest_by_subtask.values(), key=lambda item: item["subtask"])
+    )
 
 
 def _lines_by_run_topic(

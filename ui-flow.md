@@ -20,7 +20,7 @@ Implemented through Sprint 2:
 - Participant upload form for registered subtasks.
 - Immediate validation error display.
 
-Sprint 3 should add participant score display after accepted uploads and the first evaluation result views.
+Sprint 3 has added participant score display after accepted uploads and latest team-dashboard score summaries.
 
 ## Roles
 

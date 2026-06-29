@@ -184,3 +184,8 @@ th {
   margin: 0 4px 4px 0;
   font-size: 13px;
 }
+
+.metric-list {
+  margin: 0;
+  padding-left: 18px;
+}

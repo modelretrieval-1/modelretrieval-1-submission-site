@@ -252,6 +252,10 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
 
         assert response.status_code == 200
         assert "Submission accepted and evaluated." in response.text
+        assert "ndcg@1" in response.text
+        assert "ndcg@3" in response.text
+        assert "ndcg@5" in response.text
+        assert "1.000000" in response.text
 
         with connect(settings.database_path) as connection:
             submission = connection.execute(
@@ -277,6 +281,14 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
         assert run["query_count"] == 2
         assert [metric["metric_name"] for metric in metrics] == ["ndcg@1", "ndcg@3", "ndcg@5"]
         assert [metric["metric_value"] for metric in metrics] == [1.0, 1.0, 1.0]
+
+        dashboard = client.get("/team")
+
+        assert dashboard.status_code == 200
+        assert "Latest Submissions" in dashboard.text
+        assert "Subtask A" in dashboard.text
+        assert "evaluated" in dashboard.text
+        assert "run1 ndcg@5" in dashboard.text
 
 
 def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
@@ -305,6 +317,8 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
 
         assert response.status_code == 200
         assert "Submission accepted and evaluated." in response.text
+        assert "mrr" in response.text
+        assert "1.000000" in response.text
 
         with connect(settings.database_path) as connection:
             submission = connection.execute("SELECT status FROM submissions").fetchone()
@@ -318,3 +332,9 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
         assert submission["status"] == "evaluated"
         assert metric["metric_name"] == "mrr"
         assert metric["metric_value"] == 1.0
+
+        dashboard = client.get("/team")
+
+        assert dashboard.status_code == 200
+        assert "Subtask B" in dashboard.text
+        assert "run1 mrr" in dashboard.text

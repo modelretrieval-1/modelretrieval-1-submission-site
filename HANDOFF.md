@@ -530,7 +530,7 @@ Status:
 - Missing evaluation setup can mark submissions as `evaluation_failed`.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Show participant scores after evaluated submissions.
 
@@ -547,6 +547,32 @@ Suggested tests:
 - Successful Subtask B upload response shows `mrr`.
 - Team dashboard links to or summarizes the team's evaluated submission.
 - Team users cannot access another team's results.
+
+Status:
+
+- Complete.
+- Successful upload responses show submitted run metrics.
+- Team dashboard shows latest submission status and scores per subtask.
+- Team-visible result queries only use the signed-in team's submissions.
+- Implemented integration tests in `tests/test_team_submissions.py`.
+
+## Next Recommended Story
+
+Enforce one successful submission per team/subtask/period.
+
+Target behavior:
+
+- If a team already has an `accepted`, `evaluated`, or `evaluation_failed` submission for a subtask and period, a new successful upload is blocked.
+- Failed validation attempts remain retryable.
+- Team dashboard should clearly show that the subtask already has a successful submission.
+- The database partial unique index already protects this rule; the UI should show a friendly error instead of surfacing an integrity exception.
+
+Suggested tests:
+
+- A second valid upload for the same team/subtask/period is rejected with a clear message.
+- A rejected upload followed by a valid upload still succeeds.
+- Different subtasks are tracked independently.
+- Different teams are tracked independently.
 
 ## Docs To Read First In A New Session
 

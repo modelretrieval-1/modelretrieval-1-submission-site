@@ -27,6 +27,8 @@ from app.config import Settings, settings
 from app.db import connect, initialize_database
 from app.evaluation import (
     evaluate_submission,
+    list_latest_team_submission_summaries,
+    list_submission_results,
     mark_evaluation_failed,
     persist_evaluation_results,
 )
@@ -206,6 +208,7 @@ def render_submission_upload(
     account,
     subtask: str,
     errors: tuple[SubmissionValidationError, ...] = (),
+    metrics=(),
     success: str | None = None,
 ) -> HTMLResponse:
     return templates.TemplateResponse(
@@ -216,6 +219,7 @@ def render_submission_upload(
             "account": account,
             "subtask": subtask,
             "errors": errors,
+            "metrics": metrics,
             "success": success,
         },
     )
@@ -283,11 +287,20 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
 
         with connect(app_settings.database_path) as connection:
             subtasks = sorted(get_team_subtasks(connection, account.id))
+            submission_summaries = list_latest_team_submission_summaries(
+                connection,
+                internal_team_id=account.id,
+            )
 
         return templates.TemplateResponse(
             request,
             "team_dashboard.html",
-            {"app_name": app_settings.app_name, "account": account, "subtasks": subtasks},
+            {
+                "app_name": app_settings.app_name,
+                "account": account,
+                "subtasks": subtasks,
+                "submission_summaries": submission_summaries,
+            },
         )
 
     @app.get("/team/submissions/{subtask}/new", response_class=HTMLResponse)
@@ -399,6 +412,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
                     submission_id=submission_id,
                     errors=validation_errors,
                 )
+                metrics = ()
             elif validation_result is not None:
                 persist_submission_runs(
                     connection,
@@ -423,6 +437,9 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
                         ground_truth_version_id=ground_truth_version.id,
                         metrics=metrics,
                     )
+                metrics = list_submission_results(connection, submission_id=submission_id)
+            else:
+                metrics = ()
 
         if validation_errors:
             return render_submission_upload(
@@ -436,6 +453,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
             request,
             account=account,
             subtask=subtask,
+            metrics=metrics,
             success="Submission accepted and evaluated.",
         )
 

@@ -42,6 +42,7 @@ Completed foundation:
 - Accepted submission persistence with run metadata.
 - Evaluation metric core for nDCG and MRR.
 - Accepted submission evaluation with persisted metric results.
+- Participant score display after evaluated submissions.
 - Tests for settings, storage, database initialization, app startup, accounts, sessions, and login flow.
 
 Current test status:
@@ -56,7 +57,7 @@ All checks passed
 
 Next recommended story:
 
-- Sprint 3: show participant scores after evaluated submissions.
+- Sprint 3: enforce one successful submission per team/subtask/period.
 
 ## Development Setup
 

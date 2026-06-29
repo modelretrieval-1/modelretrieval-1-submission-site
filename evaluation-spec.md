@@ -22,8 +22,9 @@ Already implemented before or during Sprint 3:
 - `evaluation_results` exists in the database schema.
 - Pure metric helpers for nDCG and MRR are implemented and unit tested.
 - Accepted submissions are evaluated immediately and metric rows are persisted.
+- Participant upload responses and the team dashboard show the team's own metric results.
 
-Sprint 3 should next implement participant score display.
+Sprint 3 should next enforce the one-successful-submission rule.
 
 ## Subtask A: Language Model Retrieval
 
