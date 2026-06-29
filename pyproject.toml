@@ -1,0 +1,32 @@
+[project]
+name = "modelretrieval-submissions"
+version = "0.1.0"
+description = "Submission and evaluation system for the NTCIR-19 ModelRetrieval task."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115.0",
+  "jinja2>=3.1.0",
+  "python-multipart>=0.0.9",
+  "uvicorn[standard]>=0.30.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-cov>=5.0.0",
+  "ruff>=0.6.0",
+  "playwright>=1.46.0",
+  "httpx2>=0.28.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
