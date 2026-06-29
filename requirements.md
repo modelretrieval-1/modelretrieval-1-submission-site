@@ -11,17 +11,19 @@ The system supports:
 
 ## Current Implementation Checkpoint
 
-The project is entering Sprint 3.
+The project is in Sprint 4 organizer operations.
 
 Completed implementation:
 
 - Sprint 0 foundation.
 - Sprint 1 accounts and team setup.
 - Sprint 2 ground-truth management, TREC_EVAL validation, participant upload UI, validation-failure persistence, and accepted submission/run persistence.
+- Sprint 3 evaluation metrics, participant score display, one-successful-submission enforcement, JST deadline enforcement, and organizer submission-period controls.
+- Sprint 4 participant-selected normal/late upload period.
 
 Current sprint target:
 
-- Sprint 3 evaluation metrics and participant score display.
+- Organizer submissions table and detail view.
 
 ## Users and Roles
 

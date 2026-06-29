@@ -15,17 +15,19 @@ Maximum upload size: 10 MB.
 
 ## Current Implementation Checkpoint
 
-Sprint 2 validation-core behavior is implemented:
+Current upload behavior is implemented:
 
 - Team upload pages exist for registered subtasks.
+- Participants explicitly choose normal or late submission during upload.
 - Uploads are limited to one `.txt` file.
 - Non-`.txt` files and oversized files are rejected immediately.
 - TREC_EVAL parser and validation rules are implemented.
 - Active ground truth supplies required query and candidate model IDs.
 - Failed validation attempts are persisted as `rejected` submissions with `validation_errors`.
-- Valid submissions are persisted as `accepted` submissions with run metadata.
+- Valid submissions are persisted with run metadata, evaluated immediately, and shown to the participant with scores.
+- One successful submission is enforced per team, subtask, and selected submission turn.
 
-Sprint 3 will add evaluation and participant score display.
+Next implementation focus: organizer submission review views.
 
 ## Submission Turns
 

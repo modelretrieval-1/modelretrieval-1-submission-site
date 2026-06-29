@@ -12,9 +12,9 @@ Ground-truth files are stored on the server local filesystem.
 
 ## Current Implementation Checkpoint
 
-Evaluation is the next/current sprint target.
+Evaluation is implemented for accepted participant uploads.
 
-Already implemented before or during Sprint 3:
+Implemented behavior:
 
 - Valid submissions can be accepted and stored.
 - Ground-truth versions can be uploaded, validated, and activated.
@@ -23,8 +23,10 @@ Already implemented before or during Sprint 3:
 - Pure metric helpers for nDCG and MRR are implemented and unit tested.
 - Accepted submissions are evaluated immediately and metric rows are persisted.
 - Participant upload responses and the team dashboard show the team's own metric results.
+- One successful submission is enforced per team, subtask, and selected submission period.
+- Organizer submission-period controls and participant-selected normal/late uploads are implemented.
 
-Sprint 3 should next enforce the one-successful-submission rule.
+Next implementation focus: organizer submission review and leaderboard views.
 
 ## Subtask A: Language Model Retrieval
 

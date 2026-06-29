@@ -61,7 +61,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-112 passed
+115 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -83,6 +83,7 @@ Foundation:
 - `app/main.py`: also includes organizer submission-period control routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
+- `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.
 - `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation, ground-truth metric loading, evaluation result persistence, and evaluation status helpers.
 
 Accounts and sessions:
@@ -607,11 +608,9 @@ Suggested tests:
 
 Status:
 
-- Complete, but superseded by the participant-selected period change request below.
+- Complete, but the upload route now uses the participant-selected period behavior below.
 - Implemented JST deadline parsing and open-period selection.
-- Current implementation automatically uses the normal period before the normal deadline.
-- Current implementation automatically uses the late period after normal closes while late is open.
-- Uploads are blocked with a friendly `submission_period_closed` error after all periods close.
+- `get_open_submission_period` remains available, but participant uploads no longer auto-switch periods.
 - `is_open_override` permits a period to be used after its deadline.
 - Closed-period uploads are blocked before storing the submitted file.
 - Implemented tests in `tests/test_submissions.py` and `tests/test_team_submissions.py`.
@@ -644,15 +643,15 @@ Status:
 - Team users are redirected away from period controls.
 - Implemented tests in `tests/test_admin_periods.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Let participants choose normal or late submission during upload.
 
 Context:
 
 - Product decision changed after `caf77ef` and `083c3a4`.
-- Current implementation automatically selects the first open period from server-side JST time.
-- Desired behavior is participant-selected period: the team explicitly chooses `normal` or `late`, and the system validates that selected period is open or reopened.
+- Previous implementation automatically selected the first open period from server-side JST time.
+- Current behavior is participant-selected period: the team explicitly chooses `normal` or `late`, and the system validates that selected period is open or reopened.
 - The system must not auto-switch a selected normal upload to late, or selected late upload to normal.
 
 Target behavior:
@@ -673,7 +672,18 @@ Suggested tests:
 - If both periods are open via override, the selected period is used.
 - Missing/invalid period selection is rejected with a clear message.
 
-## Following Recommended Story
+Status:
+
+- Complete.
+- Upload form now includes a normal/late submission-period selector.
+- GET upload page shows configured period deadlines and reopen status.
+- POST upload route accepts the selected period.
+- Missing and invalid period selections are rejected before storing a submission attempt.
+- Closed selected periods are rejected even when the other period is open.
+- Successful and rejected attempts are recorded under the selected period.
+- Implemented integration tests in `tests/test_team_submissions.py`.
+
+## Next Recommended Story
 
 Add organizer submissions table and detail view.
 

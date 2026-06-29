@@ -2,16 +2,18 @@
 
 ## Current Implementation Checkpoint
 
-Implemented through Sprint 2:
+Implemented through the latest Sprint 4 slice:
 
 - Team and organizer login.
 - Organizer team and organizer-user management.
 - Organizer ground-truth upload, validation, activation, and history.
 - Participant upload UI for registered subtasks.
+- Participant-selected normal/late upload period.
 - Immediate validation errors and persisted rejected attempts.
 - Accepted submission/run persistence.
+- Accepted submission evaluation and participant score display.
 
-Sprint 3 starts with the "See My Scores" story.
+Next story: organizer submissions table and detail view.
 
 ## Participant Team Stories
 

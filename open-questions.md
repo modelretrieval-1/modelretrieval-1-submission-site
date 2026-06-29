@@ -7,7 +7,9 @@ Current implementation checkpoint:
 - Sprint 0 is complete.
 - Sprint 1 account/team setup is complete for v1.
 - Sprint 2 validation-core scope is complete.
-- Sprint 3 evaluation and participant score display is next/current.
+- Sprint 3 evaluation and participant score display is complete.
+- Sprint 4 participant-selected normal/late upload period is complete.
+- Next implementation focus: organizer submissions table and detail view.
 
 ## Authentication and Team Data
 

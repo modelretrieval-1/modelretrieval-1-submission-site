@@ -8,7 +8,7 @@ The UI should be simple, operational, and fast to scan. It is not a marketing si
 
 ## Current Implementation Checkpoint
 
-Implemented through Sprint 2:
+Implemented through the latest Sprint 4 slice:
 
 - Login/logout.
 - Team dashboard with registered subtask upload links.
@@ -19,9 +19,11 @@ Implemented through Sprint 2:
 - Organizer ground-truth upload, validation, activation, and history.
 - Organizer submission-period controls.
 - Participant upload form for registered subtasks.
+- Participant-selected normal/late upload period.
 - Immediate validation error display.
+- Participant score display after accepted uploads and latest team-dashboard score summaries.
 
-Sprint 3 has added participant score display after accepted uploads and latest team-dashboard score summaries.
+Next story: organizer submissions table and detail view.
 
 ## Roles
 

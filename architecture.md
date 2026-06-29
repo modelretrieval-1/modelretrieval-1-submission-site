@@ -12,8 +12,9 @@ The implemented stack matches this recommendation:
 - SQLite schema/bootstrap is in place.
 - Local filesystem storage is used for ground truth and submissions.
 - `uv`, Pytest, and Ruff are configured.
+- Participant validation, evaluation, score display, deadline controls, and selected-period uploads are implemented.
 
-The next implementation focus is Sprint 3 evaluation logic. VPS deployment hardening remains a later sprint.
+The next implementation focus is Sprint 4 organizer submission review. VPS deployment hardening remains a later sprint.
 
 Recommended stack:
 

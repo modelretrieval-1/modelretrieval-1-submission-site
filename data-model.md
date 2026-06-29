@@ -17,17 +17,18 @@ Core entities:
 
 ## Current Implementation Checkpoint
 
-As of the current handoff, Sprint 2 validation-core persistence is implemented.
+As of the current handoff, persistence is implemented through participant upload, validation, evaluation, score display, period controls, and participant-selected submission turns.
 
 Implemented tables include `organizers`, `teams`, `team_subtasks`, `submission_periods`, `ground_truth_versions`, `submissions`, `runs`, `validation_errors`, `evaluation_results`, and `audit_events`.
 
-Participant upload attempts currently use:
+Participant upload attempts use:
 
 - `rejected` for failed validation attempts.
 - `accepted` only transiently before successful evaluation persistence.
 - `evaluated` for valid submissions with persisted metric rows.
+- `evaluation_failed` when a valid stored submission cannot be evaluated.
 
-Sprint 3 now writes `evaluation_results` and uses `evaluated` / `evaluation_failed` statuses.
+Submissions store the selected `submission_period_id`, and the partial unique index enforces one successful submission per team, subtask, and selected period.
 
 ## organizers
 
