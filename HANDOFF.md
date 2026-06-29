@@ -61,7 +61,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-126 passed
+129 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -84,10 +84,12 @@ Foundation:
 - `app/main.py`: also includes organizer submission list and detail routes.
 - `app/main.py`: also includes organizer private leaderboard route.
 - `app/main.py`: also includes organizer leaderboard CSV export route.
+- `app/main.py`: also includes organizer submission bundle download route.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.
 - `app/submissions.py`: also includes organizer submission list/detail query helpers.
+- `app/submissions.py`: also includes submission bundle query helpers.
 - `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation, ground-truth metric loading, evaluation result persistence, leaderboard query helpers, and evaluation status helpers.
 
 Accounts and sessions:
@@ -782,7 +784,7 @@ Status:
 - Team users are redirected away from the CSV export.
 - Implemented integration tests in `tests/test_admin_leaderboard.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Add submission bundle download.
 
@@ -800,6 +802,34 @@ Suggested tests:
 - Bundle includes metadata.
 - Bundle respects subtask and period filters.
 - Team users cannot download submission bundles.
+
+Status:
+
+- Complete.
+- Implemented route: `GET /admin/submissions/bundle.zip`.
+- Submissions page includes a download link that preserves current subtask and period filters.
+- Bundle includes `metadata.csv`.
+- Bundle includes stored submission files when the file exists on disk.
+- Bundle metadata includes all matching attempts, including attempts without stored files.
+- Team users are redirected away from bundle downloads.
+- Implemented integration tests in `tests/test_admin_submissions.py`.
+
+## Next Recommended Story
+
+Add production deployment documentation.
+
+Target behavior:
+
+- Document VPS deployment steps.
+- Provide systemd service guidance.
+- Provide Nginx or Caddy reverse proxy guidance.
+- Document persistent storage and SQLite backup/restore approach.
+- Document first organizer creation and operational checklist.
+
+Suggested tests:
+
+- Keep automated suite green.
+- Add smoke-test/deployment checklist where appropriate.
 
 ## Docs To Read First In A New Session
 

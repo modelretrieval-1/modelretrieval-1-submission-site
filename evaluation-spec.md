@@ -29,7 +29,7 @@ Implemented behavior:
 - Organizer private leaderboard view shows evaluated run rows with metrics and period filters.
 - Organizer leaderboard rows can be exported as CSV with the current filters.
 
-Next implementation focus: submission bundle download.
+Next implementation focus: production deployment documentation.
 
 ## Subtask A: Language Model Retrieval
 

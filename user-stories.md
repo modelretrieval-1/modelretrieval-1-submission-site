@@ -15,8 +15,9 @@ Implemented through the latest Sprint 4 slice:
 - Organizer submissions table and detail view.
 - Organizer private leaderboard view.
 - Leaderboard CSV export.
+- Submission bundle download.
 
-Next story: submission bundle download.
+Next story: production deployment documentation.
 
 ## Participant Team Stories
 

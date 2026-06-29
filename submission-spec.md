@@ -29,8 +29,9 @@ Current upload behavior is implemented:
 - Organizers can review submitted attempts and inspect validation errors or run metrics.
 - Organizers can view a private leaderboard of evaluated run metrics.
 - Organizers can export leaderboard rows as CSV.
+- Organizers can download submission bundles with metadata and stored files.
 
-Next implementation focus: submission bundle download.
+Next implementation focus: production deployment documentation.
 
 ## Submission Turns
 

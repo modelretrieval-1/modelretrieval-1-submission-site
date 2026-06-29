@@ -375,7 +375,8 @@ Current implementation status:
 - Organizer submissions table and detail view is complete.
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
-- Next item: Sprint 4 submission bundle download.
+- Submission bundle download is complete.
+- Next item: production deployment documentation.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -474,7 +475,8 @@ Status:
 - Organizer submissions table and detail view is complete.
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
-- Next continue with submission bundle download.
+- Submission bundle download is complete.
+- Next continue with production deployment documentation.
 
 Demo:
 
