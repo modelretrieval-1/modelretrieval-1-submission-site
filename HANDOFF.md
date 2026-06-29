@@ -61,7 +61,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-120 passed
+123 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -82,11 +82,12 @@ Foundation:
 - `app/main.py`: also includes team submission upload routes.
 - `app/main.py`: also includes organizer submission-period control routes.
 - `app/main.py`: also includes organizer submission list and detail routes.
+- `app/main.py`: also includes organizer private leaderboard route.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.
 - `app/submissions.py`: also includes organizer submission list/detail query helpers.
-- `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation, ground-truth metric loading, evaluation result persistence, and evaluation status helpers.
+- `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation, ground-truth metric loading, evaluation result persistence, leaderboard query helpers, and evaluation status helpers.
 
 Accounts and sessions:
 
@@ -111,6 +112,7 @@ Templates:
 - `app/templates/admin_periods.html`
 - `app/templates/admin_submissions.html`
 - `app/templates/admin_submission_detail.html`
+- `app/templates/admin_leaderboard.html`
 
 Tests:
 
@@ -131,6 +133,7 @@ Tests:
 - `tests/test_evaluation.py`
 - `tests/test_admin_periods.py`
 - `tests/test_admin_submissions.py`
+- `tests/test_admin_leaderboard.py`
 
 ## Product Decisions
 
@@ -719,7 +722,7 @@ Status:
 - Team users are redirected away from organizer submission views.
 - Implemented integration tests in `tests/test_admin_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Add organizer private leaderboard view.
 
@@ -737,6 +740,36 @@ Suggested tests:
 - Organizer can filter leaderboard by subtask and period.
 - Subtask A rows show nDCG metrics.
 - Subtask B rows show MRR.
+
+Status:
+
+- Complete.
+- Implemented route: `GET /admin/leaderboard`.
+- Leaderboard is organizer-only.
+- Leaderboard shows evaluated run rows with team, subtask, period, RunID, metrics, and submitted time.
+- Leaderboard can filter by subtask and period.
+- Subtask A rows show `ndcg@1`, `ndcg@3`, and `ndcg@5`.
+- Subtask B rows show `mrr`.
+- Implemented integration tests in `tests/test_admin_leaderboard.py`.
+
+## Next Recommended Story
+
+Add leaderboard CSV export.
+
+Target behavior:
+
+- Organizer can export leaderboard rows as CSV.
+- CSV export respects the current subtask and submission-period filters.
+- Export includes team, subtask, period, RunID, metrics, and submitted timestamp.
+- Team users cannot access the CSV export.
+
+Suggested tests:
+
+- Organizer can download leaderboard CSV.
+- CSV export includes Subtask A nDCG metrics.
+- CSV export includes Subtask B MRR.
+- CSV export respects subtask and period filters.
+- Team users cannot download leaderboard CSV.
 
 ## Docs To Read First In A New Session
 

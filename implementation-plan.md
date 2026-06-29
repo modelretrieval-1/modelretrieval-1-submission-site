@@ -373,7 +373,8 @@ Current implementation status:
 - Implemented Sprint 3 items: pure metric calculation helpers, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, participant score display, one-successful-submission enforcement, JST deadline/open-period enforcement, organizer submission-period controls, and tests.
 - Participant-selected normal/late submission period is complete.
 - Organizer submissions table and detail view is complete.
-- Next item: Sprint 4 private leaderboard view.
+- Organizer private leaderboard view is complete.
+- Next item: Sprint 4 leaderboard CSV export.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -470,7 +471,8 @@ Status:
 - Next/current sprint.
 - Participant-selected submission period change request is complete.
 - Organizer submissions table and detail view is complete.
-- Next continue with private leaderboard view.
+- Organizer private leaderboard view is complete.
+- Next continue with leaderboard CSV export.
 
 Demo:
 

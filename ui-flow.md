@@ -23,8 +23,9 @@ Implemented through the latest Sprint 4 slice:
 - Immediate validation error display.
 - Participant score display after accepted uploads and latest team-dashboard score summaries.
 - Organizer submissions table and detail view.
+- Organizer private leaderboard view.
 
-Next story: organizer private leaderboard view.
+Next story: leaderboard CSV export.
 
 ## Roles
 

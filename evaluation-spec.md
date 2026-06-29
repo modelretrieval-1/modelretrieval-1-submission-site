@@ -26,8 +26,9 @@ Implemented behavior:
 - One successful submission is enforced per team, subtask, and selected submission period.
 - Organizer submission-period controls and participant-selected normal/late uploads are implemented.
 - Organizer submission detail views show run-level metric rows for evaluated submissions.
+- Organizer private leaderboard view shows evaluated run rows with metrics and period filters.
 
-Next implementation focus: organizer private leaderboard view.
+Next implementation focus: leaderboard CSV export.
 
 ## Subtask A: Language Model Retrieval
 

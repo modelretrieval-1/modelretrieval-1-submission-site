@@ -13,8 +13,9 @@ Implemented through the latest Sprint 4 slice:
 - Accepted submission/run persistence.
 - Accepted submission evaluation and participant score display.
 - Organizer submissions table and detail view.
+- Organizer private leaderboard view.
 
-Next story: organizer private leaderboard view.
+Next story: leaderboard CSV export.
 
 ## Participant Team Stories
 

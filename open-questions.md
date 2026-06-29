@@ -10,7 +10,8 @@ Current implementation checkpoint:
 - Sprint 3 evaluation and participant score display is complete.
 - Sprint 4 participant-selected normal/late upload period is complete.
 - Sprint 4 organizer submissions table and detail view is complete.
-- Next implementation focus: organizer private leaderboard view.
+- Sprint 4 organizer private leaderboard view is complete.
+- Next implementation focus: leaderboard CSV export.
 
 ## Authentication and Team Data
 

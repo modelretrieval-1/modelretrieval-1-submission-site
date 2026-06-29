@@ -27,8 +27,9 @@ Current upload behavior is implemented:
 - Valid submissions are persisted with run metadata, evaluated immediately, and shown to the participant with scores.
 - One successful submission is enforced per team, subtask, and selected submission turn.
 - Organizers can review submitted attempts and inspect validation errors or run metrics.
+- Organizers can view a private leaderboard of evaluated run metrics.
 
-Next implementation focus: organizer private leaderboard view.
+Next implementation focus: leaderboard CSV export.
 
 ## Submission Turns
 
