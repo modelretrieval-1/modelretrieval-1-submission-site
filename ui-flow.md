@@ -22,8 +22,9 @@ Implemented through the latest Sprint 4 slice:
 - Participant-selected normal/late upload period.
 - Immediate validation error display.
 - Participant score display after accepted uploads and latest team-dashboard score summaries.
+- Organizer submissions table and detail view.
 
-Next story: organizer submissions table and detail view.
+Next story: organizer private leaderboard view.
 
 ## Roles
 

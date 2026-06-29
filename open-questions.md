@@ -9,7 +9,8 @@ Current implementation checkpoint:
 - Sprint 2 validation-core scope is complete.
 - Sprint 3 evaluation and participant score display is complete.
 - Sprint 4 participant-selected normal/late upload period is complete.
-- Next implementation focus: organizer submissions table and detail view.
+- Sprint 4 organizer submissions table and detail view is complete.
+- Next implementation focus: organizer private leaderboard view.
 
 ## Authentication and Team Data
 

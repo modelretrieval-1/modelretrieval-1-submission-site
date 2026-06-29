@@ -61,7 +61,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-115 passed
+120 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -81,9 +81,11 @@ Foundation:
 - `app/main.py`: also includes ground-truth upload routes.
 - `app/main.py`: also includes team submission upload routes.
 - `app/main.py`: also includes organizer submission-period control routes.
+- `app/main.py`: also includes organizer submission list and detail routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.
+- `app/submissions.py`: also includes organizer submission list/detail query helpers.
 - `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation, ground-truth metric loading, evaluation result persistence, and evaluation status helpers.
 
 Accounts and sessions:
@@ -107,6 +109,8 @@ Templates:
 - `app/templates/admin_ground_truth.html`
 - `app/templates/team_submission_upload.html`
 - `app/templates/admin_periods.html`
+- `app/templates/admin_submissions.html`
+- `app/templates/admin_submission_detail.html`
 
 Tests:
 
@@ -126,6 +130,7 @@ Tests:
 - `tests/test_team_submissions.py`
 - `tests/test_evaluation.py`
 - `tests/test_admin_periods.py`
+- `tests/test_admin_submissions.py`
 
 ## Product Decisions
 
@@ -683,7 +688,7 @@ Status:
 - Successful and rejected attempts are recorded under the selected period.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Add organizer submissions table and detail view.
 
@@ -702,6 +707,36 @@ Suggested tests:
 - Organizer can open rejected submission detail and see validation errors.
 - Organizer can open evaluated submission detail and see run metrics.
 - Team users cannot access organizer submission views.
+
+Status:
+
+- Complete.
+- Implemented route: `GET /admin/submissions`.
+- Implemented route: `GET /admin/submissions/{submission_id}`.
+- Organizer submissions table can filter by team ID, subtask, period, and status.
+- Rejected submission details show persisted validation errors.
+- Evaluated submission details show run metadata and metric rows.
+- Team users are redirected away from organizer submission views.
+- Implemented integration tests in `tests/test_admin_submissions.py`.
+
+## Next Recommended Story
+
+Add organizer private leaderboard view.
+
+Target behavior:
+
+- Organizer can view private leaderboard rows for Subtask A and Subtask B.
+- Leaderboard can filter by subtask and submission period.
+- Rows show team, run ID, metrics, submission period, and submission timestamp.
+- Team users cannot access the leaderboard.
+
+Suggested tests:
+
+- Organizer can view leaderboard page.
+- Team cannot view leaderboard page.
+- Organizer can filter leaderboard by subtask and period.
+- Subtask A rows show nDCG metrics.
+- Subtask B rows show MRR.
 
 ## Docs To Read First In A New Session
 

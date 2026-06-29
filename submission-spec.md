@@ -26,8 +26,9 @@ Current upload behavior is implemented:
 - Failed validation attempts are persisted as `rejected` submissions with `validation_errors`.
 - Valid submissions are persisted with run metadata, evaluated immediately, and shown to the participant with scores.
 - One successful submission is enforced per team, subtask, and selected submission turn.
+- Organizers can review submitted attempts and inspect validation errors or run metrics.
 
-Next implementation focus: organizer submission review views.
+Next implementation focus: organizer private leaderboard view.
 
 ## Submission Turns
 

@@ -12,8 +12,9 @@ Implemented through the latest Sprint 4 slice:
 - Immediate validation errors and persisted rejected attempts.
 - Accepted submission/run persistence.
 - Accepted submission evaluation and participant score display.
+- Organizer submissions table and detail view.
 
-Next story: organizer submissions table and detail view.
+Next story: organizer private leaderboard view.
 
 ## Participant Team Stories
 
