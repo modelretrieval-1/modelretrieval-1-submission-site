@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Leaderboard</h1>
+        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+      </div>
+      <a href="/admin">Dashboard</a>
+    </div>
+
+    <form method="get" action="/admin/leaderboard" class="form-grid">
+      <label>
+        Subtask
+        <select name="subtask">
+          <option value="">All</option>
+          <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
+          <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
+        </select>
+      </label>
+      <label>
+        Period
+        <select name="period">
+          <option value="">All</option>
+          <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
+          <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
+        </select>
+      </label>
+      <button type="submit">Filter</button>
+    </form>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Subtask</th>
+            <th>Period</th>
+            <th>RunID</th>
+            <th>nDCG@1</th>
+            <th>nDCG@3</th>
+            <th>nDCG@5</th>
+            <th>MRR</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.team_public_id }}<br>{{ row.team_display_name }}</td>
+              <td>{{ row.subtask }}</td>
+              <td>{{ row.period_name }}</td>
+              <td>{{ row.run_id }}</td>
+              <td>
+                {% if row.metric_values.get("ndcg@1") is not none %}
+                  {{ "%.6f"|format(row.metric_values.get("ndcg@1")) }}
+                {% endif %}
+              </td>
+              <td>
+                {% if row.metric_values.get("ndcg@3") is not none %}
+                  {{ "%.6f"|format(row.metric_values.get("ndcg@3")) }}
+                {% endif %}
+              </td>
+              <td>
+                {% if row.metric_values.get("ndcg@5") is not none %}
+                  {{ "%.6f"|format(row.metric_values.get("ndcg@5")) }}
+                {% endif %}
+              </td>
+              <td>
+                {% if row.metric_values.get("mrr") is not none %}
+                  {{ "%.6f"|format(row.metric_values.get("mrr")) }}
+                {% endif %}
+              </td>
+              <td>{{ row.submitted_at_jst }} JST</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="9">No evaluated submissions match these filters.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

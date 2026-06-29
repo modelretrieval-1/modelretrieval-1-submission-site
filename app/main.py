@@ -29,6 +29,7 @@ from app.db import connect, initialize_database
 from app.evaluation import (
     evaluate_submission,
     list_latest_team_submission_summaries,
+    list_leaderboard_rows,
     list_submission_results,
     mark_evaluation_failed,
     persist_evaluation_results,
@@ -298,6 +299,35 @@ def render_admin_submission_detail(
             "validation_errors": validation_errors,
             "runs": runs,
             "metrics": metrics,
+        },
+    )
+
+
+def render_admin_leaderboard(request: Request, *, account) -> HTMLResponse:
+    app_settings: Settings = request.app.state.settings
+    filters = {
+        "subtask": request.query_params.get("subtask", "").strip().upper(),
+        "period": request.query_params.get("period", "").strip().lower(),
+    }
+    subtask_filter = filters["subtask"] if filters["subtask"] in {"A", "B"} else ""
+    period_filter = filters["period"] if filters["period"] in {"normal", "late"} else ""
+    with connect(app_settings.database_path) as connection:
+        rows = list_leaderboard_rows(
+            connection,
+            subtask=subtask_filter or None,
+            period_name=period_filter or None,
+        )
+    return templates.TemplateResponse(
+        request,
+        "admin_leaderboard.html",
+        {
+            "app_name": app_settings.app_name,
+            "account": account,
+            "rows": rows,
+            "filters": {
+                "subtask": subtask_filter,
+                "period": period_filter,
+            },
         },
     )
 
@@ -760,6 +790,13 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         if response is None:
             return redirect("/admin/submissions")
         return response
+
+    @app.get("/admin/leaderboard", response_class=HTMLResponse)
+    def admin_leaderboard(request: Request) -> Response:
+        account, redirect_response = require_organizer(request)
+        if redirect_response is not None:
+            return redirect_response
+        return render_admin_leaderboard(request, account=account)
 
     @app.post("/admin/periods/{period_name}", response_class=HTMLResponse)
     async def update_period(request: Request, period_name: str) -> Response:

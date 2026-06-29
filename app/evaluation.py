@@ -36,6 +36,18 @@ class TeamSubmissionSummary:
     metrics: tuple[EvaluationResult, ...]
 
 
+@dataclass(frozen=True)
+class LeaderboardRow:
+    submission_id: int
+    team_public_id: str
+    team_display_name: str
+    subtask: str
+    period_name: str
+    run_id: str
+    submitted_at_jst: str
+    metric_values: dict[str, float]
+
+
 def dcg(relevance_scores: list[float]) -> float:
     return sum(
         ((2**relevance_score) - 1) / log2(index + 2)
@@ -315,6 +327,78 @@ def list_latest_team_submission_summaries(
             metrics=list_submission_results(connection, submission_id=row["id"]),
         )
         for row in sorted(latest_by_subtask.values(), key=lambda item: item["subtask"])
+    )
+
+
+def list_leaderboard_rows(
+    connection: sqlite3.Connection,
+    *,
+    subtask: str | None = None,
+    period_name: str | None = None,
+) -> tuple[LeaderboardRow, ...]:
+    where_clauses = ["submissions.status = 'evaluated'"]
+    parameters: list[str] = []
+    if subtask:
+        where_clauses.append("submissions.subtask = ?")
+        parameters.append(subtask)
+    if period_name:
+        where_clauses.append("submission_periods.name = ?")
+        parameters.append(period_name)
+
+    rows = connection.execute(
+        f"""
+        SELECT
+          submissions.id AS submission_id,
+          teams.team_id,
+          teams.display_name,
+          submissions.subtask,
+          submission_periods.name AS period_name,
+          runs.run_id,
+          submissions.submitted_at_jst,
+          evaluation_results.metric_name,
+          evaluation_results.metric_value
+        FROM evaluation_results
+        JOIN runs ON runs.id = evaluation_results.run_id
+        JOIN submissions ON submissions.id = evaluation_results.submission_id
+        JOIN teams ON teams.id = submissions.team_id
+        JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+        WHERE {' AND '.join(where_clauses)}
+        ORDER BY submissions.subtask, submission_periods.name, teams.team_id, runs.run_id
+        """,
+        parameters,
+    ).fetchall()
+
+    grouped: dict[tuple[int, str], LeaderboardRow] = {}
+    for row in rows:
+        key = (row["submission_id"], row["run_id"])
+        leaderboard_row = grouped.get(key)
+        if leaderboard_row is None:
+            leaderboard_row = LeaderboardRow(
+                submission_id=row["submission_id"],
+                team_public_id=row["team_id"],
+                team_display_name=row["display_name"],
+                subtask=row["subtask"],
+                period_name=row["period_name"],
+                run_id=row["run_id"],
+                submitted_at_jst=row["submitted_at_jst"],
+                metric_values={},
+            )
+            grouped[key] = leaderboard_row
+        leaderboard_row.metric_values[row["metric_name"]] = row["metric_value"]
+
+    return tuple(sorted(grouped.values(), key=_leaderboard_sort_key))
+
+
+def _leaderboard_sort_key(row: LeaderboardRow) -> tuple[str, str, float, float, str, str]:
+    primary_metric = "mrr" if row.subtask == "B" else "ndcg@5"
+    secondary_metric = "ndcg@3" if row.subtask == "A" else "mrr"
+    return (
+        row.subtask,
+        row.period_name,
+        -row.metric_values.get(primary_metric, 0.0),
+        -row.metric_values.get(secondary_metric, 0.0),
+        row.team_public_id,
+        row.run_id,
     )
 
 
