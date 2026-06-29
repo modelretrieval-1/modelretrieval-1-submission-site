@@ -457,6 +457,34 @@ def get_normal_submission_period(connection: sqlite3.Connection) -> SubmissionPe
     )
 
 
+def update_submission_period(
+    connection: sqlite3.Connection,
+    *,
+    period_name: str,
+    starts_at_jst: str | None,
+    deadline_at_jst: str,
+    is_open_override: bool,
+) -> bool:
+    cursor = connection.execute(
+        """
+        UPDATE submission_periods
+        SET starts_at_jst = ?,
+            deadline_at_jst = ?,
+            is_open_override = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE name = ?
+        """,
+        (
+            starts_at_jst,
+            deadline_at_jst,
+            int(is_open_override),
+            period_name,
+        ),
+    )
+    connection.commit()
+    return cursor.rowcount > 0
+
+
 def create_submission_attempt(
     connection: sqlite3.Connection,
     *,

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Submission Periods - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Submission Periods</h1>
+        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+      </div>
+      <a href="/admin">Dashboard</a>
+    </div>
+
+    {% if error %}
+      <p class="alert" role="alert">{{ error }}</p>
+    {% endif %}
+
+    {% if success %}
+      <p class="notice" role="status">{{ success }}</p>
+    {% endif %}
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Start JST</th>
+            <th>Deadline JST</th>
+            <th>Reopen Override</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for period in periods %}
+            <tr>
+              <td>{{ period.name }}</td>
+              <td colspan="4">
+                <form method="post" action="/admin/periods/{{ period.name }}" class="form-grid">
+                  <label>
+                    Start JST
+                    <input
+                      type="text"
+                      name="starts_at_jst"
+                      value="{{ period.starts_at_jst or '' }}"
+                      placeholder="YYYY-MM-DD HH:MM:SS"
+                    >
+                  </label>
+                  <label>
+                    Deadline JST
+                    <input
+                      type="text"
+                      name="deadline_at_jst"
+                      value="{{ period.deadline_at_jst }}"
+                      placeholder="YYYY-MM-DD HH:MM:SS"
+                      required
+                    >
+                  </label>
+                  <label class="inline-choice">
+                    <input
+                      type="checkbox"
+                      name="is_open_override"
+                      {% if period.is_open_override %}checked{% endif %}
+                    >
+                    Reopen
+                  </label>
+                  <button type="submit">Save</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

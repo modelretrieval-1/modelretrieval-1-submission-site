@@ -13,7 +13,8 @@ Scrum implementation is underway.
 - Sprint 0: complete.
 - Sprint 1: complete for the planned v1 account scope.
 - Sprint 2: complete for the planned validation-core scope.
-- Sprint 3: next/current sprint, focused on evaluation metrics and participant score display.
+- Sprint 3: complete for the planned evaluation and participant-result scope.
+- Sprint 4: next/current sprint, focused on organizer operations.
 
 ## Current Stack
 
@@ -60,7 +61,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-106 passed
+112 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -79,6 +80,7 @@ Foundation:
 - `app/main.py`: also includes organizer password change routes.
 - `app/main.py`: also includes ground-truth upload routes.
 - `app/main.py`: also includes team submission upload routes.
+- `app/main.py`: also includes organizer submission-period control routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation, ground-truth metric loading, evaluation result persistence, and evaluation status helpers.
@@ -103,6 +105,7 @@ Templates:
 - `app/templates/password_change.html`
 - `app/templates/admin_ground_truth.html`
 - `app/templates/team_submission_upload.html`
+- `app/templates/admin_periods.html`
 
 Tests:
 
@@ -121,6 +124,7 @@ Tests:
 - `tests/test_submissions.py`
 - `tests/test_team_submissions.py`
 - `tests/test_evaluation.py`
+- `tests/test_admin_periods.py`
 
 ## Product Decisions
 
@@ -612,7 +616,7 @@ Status:
 - Closed-period uploads are blocked before storing the submitted file.
 - Implemented tests in `tests/test_submissions.py` and `tests/test_team_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Add organizer submission-period controls.
 
@@ -629,6 +633,36 @@ Suggested tests:
 - Organizer can update normal and late deadlines.
 - Organizer can toggle reopen override.
 - Team users cannot access period controls.
+
+Status:
+
+- Complete.
+- Implemented route: `GET /admin/periods`.
+- Implemented route: `POST /admin/periods/{period_name}`.
+- Organizer can edit start timestamps, deadlines, and reopen override.
+- Invalid timestamps are rejected with a clear error.
+- Team users are redirected away from period controls.
+- Implemented tests in `tests/test_admin_periods.py`.
+
+## Next Recommended Story
+
+Add organizer submissions table and detail view.
+
+Target behavior:
+
+- Organizer can view all submission attempts.
+- Organizer can filter by team, subtask, period, and status.
+- Organizer can inspect validation errors for rejected submissions.
+- Organizer can inspect run-level metrics for evaluated submissions.
+- Team users cannot access organizer submission views.
+
+Suggested tests:
+
+- Organizer can view submissions table.
+- Organizer can filter submissions by status and subtask.
+- Organizer can open rejected submission detail and see validation errors.
+- Organizer can open evaluated submission detail and see run metrics.
+- Team users cannot access organizer submission views.
 
 ## Docs To Read First In A New Session
 

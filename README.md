@@ -4,7 +4,7 @@ This repository contains the submission and evaluation system for the NTCIR-19 M
 
 ## Current Status
 
-The project is entering **Sprint 3: Evaluation and Participant Results**.
+The project is entering **Sprint 4: Organizer Operations**.
 
 Sprint 2 validation-core work is complete for the planned scope.
 
@@ -45,13 +45,14 @@ Completed foundation:
 - Participant score display after evaluated submissions.
 - One successful submission per team/subtask/period enforcement.
 - Submission period and JST deadline enforcement.
+- Organizer submission-period controls.
 - Tests for settings, storage, database initialization, app startup, accounts, sessions, and login flow.
 
 Current test status:
 
 ```text
 uv run --extra dev pytest
-106 passed
+112 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -59,7 +60,7 @@ All checks passed
 
 Next recommended story:
 
-- Sprint 3 polish: add organizer submission-period controls.
+- Sprint 4: add organizer submissions table and detail view.
 
 ## Development Setup
 

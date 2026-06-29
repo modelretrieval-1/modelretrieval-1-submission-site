@@ -17,6 +17,7 @@ Implemented through Sprint 2:
 - Organizer user management.
 - Organizer password change.
 - Organizer ground-truth upload, validation, activation, and history.
+- Organizer submission-period controls.
 - Participant upload form for registered subtasks.
 - Immediate validation error display.
 

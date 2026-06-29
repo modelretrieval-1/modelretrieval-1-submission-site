@@ -48,9 +48,12 @@ from app.submissions import (
     create_submission_attempt,
     get_open_submission_period,
     has_successful_submission,
+    list_submission_periods,
+    parse_jst_datetime,
     persist_submission_runs,
     persist_validation_errors,
     store_submission_file,
+    update_submission_period,
     validate_submission_against_requirements,
     validate_submission_filename,
     validate_submission_size,
@@ -197,6 +200,29 @@ def render_ground_truth(
             "app_name": app_settings.app_name,
             "account": account,
             "versions": versions,
+            "error": error,
+            "success": success,
+        },
+    )
+
+
+def render_periods(
+    request: Request,
+    *,
+    account,
+    error: str | None = None,
+    success: str | None = None,
+) -> HTMLResponse:
+    app_settings: Settings = request.app.state.settings
+    with connect(app_settings.database_path) as connection:
+        periods = list_submission_periods(connection)
+    return templates.TemplateResponse(
+        request,
+        "admin_periods.html",
+        {
+            "app_name": app_settings.app_name,
+            "account": account,
+            "periods": periods,
             "error": error,
             "success": success,
         },
@@ -593,6 +619,56 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         if redirect_response is not None:
             return redirect_response
         return render_admin_users(request, account=account)
+
+    @app.get("/admin/periods", response_class=HTMLResponse)
+    def admin_periods(request: Request) -> Response:
+        account, redirect_response = require_organizer(request)
+        if redirect_response is not None:
+            return redirect_response
+        return render_periods(request, account=account)
+
+    @app.post("/admin/periods/{period_name}", response_class=HTMLResponse)
+    async def update_period(request: Request, period_name: str) -> Response:
+        account, redirect_response = require_organizer(request)
+        if redirect_response is not None:
+            return redirect_response
+
+        period_name = period_name.strip().lower()
+        if period_name not in {"normal", "late"}:
+            return render_periods(request, account=account, error="Submission period not found.")
+
+        form = await request.form()
+        starts_at_jst = str(form.get("starts_at_jst", "")).strip() or None
+        deadline_at_jst = str(form.get("deadline_at_jst", "")).strip()
+        is_open_override = form.get("is_open_override") == "on"
+
+        if not deadline_at_jst:
+            return render_periods(request, account=account, error="Deadline is required.")
+
+        try:
+            if starts_at_jst is not None:
+                parse_jst_datetime(starts_at_jst)
+            parse_jst_datetime(deadline_at_jst)
+        except ValueError:
+            return render_periods(
+                request,
+                account=account,
+                error="Use timestamp format YYYY-MM-DD HH:MM:SS.",
+            )
+
+        with connect(app_settings.database_path) as connection:
+            updated = update_submission_period(
+                connection,
+                period_name=period_name,
+                starts_at_jst=starts_at_jst,
+                deadline_at_jst=deadline_at_jst,
+                is_open_override=is_open_override,
+            )
+
+        if not updated:
+            return render_periods(request, account=account, error="Submission period not found.")
+
+        return render_periods(request, account=account, success="Submission period updated.")
 
     @app.post("/admin/users", response_class=HTMLResponse)
     async def add_organizer(request: Request) -> Response:
