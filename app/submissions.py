@@ -109,6 +109,22 @@ class PersistedSubmissionRun:
     query_count: int
 
 
+@dataclass(frozen=True)
+class SubmissionBundleEntry:
+    submission_id: int
+    team_public_id: str
+    team_display_name: str
+    subtask: str
+    period_name: str
+    status: str
+    original_filename: str
+    stored_file_path: str | None
+    file_sha256: str | None
+    file_size_bytes: int
+    submitted_at_jst: str
+    validation_summary: str | None
+
+
 def parse_trec_eval(content: str, *, max_runs: int = MAX_RUNS_PER_SUBTASK) -> ParsedSubmission:
     lines: list[SubmissionLine] = []
     errors: list[SubmissionValidationError] = []
@@ -769,6 +785,64 @@ def list_submission_runs(
             run_id=row["run_id"],
             line_count=row["line_count"],
             query_count=row["query_count"],
+        )
+        for row in rows
+    )
+
+
+def list_submission_bundle_entries(
+    connection: sqlite3.Connection,
+    *,
+    subtask: str | None = None,
+    period_name: str | None = None,
+) -> tuple[SubmissionBundleEntry, ...]:
+    where_clauses = []
+    parameters: list[str] = []
+    if subtask:
+        where_clauses.append("submissions.subtask = ?")
+        parameters.append(subtask)
+    if period_name:
+        where_clauses.append("submission_periods.name = ?")
+        parameters.append(period_name)
+
+    where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    rows = connection.execute(
+        f"""
+        SELECT
+          submissions.id,
+          teams.team_id,
+          teams.display_name,
+          submissions.subtask,
+          submission_periods.name AS period_name,
+          submissions.status,
+          submissions.original_filename,
+          submissions.stored_file_path,
+          submissions.file_sha256,
+          submissions.file_size_bytes,
+          submissions.submitted_at_jst,
+          submissions.validation_summary
+        FROM submissions
+        JOIN teams ON teams.id = submissions.team_id
+        JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+        {where_sql}
+        ORDER BY submissions.id
+        """,
+        parameters,
+    ).fetchall()
+    return tuple(
+        SubmissionBundleEntry(
+            submission_id=row["id"],
+            team_public_id=row["team_id"],
+            team_display_name=row["display_name"],
+            subtask=row["subtask"],
+            period_name=row["period_name"],
+            status=row["status"],
+            original_filename=row["original_filename"],
+            stored_file_path=row["stored_file_path"],
+            file_sha256=row["file_sha256"],
+            file_size_bytes=row["file_size_bytes"],
+            submitted_at_jst=row["submitted_at_jst"],
+            validation_summary=row["validation_summary"],
         )
         for row in rows
     )

@@ -5,9 +5,11 @@ import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime
-from io import StringIO
+from io import BytesIO, StringIO
+from pathlib import Path
 from typing import Annotated
 from urllib.parse import urlencode
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from fastapi import FastAPI, File, Form, Request, UploadFile, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -44,6 +46,7 @@ from app.ground_truth import (
     get_active_ground_truth_requirements,
     get_ground_truth_version,
     list_ground_truth_versions,
+    safe_filename,
     store_ground_truth_file,
     validate_ground_truth_content,
 )
@@ -57,6 +60,7 @@ from app.submissions import (
     has_successful_submission,
     is_submission_period_open,
     list_admin_submission_summaries,
+    list_submission_bundle_entries,
     list_submission_periods,
     list_submission_runs,
     list_submission_validation_errors,
@@ -240,6 +244,75 @@ def render_periods(
     )
 
 
+def get_submission_bundle_filters(request: Request) -> dict[str, str]:
+    requested_subtask = request.query_params.get("subtask", "").strip().upper()
+    requested_period = request.query_params.get("period", "").strip().lower()
+    return {
+        "subtask": requested_subtask if requested_subtask in {"A", "B"} else "",
+        "period": requested_period if requested_period in {"normal", "late"} else "",
+    }
+
+
+def submission_bundle_content(entries) -> bytes:
+    output = BytesIO()
+    with ZipFile(output, mode="w", compression=ZIP_DEFLATED) as archive:
+        metadata_rows = []
+        for entry in entries:
+            archive_path = ""
+            if entry.stored_file_path:
+                stored_path = Path(entry.stored_file_path)
+                if stored_path.exists():
+                    archive_path = (
+                        "submissions/"
+                        f"{entry.submission_id}_{entry.team_public_id}_"
+                        f"{entry.subtask}_{entry.period_name}_"
+                        f"{safe_filename(entry.original_filename)}"
+                    )
+                    archive.write(stored_path, archive_path)
+            metadata_rows.append((entry, archive_path))
+        archive.writestr("metadata.csv", submission_bundle_metadata_csv(metadata_rows))
+    return output.getvalue()
+
+
+def submission_bundle_metadata_csv(metadata_rows) -> str:
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "submission_id",
+            "team_id",
+            "team_display_name",
+            "subtask",
+            "period",
+            "status",
+            "original_filename",
+            "bundle_file",
+            "file_sha256",
+            "file_size_bytes",
+            "submitted_at_jst",
+            "validation_summary",
+        ]
+    )
+    for entry, archive_path in metadata_rows:
+        writer.writerow(
+            [
+                entry.submission_id,
+                entry.team_public_id,
+                entry.team_display_name,
+                entry.subtask,
+                entry.period_name,
+                entry.status,
+                entry.original_filename,
+                archive_path,
+                entry.file_sha256 or "",
+                entry.file_size_bytes,
+                entry.submitted_at_jst,
+                entry.validation_summary or "",
+            ]
+        )
+    return output.getvalue()
+
+
 def render_admin_submissions(request: Request, *, account) -> HTMLResponse:
     app_settings: Settings = request.app.state.settings
     filters = {
@@ -271,6 +344,16 @@ def render_admin_submissions(request: Request, *, account) -> HTMLResponse:
                 "period": period_filter,
                 "status": filters["status"],
             },
+            "bundle_query": urlencode(
+                {
+                    key: value
+                    for key, value in {
+                        "subtask": subtask_filter,
+                        "period": period_filter,
+                    }.items()
+                    if value
+                }
+            ),
         },
     )
 
@@ -821,6 +904,25 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         if redirect_response is not None:
             return redirect_response
         return render_admin_submissions(request, account=account)
+
+    @app.get("/admin/submissions/bundle.zip")
+    def admin_submissions_bundle(request: Request) -> Response:
+        _account, redirect_response = require_organizer(request)
+        if redirect_response is not None:
+            return redirect_response
+
+        filters = get_submission_bundle_filters(request)
+        with connect(app_settings.database_path) as connection:
+            entries = list_submission_bundle_entries(
+                connection,
+                subtask=filters["subtask"] or None,
+                period_name=filters["period"] or None,
+            )
+        return Response(
+            content=submission_bundle_content(entries),
+            media_type="application/zip",
+            headers={"Content-Disposition": 'attachment; filename="submissions-bundle.zip"'},
+        )
 
     @app.get("/admin/submissions/{submission_id}", response_class=HTMLResponse)
     def admin_submission_detail(request: Request, submission_id: int) -> Response:

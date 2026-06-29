@@ -1,5 +1,8 @@
+import csv
 import tempfile
+from io import BytesIO, StringIO
 from pathlib import Path
+from zipfile import ZipFile
 
 from fastapi.testclient import TestClient
 
@@ -211,3 +214,70 @@ def test_team_cannot_access_organizer_submission_views():
         assert list_response.headers["location"] == "/team"
         assert detail_response.status_code == 303
         assert detail_response.headers["location"] == "/team"
+
+
+def test_organizer_can_download_submission_bundle_with_files_and_metadata():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        seed_submission_attempts(client, team.password)
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin/submissions/bundle.zip")
+
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/zip"
+        assert (
+            response.headers["content-disposition"]
+            == 'attachment; filename="submissions-bundle.zip"'
+        )
+
+        with ZipFile(BytesIO(response.content)) as archive:
+            names = archive.namelist()
+            metadata = archive.read("metadata.csv").decode()
+            rows = list(csv.DictReader(StringIO(metadata)))
+
+            assert "metadata.csv" in names
+            assert len(rows) == 2
+            assert rows[0]["original_filename"] == "bad.txt"
+            assert rows[0]["status"] == "rejected"
+            assert rows[1]["original_filename"] == "good.txt"
+            assert rows[1]["status"] == "evaluated"
+            assert rows[1]["bundle_file"] in names
+            assert archive.read(rows[1]["bundle_file"]) == valid_submission_content()
+
+
+def test_submission_bundle_respects_subtask_and_period_filters():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        seed_submission_attempts(client, team.password)
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin/submissions/bundle.zip?subtask=A&period=late")
+
+        assert response.status_code == 200
+        with ZipFile(BytesIO(response.content)) as archive:
+            rows = list(csv.DictReader(StringIO(archive.read("metadata.csv").decode())))
+
+            assert len(rows) == 1
+            assert rows[0]["period"] == "late"
+            assert rows[0]["original_filename"] == "good.txt"
+            assert rows[0]["bundle_file"] in archive.namelist()
+
+
+def test_team_cannot_download_submission_bundle():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        _organizer, team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.get("/admin/submissions/bundle.zip", follow_redirects=False)
+
+        assert response.status_code == 303
+        assert response.headers["location"] == "/team"
