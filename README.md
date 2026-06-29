@@ -40,13 +40,14 @@ Completed foundation:
 - `.txt` and maximum upload-size guards.
 - Rejected submission attempt persistence with validation errors.
 - Accepted submission persistence with run metadata.
+- Evaluation metric core for nDCG and MRR.
 - Tests for settings, storage, database initialization, app startup, accounts, sessions, and login flow.
 
 Current test status:
 
 ```text
 uv run --extra dev pytest
-90 passed
+98 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -54,7 +55,7 @@ All checks passed
 
 Next recommended story:
 
-- Sprint 3: implement evaluation metrics and participant score display.
+- Sprint 3: evaluate accepted submissions and persist metric results.
 
 ## Development Setup
 

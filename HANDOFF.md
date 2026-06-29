@@ -60,7 +60,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-90 passed
+98 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -81,6 +81,7 @@ Foundation:
 - `app/main.py`: also includes team submission upload routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
+- `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, and Subtask B evaluation helpers.
 
 Accounts and sessions:
 
@@ -119,6 +120,7 @@ Tests:
 - `tests/test_ground_truth.py`
 - `tests/test_submissions.py`
 - `tests/test_team_submissions.py`
+- `tests/test_evaluation.py`
 
 ## Product Decisions
 
@@ -473,26 +475,49 @@ Status:
 - Valid submissions are stored as `accepted` and run metadata is written to `runs`.
 - Implemented tests in `tests/test_team_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
-Implement evaluation metrics and participant score display.
+Implement evaluation metric calculation core.
 
 Target behavior:
 
 - Compute official Subtask A nDCG@3 and nDCG@5.
-- Prepare Subtask B MRR evaluation.
 - Evaluate each RunID independently.
-- Store metric rows in `evaluation_results`.
-- Show the submitting team its own scores immediately after an accepted upload.
-- Keep the organizer leaderboard private.
+- Compute Subtask B MRR.
+- Keep the functions pure and covered by known expected values.
 
 Suggested tests:
 
 - nDCG@3 and nDCG@5 match known expected values.
 - MRR matches known expected values.
+- Macro nDCG is averaged across queries.
+- Multi-run submissions are scored independently.
+
+Status:
+
+- Complete.
+- Implemented `app/evaluation.py`.
+- Implemented `dcg`, `ndcg_at`, `mean_reciprocal_rank`, `evaluate_subtask_a`, and `evaluate_subtask_b`.
+- Implemented tests in `tests/test_evaluation.py`.
+
+## Next Recommended Story
+
+Evaluate accepted submissions and persist metric results.
+
+Target behavior:
+
+- Load active ground truth into Subtask A relevance maps and Subtask B relevant-model maps.
+- Evaluate each accepted submission after validation.
+- Store metric rows in `evaluation_results`.
+- Update submission status from `accepted` to `evaluated` or `evaluation_failed`.
+- Keep participant score display ready for the following UI slice.
+
+Suggested tests:
+
 - Accepted submission creates evaluation result rows.
-- Participant upload response shows scores for each RunID.
-- Team cannot see another team's results.
+- Subtask A accepted submission stores `ndcg@1`, `ndcg@3`, and `ndcg@5`.
+- Subtask B accepted submission stores `mrr`.
+- Evaluation failure leaves a clear status and does not lose the submission file.
 
 ## Docs To Read First In A New Session
 
