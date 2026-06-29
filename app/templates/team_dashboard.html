@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Team Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Team Dashboard</h1>
+        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+      </div>
+      <a href="/logout">Logout</a>
+    </div>
+
+    <h2>Registered Subtasks</h2>
+    <ul>
+      {% for subtask in subtasks %}
+        <li>
+          Subtask {{ subtask }}
+          <a href="/team/submissions/{{ subtask }}/new">Upload submission</a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <h2>Deadlines</h2>
+    <dl>
+      <dt>Normal submission</dt>
+      <dd>August 1, 2026 at 15:00 JST</dd>
+      <dt>Late submission</dt>
+      <dd>October 15, 2026 at 23:59 JST</dd>
+    </dl>
+  </section>
+{% endblock %}

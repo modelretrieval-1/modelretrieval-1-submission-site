@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Ground Truth - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Ground Truth</h1>
+        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+      </div>
+      <a href="/admin">Dashboard</a>
+    </div>
+
+    {% if error %}
+      <p class="alert" role="alert">{{ error }}</p>
+    {% endif %}
+
+    {% if success %}
+      <p class="notice" role="status">{{ success }}</p>
+    {% endif %}
+
+    <h2>Upload Version</h2>
+    <form method="post" action="/admin/ground-truth" enctype="multipart/form-data" class="form-grid">
+      <label>
+        Subtask
+        <select name="subtask" required>
+          <option value="A">Subtask A</option>
+          <option value="B">Subtask B</option>
+        </select>
+      </label>
+      <label>
+        Version Label
+        <input type="text" name="version_label" required>
+      </label>
+      <label>
+        Notes
+        <input type="text" name="notes">
+      </label>
+      <label>
+        File
+        <input type="file" name="file" required>
+      </label>
+      <button type="submit">Upload</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Version History</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Subtask</th>
+            <th>Version</th>
+            <th>Status</th>
+            <th>Active</th>
+            <th>Uploaded</th>
+            <th>SHA-256</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for version in versions %}
+            <tr>
+              <td>Subtask {{ version.subtask }}</td>
+              <td>{{ version.version_label }}</td>
+              <td>{{ version.validation_status }}</td>
+              <td>{{ "Yes" if version.is_active else "No" }}</td>
+              <td>{{ version.uploaded_at_jst }} JST</td>
+              <td><code>{{ version.file_sha256 }}</code></td>
+              <td>{{ version.notes or "" }}</td>
+              <td>
+                {% if version.validation_status == "validated" and not version.is_active %}
+                  <form method="post" action="/admin/ground-truth/{{ version.id }}/activate">
+                    <button type="submit">Activate</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="8">No ground-truth versions uploaded.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

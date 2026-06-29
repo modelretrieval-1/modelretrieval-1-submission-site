@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Subtask {{ subtask }} Submission - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Upload Subtask {{ subtask }} Submission</h1>
+        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+      </div>
+      <div class="header-actions">
+        <a href="/team">Team dashboard</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+
+    {% if success %}
+      <div class="notice">{{ success }}</div>
+    {% endif %}
+
+    {% if errors %}
+      <div class="alert">
+        <strong>Submission rejected.</strong>
+        <ul>
+          {% for error in errors %}
+            <li>
+              {% if error.line_number %}Line {{ error.line_number }}: {% endif %}
+              {{ error.message }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
+      <label>
+        Submission file
+        <input name="file" type="file" accept=".txt" required>
+      </label>
+      <button type="submit">Upload</button>
+    </form>
+  </section>
+{% endblock %}

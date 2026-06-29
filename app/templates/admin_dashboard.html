@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Organizer Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Organizer Dashboard</h1>
+        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+      </div>
+      <div class="header-actions">
+        <a href="/account/password">Change Password</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+
+    <nav class="admin-links" aria-label="Organizer sections">
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/teams">Teams</a>
+      <a href="/admin/users">Organizer Users</a>
+      <a href="/admin/ground-truth">Ground Truth</a>
+      <a href="/admin/submissions">Submissions</a>
+      <a href="/admin/leaderboard">Leaderboard</a>
+    </nav>
+  </section>
+{% endblock %}

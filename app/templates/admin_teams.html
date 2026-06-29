@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Teams - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Teams</h1>
+        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+      </div>
+      <a href="/admin">Dashboard</a>
+    </div>
+
+    {% if error %}
+      <p class="alert" role="alert">{{ error }}</p>
+    {% endif %}
+
+    {% if generated_password %}
+      <div class="notice" role="status">
+        <h2>Generated Password</h2>
+        <p>Team: <strong>{{ generated_team_id }}</strong></p>
+        <code>{{ generated_password }}</code>
+      </div>
+    {% endif %}
+
+    <h2>Add Team</h2>
+    <form method="post" action="/admin/teams" class="form-grid">
+      <label>
+        Team ID
+        <input type="text" name="team_id" required>
+      </label>
+      <label>
+        Display Name
+        <input type="text" name="display_name" required>
+      </label>
+      <fieldset>
+        <legend>Registered Subtasks</legend>
+        <label class="inline-choice">
+          <input type="checkbox" name="subtasks" value="A">
+          Subtask A
+        </label>
+        <label class="inline-choice">
+          <input type="checkbox" name="subtasks" value="B">
+          Subtask B
+        </label>
+      </fieldset>
+      <button type="submit">Add Team</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Registered Teams</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Team ID</th>
+            <th>Name</th>
+            <th>Subtasks</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for team in teams %}
+            <tr>
+              <td>{{ team.team_id }}</td>
+              <td>{{ team.display_name }}</td>
+              <td>
+                {% for subtask in team.subtasks %}
+                  <span class="tag">Subtask {{ subtask }}</span>
+                {% endfor %}
+              </td>
+              <td>{{ "Active" if team.is_active else "Disabled" }}</td>
+              <td>{{ team.created_at }}</td>
+              <td>{{ team.last_login_at or "Never" }}</td>
+              <td>
+                <form method="post" action="/admin/teams/{{ team.team_id }}/password">
+                  <button type="submit">Generate Password</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7">No teams yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
+
