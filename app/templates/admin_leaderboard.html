@@ -9,7 +9,10 @@
         <h1>Leaderboard</h1>
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
-      <a href="/admin">Dashboard</a>
+      <div class="header-actions">
+        <a href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
+        <a href="/admin">Dashboard</a>
+      </div>
     </div>
 
     <form method="get" action="/admin/leaderboard" class="form-grid">

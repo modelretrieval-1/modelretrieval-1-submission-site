@@ -1,4 +1,6 @@
+import csv
 import tempfile
+from io import StringIO
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -180,6 +182,69 @@ def test_team_cannot_access_private_leaderboard():
         login(client, "team-001", team.password)
 
         response = client.get("/admin/leaderboard", follow_redirects=False)
+
+        assert response.status_code == 303
+        assert response.headers["location"] == "/team"
+
+
+def test_organizer_can_download_leaderboard_csv_with_all_metrics():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        activate_subtask_b_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        seed_evaluated_submissions(client, team.password)
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin/leaderboard.csv")
+
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/csv")
+        assert response.headers["content-disposition"] == 'attachment; filename="leaderboard.csv"'
+
+        rows = list(csv.DictReader(StringIO(response.text)))
+
+        assert rows[0]["team_id"] == "team-001"
+        assert rows[0]["run_id"] == "run-a"
+        assert rows[0]["ndcg@1"] == "1.000000"
+        assert rows[0]["ndcg@3"] == "1.000000"
+        assert rows[0]["ndcg@5"] == "1.000000"
+        assert rows[0]["mrr"] == ""
+        assert rows[1]["run_id"] == "run-b"
+        assert rows[1]["mrr"] == "1.000000"
+
+
+def test_leaderboard_csv_respects_subtask_and_period_filters():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        activate_subtask_b_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        seed_evaluated_submissions(client, team.password)
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin/leaderboard.csv?subtask=B&period=late")
+
+        assert response.status_code == 200
+        rows = list(csv.DictReader(StringIO(response.text)))
+
+        assert len(rows) == 1
+        assert rows[0]["subtask"] == "B"
+        assert rows[0]["period"] == "late"
+        assert rows[0]["run_id"] == "run-b"
+        assert rows[0]["mrr"] == "1.000000"
+
+
+def test_team_cannot_download_leaderboard_csv():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        _organizer, team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.get("/admin/leaderboard.csv", follow_redirects=False)
 
         assert response.status_code == 303
         assert response.headers["location"] == "/team"

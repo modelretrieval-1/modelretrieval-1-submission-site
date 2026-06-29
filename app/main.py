@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import csv
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime
+from io import StringIO
 from typing import Annotated
+from urllib.parse import urlencode
 
 from fastapi import FastAPI, File, Form, Request, UploadFile, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -303,19 +306,64 @@ def render_admin_submission_detail(
     )
 
 
+def get_leaderboard_filters(request: Request) -> dict[str, str]:
+    requested_subtask = request.query_params.get("subtask", "").strip().upper()
+    requested_period = request.query_params.get("period", "").strip().lower()
+    return {
+        "subtask": requested_subtask if requested_subtask in {"A", "B"} else "",
+        "period": requested_period if requested_period in {"normal", "late"} else "",
+    }
+
+
+def leaderboard_csv_content(rows) -> str:
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "team_id",
+            "team_display_name",
+            "subtask",
+            "period",
+            "run_id",
+            "ndcg@1",
+            "ndcg@3",
+            "ndcg@5",
+            "mrr",
+            "submitted_at_jst",
+        ]
+    )
+    for row in rows:
+        writer.writerow(
+            [
+                row.team_public_id,
+                row.team_display_name,
+                row.subtask,
+                row.period_name,
+                row.run_id,
+                format_metric_value(row.metric_values.get("ndcg@1")),
+                format_metric_value(row.metric_values.get("ndcg@3")),
+                format_metric_value(row.metric_values.get("ndcg@5")),
+                format_metric_value(row.metric_values.get("mrr")),
+                row.submitted_at_jst,
+            ]
+        )
+    return output.getvalue()
+
+
+def format_metric_value(value: float | None) -> str:
+    if value is None:
+        return ""
+    return f"{value:.6f}"
+
+
 def render_admin_leaderboard(request: Request, *, account) -> HTMLResponse:
     app_settings: Settings = request.app.state.settings
-    filters = {
-        "subtask": request.query_params.get("subtask", "").strip().upper(),
-        "period": request.query_params.get("period", "").strip().lower(),
-    }
-    subtask_filter = filters["subtask"] if filters["subtask"] in {"A", "B"} else ""
-    period_filter = filters["period"] if filters["period"] in {"normal", "late"} else ""
+    filters = get_leaderboard_filters(request)
     with connect(app_settings.database_path) as connection:
         rows = list_leaderboard_rows(
             connection,
-            subtask=subtask_filter or None,
-            period_name=period_filter or None,
+            subtask=filters["subtask"] or None,
+            period_name=filters["period"] or None,
         )
     return templates.TemplateResponse(
         request,
@@ -324,10 +372,8 @@ def render_admin_leaderboard(request: Request, *, account) -> HTMLResponse:
             "app_name": app_settings.app_name,
             "account": account,
             "rows": rows,
-            "filters": {
-                "subtask": subtask_filter,
-                "period": period_filter,
-            },
+            "filters": filters,
+            "export_query": urlencode({key: value for key, value in filters.items() if value}),
         },
     )
 
@@ -797,6 +843,25 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         if redirect_response is not None:
             return redirect_response
         return render_admin_leaderboard(request, account=account)
+
+    @app.get("/admin/leaderboard.csv")
+    def admin_leaderboard_csv(request: Request) -> Response:
+        _account, redirect_response = require_organizer(request)
+        if redirect_response is not None:
+            return redirect_response
+
+        filters = get_leaderboard_filters(request)
+        with connect(app_settings.database_path) as connection:
+            rows = list_leaderboard_rows(
+                connection,
+                subtask=filters["subtask"] or None,
+                period_name=filters["period"] or None,
+            )
+        return Response(
+            content=leaderboard_csv_content(rows),
+            media_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="leaderboard.csv"'},
+        )
 
     @app.post("/admin/periods/{period_name}", response_class=HTMLResponse)
     async def update_period(request: Request, period_name: str) -> Response:
