@@ -200,6 +200,62 @@ Expected VPS file placement:
 
 The deployed `compose.yml` files may be copied from the repository's environment-specific Compose files.
 
+## APP_IMAGE
+
+`APP_IMAGE` tells Docker Compose which image to pull.
+
+Staging commonly uses:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:latest-staging
+```
+
+Production should use an immutable version tag:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:vYYYY.MM.DD
+```
+
+Check the current value:
+
+```bash
+grep APP_IMAGE /opt/modelretrieval/staging/.env
+grep APP_IMAGE /opt/modelretrieval/production/.env
+```
+
+If Docker cannot pull with `unauthorized`, log in to GHCR as the same user that runs Docker Compose:
+
+```bash
+echo "<github_pat>" | docker login ghcr.io -u "<github_username>" --password-stdin
+```
+
+The token needs `read:packages`. Private repositories or packages may also require `repo`.
+
+## Data Directory Ownership
+
+The container writes to `/data`, which is a host bind mount.
+
+If startup fails with:
+
+```text
+PermissionError: [Errno 13] Permission denied: '/data/storage'
+```
+
+find the container UID/GID:
+
+```bash
+docker compose run --rm --no-deps --entrypoint id app
+```
+
+Then apply ownership on the host data directory:
+
+```bash
+sudo chown -R <uid>:<gid> /opt/modelretrieval/staging/data
+sudo chown -R <uid>:<gid> /opt/modelretrieval/production/data
+```
+
+Run the command for the environment you are fixing. Do not use `chmod 777`.
+
 ## First Admin Creation
 
 After each environment is deployed, create the first organizer account inside that environment.

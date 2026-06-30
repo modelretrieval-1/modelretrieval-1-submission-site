@@ -75,12 +75,14 @@ docker compose version
 
 ## 3. Deploy User
 
-Create a non-root deploy user:
+Create a non-root deploy user without a password:
 
 ```bash
-sudo adduser deploy
+sudo adduser --disabled-password --gecos "" deploy
 sudo usermod -aG docker deploy
 ```
+
+The deploy user should use SSH keys only. It does not need broad passwordless `sudo` for normal deployments.
 
 Install the GitHub Actions public SSH key for this user:
 
@@ -93,6 +95,39 @@ sudo chmod 600 /home/deploy/.ssh/authorized_keys
 ```
 
 The matching private key is stored in GitHub as `STAGING_SSH_KEY` and `PRODUCTION_SSH_KEY`, or as separate keys if desired.
+
+Optional hardening:
+
+```bash
+sudo passwd -l deploy
+```
+
+If the VPS SSH policy allows it, disable SSH password authentication globally:
+
+```text
+PasswordAuthentication no
+PubkeyAuthentication yes
+```
+
+This is usually configured in:
+
+```text
+/etc/ssh/sshd_config
+```
+
+Then reload SSH:
+
+```bash
+sudo systemctl reload ssh
+```
+
+Some distributions use `sshd` instead:
+
+```bash
+sudo systemctl reload sshd
+```
+
+Before disabling password authentication, confirm key-based SSH login works from your admin machine and from GitHub Actions.
 
 ## 4. Firewall
 
@@ -161,12 +196,103 @@ Edit both `.env` files:
 - Confirm `DATABASE_PATH=/data/app.sqlite3`.
 - Confirm `STORAGE_ROOT=/data/storage`.
 
+### APP_IMAGE
+
+`APP_IMAGE` is the container image that Docker Compose pulls and runs.
+
+After GitHub Actions publishes an image, check it in:
+
+```text
+GitHub repository -> Packages
+```
+
+Expected image tags:
+
+```text
+ghcr.io/<owner>/<repo>:latest-staging
+ghcr.io/<owner>/<repo>:main-<short-sha>
+ghcr.io/<owner>/<repo>:vYYYY.MM.DD
+```
+
+Recommended staging value:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:latest-staging
+```
+
+Recommended production value:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:vYYYY.MM.DD
+```
+
+Production should use an immutable `v*` tag, not `latest-staging`.
+
+Check the current value on the VPS:
+
+```bash
+grep APP_IMAGE /opt/modelretrieval/staging/.env
+grep APP_IMAGE /opt/modelretrieval/production/.env
+```
+
+If GHCR returns `unauthorized`, log in as the same user that runs Docker Compose:
+
+```bash
+su - deploy
+echo "<github_pat>" | docker login ghcr.io -u "<github_username>" --password-stdin
+```
+
+The GitHub personal access token needs `read:packages`. If the package or repository is private, it may also need `repo`.
+
 Install production backup script:
 
 ```bash
 cp deployment/scripts/backup.sh /opt/modelretrieval/production/backup.sh
 chmod 700 /opt/modelretrieval/production/backup.sh
 ```
+
+### Data Directory Ownership
+
+The app container runs as a non-root `app` user. The host bind-mounted `data/` directories must be writable by that container user.
+
+If the app fails with:
+
+```text
+PermissionError: [Errno 13] Permission denied: '/data/storage'
+```
+
+the host data directory has the wrong owner.
+
+The app may exit before `docker compose exec app id` works. Use a one-off container instead:
+
+```bash
+cd /opt/modelretrieval/staging
+docker compose run --rm --no-deps --entrypoint id app
+```
+
+Example output:
+
+```text
+uid=999(app) gid=999(app) groups=999(app)
+```
+
+Then fix staging ownership:
+
+```bash
+sudo chown -R 999:999 /opt/modelretrieval/staging/data
+```
+
+Replace `999:999` with the UID/GID shown by `id`.
+
+For production:
+
+```bash
+cd /opt/modelretrieval/production
+docker compose run --rm --no-deps --entrypoint id app
+sudo chown -R <uid>:<gid> /opt/modelretrieval/production/data
+```
+
+Avoid `chmod 777`; set ownership instead.
 
 ## 7. Nginx And HTTPS
 
@@ -212,6 +338,27 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+If `sudo nginx -t` fails with:
+
+```text
+nginx: [emerg] could not build server_names_hash, you should increase server_names_hash_bucket_size: 64
+```
+
+add this inside the `http { ... }` block in `/etc/nginx/nginx.conf`:
+
+```nginx
+server_names_hash_bucket_size 128;
+```
+
+Then test and reload:
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+If needed, increase the value to `256`.
+
 ## 8. First Manual Staging Deploy
 
 Set `APP_IMAGE` in `/opt/modelretrieval/staging/.env`.
@@ -223,6 +370,8 @@ cd /opt/modelretrieval/staging
 docker compose pull
 docker compose up -d
 ```
+
+If startup fails with a `/data/storage` permission error, run the data directory ownership fix from step 6.
 
 Smoke check:
 
@@ -248,6 +397,8 @@ cd /opt/modelretrieval/production
 docker compose pull
 docker compose up -d
 ```
+
+If startup fails with a `/data/storage` permission error, run the data directory ownership fix from step 6.
 
 Smoke check:
 

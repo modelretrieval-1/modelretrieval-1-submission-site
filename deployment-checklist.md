@@ -32,6 +32,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Staging Nginx config has real hostname and proxies to `127.0.0.1:8001`.
 - [ ] Production Nginx config has real hostname and proxies to `127.0.0.1:8002`.
 - [ ] Nginx config includes `client_max_body_size 12m` or larger.
+- [ ] Nginx `server_names_hash_bucket_size` is increased if long hostnames make `nginx -t` fail.
 - [ ] `sudo nginx -t` passes.
 - [ ] `/opt/modelretrieval/staging` exists.
 - [ ] `/opt/modelretrieval/production` exists.
@@ -42,9 +43,16 @@ This checklist is used before launch and before each production deployment.
 - [ ] `compose.production.yml` has been copied to production as `compose.yml`.
 - [ ] Staging `.env` exists and is not committed.
 - [ ] Production `.env` exists and is not committed.
+- [ ] Staging `APP_IMAGE` points to an existing GHCR image.
+- [ ] Production `APP_IMAGE` points to an immutable `v*` GHCR image.
+- [ ] Docker Compose user can pull `APP_IMAGE` from GHCR.
 - [ ] Staging and production use different `SECRET_KEY` values.
 - [ ] Staging and production use separate data directories.
+- [ ] Staging data directory ownership matches the app container UID/GID.
+- [ ] Production data directory ownership matches the app container UID/GID.
 - [ ] GitHub Actions deploy user can SSH to the VPS.
+- [ ] Deploy user has no usable password login.
+- [ ] Deploy user uses SSH keys only.
 - [ ] GitHub Actions deploy user can run Docker Compose in both environment directories.
 
 ## Staging Verification

@@ -42,6 +42,15 @@ The workflow already declares these permissions.
 
 ## SSH Key Guidance
 
+The VPS `deploy` user should be created without a password and should authenticate by SSH key only.
+
+Recommended user creation command:
+
+```bash
+sudo adduser --disabled-password --gecos "" deploy
+sudo usermod -aG docker deploy
+```
+
 Create a deploy key for GitHub Actions:
 
 ```bash
@@ -68,6 +77,8 @@ PRODUCTION_SSH_KEY
 ```
 
 You may use one key for both environments on the same VPS, or separate keys for stricter separation.
+
+Do not store a VPS user password in GitHub. The workflow is designed for SSH key authentication only.
 
 ## Remote Path Requirements
 
@@ -114,6 +125,42 @@ Production receives the image built from the version tag:
 ```text
 ghcr.io/<owner>/<repo>:vYYYY.MM.DD
 ```
+
+Before CI/CD has run, set `APP_IMAGE` manually in the VPS `.env` file.
+
+For staging:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:latest-staging
+```
+
+For production:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:vYYYY.MM.DD
+```
+
+Check the current value:
+
+```bash
+grep APP_IMAGE /opt/modelretrieval/staging/.env
+grep APP_IMAGE /opt/modelretrieval/production/.env
+```
+
+The image can be found in:
+
+```text
+GitHub repository -> Packages
+```
+
+If `docker compose pull` returns `unauthorized`, log in to GHCR on the VPS as the Docker Compose user:
+
+```bash
+su - deploy
+echo "<github_pat>" | docker login ghcr.io -u "<github_username>" --password-stdin
+```
+
+The token needs `read:packages`. Private repositories or packages may also require `repo`.
 
 ## Environment Protection
 

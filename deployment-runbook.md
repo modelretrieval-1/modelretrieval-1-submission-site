@@ -29,6 +29,8 @@ For first-time VPS setup, start with `deployment/vps-setup.md`.
 
 For GitHub Actions secret configuration, use `deployment/github-secrets.md`.
 
+The VPS deploy user should be passwordless and use SSH key authentication only.
+
 ## One-Time VPS Setup
 
 Install host-level services on the Sakura VPS:
@@ -75,12 +77,73 @@ sudo cp deployment/staging.env.example /opt/modelretrieval/staging/.env
 sudo cp deployment/production.env.example /opt/modelretrieval/production/.env
 ```
 
+Set `APP_IMAGE` in each `.env`.
+
+Staging can use:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:latest-staging
+```
+
+Production should use an immutable version tag:
+
+```text
+APP_IMAGE=ghcr.io/<owner>/<repo>:vYYYY.MM.DD
+```
+
+Check the current values:
+
+```bash
+grep APP_IMAGE /opt/modelretrieval/staging/.env
+grep APP_IMAGE /opt/modelretrieval/production/.env
+```
+
+If GHCR returns `unauthorized`, log in as the Docker Compose user:
+
+```bash
+su - deploy
+echo "<github_pat>" | docker login ghcr.io -u "<github_username>" --password-stdin
+```
+
+The token needs `read:packages`. Private repositories or packages may also require `repo`.
+
 Copy deployment scripts to the VPS environment directories:
 
 ```bash
 sudo cp deployment/scripts/backup.sh /opt/modelretrieval/production/backup.sh
 sudo chmod 700 /opt/modelretrieval/production/backup.sh
 ```
+
+Fix bind-mounted data directory ownership if needed. The app container runs as a non-root `app` user, so host `data/` directories must be writable by that container UID/GID.
+
+If the app cannot start and logs show:
+
+```text
+PermissionError: [Errno 13] Permission denied: '/data/storage'
+```
+
+use a one-off container to check the app UID/GID:
+
+```bash
+cd /opt/modelretrieval/staging
+docker compose run --rm --no-deps --entrypoint id app
+```
+
+Then set ownership using the returned UID/GID:
+
+```bash
+sudo chown -R <uid>:<gid> /opt/modelretrieval/staging/data
+```
+
+Repeat for production when needed:
+
+```bash
+cd /opt/modelretrieval/production
+docker compose run --rm --no-deps --entrypoint id app
+sudo chown -R <uid>:<gid> /opt/modelretrieval/production/data
+```
+
+Do not use `chmod 777`.
 
 ## DNS Setup
 
@@ -153,6 +216,27 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+If `sudo nginx -t` fails with:
+
+```text
+nginx: [emerg] could not build server_names_hash, you should increase server_names_hash_bucket_size: 64
+```
+
+add this inside the `http { ... }` block in `/etc/nginx/nginx.conf`:
+
+```nginx
+server_names_hash_bucket_size 128;
+```
+
+Then test again:
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+If `128` is still too small, use `256`.
+
 Keep these settings in both final configs:
 
 - `client_max_body_size 12m`
@@ -174,6 +258,8 @@ docker compose exec app python -m app.cli create-admin --username admin --displa
 ```
 
 Only run `create-admin` when the environment does not yet have an organizer account.
+
+If the app exits before `docker compose exec` works, check `docker compose logs app`. For `/data/storage` permission errors, apply the data directory ownership fix from the one-time setup section.
 
 ## Production Deployment
 
