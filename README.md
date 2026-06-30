@@ -129,6 +129,8 @@ uv lock
 - [deployment-environments.md](deployment-environments.md): development, staging, and production configuration.
 - [deployment-runbook.md](deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
 - [deployment-checklist.md](deployment-checklist.md): launch and release verification checklist.
+- [deployment/vps-setup.md](deployment/vps-setup.md): Sakura VPS setup procedure.
+- [deployment/github-secrets.md](deployment/github-secrets.md): GitHub Actions secret configuration.
 - [open-questions.md](open-questions.md): resolved product and implementation decisions.
 - [implementation-plan.md](implementation-plan.md): Scrum plan, epics, testing strategy, sprint plan.
 - [HANDOFF.md](HANDOFF.md): concise continuation guide for a new Codex session.

@@ -17,6 +17,8 @@ This checklist is used before launch and before each production deployment.
 - [ ] Confirm backup retention period.
 - [ ] Confirm who has SSH access to the VPS.
 - [ ] Confirm GitHub Actions environments and deployment secrets.
+- [ ] `deployment/vps-setup.md` has been followed for the target VPS.
+- [ ] `deployment/github-secrets.md` has been followed for GitHub Actions.
 
 ## One-Time VPS Checklist
 
@@ -42,6 +44,8 @@ This checklist is used before launch and before each production deployment.
 - [ ] Production `.env` exists and is not committed.
 - [ ] Staging and production use different `SECRET_KEY` values.
 - [ ] Staging and production use separate data directories.
+- [ ] GitHub Actions deploy user can SSH to the VPS.
+- [ ] GitHub Actions deploy user can run Docker Compose in both environment directories.
 
 ## Staging Verification
 

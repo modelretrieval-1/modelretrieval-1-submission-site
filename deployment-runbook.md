@@ -19,9 +19,15 @@ The repository includes the first Docker deployment files:
 - `deployment/scripts/backup.sh`
 - `deployment/scripts/smoke-check.sh`
 - `deployment/restore.md`
+- `deployment/vps-setup.md`
+- `deployment/github-secrets.md`
 - `.github/workflows/ci-cd.yml`
 
 The GitHub Actions workflow runs tests, linting, image publishing, staging deployment, production backup, production deployment, and smoke checks.
+
+For first-time VPS setup, start with `deployment/vps-setup.md`.
+
+For GitHub Actions secret configuration, use `deployment/github-secrets.md`.
 
 ## One-Time VPS Setup
 

@@ -237,6 +237,13 @@ Initial GitHub Actions workflow added:
 
 The workflow runs tests and lint, builds and pushes GHCR images, deploys staging from branch pushes, deploys production from `v*` tags, runs production backup before deploy, and runs smoke checks after deploy.
 
+## Operator Setup Documents
+
+Added operator-facing setup docs:
+
+- `deployment/vps-setup.md`: Sakura VPS, Docker, Nginx, Certbot, directories, first manual deploy, and first admin setup.
+- `deployment/github-secrets.md`: GitHub Actions secrets, SSH key expectations, remote paths, image behavior, and environment protection.
+
 ## Completed Latest Story
 
 Implement organizer team management.

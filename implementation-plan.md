@@ -542,6 +542,7 @@ Status:
 - Initial Nginx templates have been added under `deployment/nginx/` for staging and production reverse proxying.
 - Initial backup and restore tooling has been added under `deployment/scripts/backup.sh` and `deployment/restore.md`.
 - Initial CI/CD workflow has been added in `.github/workflows/ci-cd.yml` with smoke checks via `deployment/scripts/smoke-check.sh`.
+- Operator setup docs have been added in `deployment/vps-setup.md` and `deployment/github-secrets.md`.
 - Current deployment direction: local development, staging and production on one Sakura VPS, Muumuu Domain DNS, host Nginx, Docker Compose app stacks, automatic staging deployment from `main`, and production deployment from explicit version tags.
 
 ## Initial MVP
