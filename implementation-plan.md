@@ -520,7 +520,8 @@ Deliverables:
 
 - VPS deployment docs.
 - Reverse proxy config.
-- systemd service.
+- Docker Compose configuration.
+- CI/CD deployment workflow.
 - Backup plan.
 - Final E2E regression suite.
 
@@ -528,6 +529,15 @@ Demo:
 
 - Run app in production-like mode.
 - Complete team and organizer workflows.
+
+Status:
+
+- Deployment planning documents have been started:
+  - `deployment-strategy.md`
+  - `deployment-environments.md`
+  - `deployment-runbook.md`
+  - `deployment-checklist.md`
+- Current deployment direction: local development, staging and production on one Sakura VPS, Muumuu Domain DNS, host Nginx, Docker Compose app stacks, automatic staging deployment from `main`, and production deployment from explicit version tags.
 
 ## Initial MVP
 

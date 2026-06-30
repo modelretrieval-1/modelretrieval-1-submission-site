@@ -30,7 +30,7 @@ Scrum implementation is underway.
 - Pytest
 - Ruff
 - Playwright planned for E2E tests
-- VPS deployment planned with Nginx or Caddy, HTTPS, and systemd
+- VPS deployment planned with Docker Compose app containers, host Nginx, HTTPS, and separate staging/production data directories
 
 ## Setup Commands
 
@@ -166,9 +166,23 @@ Key decisions already made:
 - Records are retained forever.
 - No email notifications.
 - VPS deployment.
+- Three environments: local development, staging on Sakura VPS, and production on the same Sakura VPS.
+- Use Muumuu Domain DNS with separate staging and production hostnames.
+- Use host Nginx as reverse proxy.
+- Use Docker Compose for staging and production app stacks.
+- Deploy staging automatically from `main`; deploy production from explicit version tags.
 - Keep the frontend server-rendered with FastAPI/Jinja2.
 - Use Bootstrap 5 plus a small local CSS layer for UI.
 - Do not introduce React, Vue, or a frontend build pipeline for this phase.
+
+## Sprint 6 Deployment Documents
+
+Created deployment planning documents:
+
+- `deployment-strategy.md`: environment model, release flow, Docker Compose recommendation, DNS/Nginx shape, backup and rollback strategy.
+- `deployment-environments.md`: development, staging, and production domains, data paths, environment variables, and secret rules.
+- `deployment-runbook.md`: setup, deploy, promote, rollback, backup, restore, logs, and smoke-test operations.
+- `deployment-checklist.md`: pre-code, one-time VPS, staging, production, backup, and launch-readiness checklist.
 
 ## Completed Latest Story
 

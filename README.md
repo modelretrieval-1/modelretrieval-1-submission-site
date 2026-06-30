@@ -118,6 +118,10 @@ uv lock
 - [submission-spec.md](submission-spec.md): participant upload format and validation rules.
 - [evaluation-spec.md](evaluation-spec.md): metric definitions and evaluation behavior.
 - [architecture.md](architecture.md): VPS deployment architecture.
+- [deployment-strategy.md](deployment-strategy.md): environment model and deployment approach.
+- [deployment-environments.md](deployment-environments.md): development, staging, and production configuration.
+- [deployment-runbook.md](deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
+- [deployment-checklist.md](deployment-checklist.md): launch and release verification checklist.
 - [open-questions.md](open-questions.md): resolved product and implementation decisions.
 - [implementation-plan.md](implementation-plan.md): Scrum plan, epics, testing strategy, sprint plan.
 - [HANDOFF.md](HANDOFF.md): concise continuation guide for a new Codex session.

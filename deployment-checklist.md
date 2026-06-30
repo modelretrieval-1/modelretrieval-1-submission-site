@@ -1,0 +1,101 @@
+# Deployment Checklist
+
+## Purpose
+
+This checklist is used before launch and before each production deployment.
+
+## Before Writing Deployment Code
+
+- [ ] Confirm staging hostname.
+- [ ] Confirm production hostname.
+- [ ] Confirm Sakura VPS OS version.
+- [ ] Confirm Docker Engine and Compose plugin installation plan.
+- [ ] Confirm Nginx is the reverse proxy.
+- [ ] Confirm HTTPS certificate method.
+- [ ] Confirm Git hosting provider and container registry.
+- [ ] Confirm whether production deploys are tag-based.
+- [ ] Confirm backup retention period.
+- [ ] Confirm who has SSH access to the VPS.
+
+## One-Time VPS Checklist
+
+- [ ] DNS A record exists for staging.
+- [ ] DNS A record exists for production.
+- [ ] Firewall allows SSH, HTTP, and HTTPS.
+- [ ] Docker is installed.
+- [ ] Docker Compose plugin is installed.
+- [ ] Nginx is installed.
+- [ ] Certbot is installed.
+- [ ] `/opt/modelretrieval/staging` exists.
+- [ ] `/opt/modelretrieval/production` exists.
+- [ ] `/opt/modelretrieval/backups` exists.
+- [ ] Staging `.env` exists and is not committed.
+- [ ] Production `.env` exists and is not committed.
+- [ ] Staging and production use different `SECRET_KEY` values.
+- [ ] Staging and production use separate data directories.
+
+## Staging Verification
+
+- [ ] CI tests pass.
+- [ ] CI lint passes.
+- [ ] Staging deploy completes.
+- [ ] `https://staging.<domain>/health` returns success.
+- [ ] Login page loads over HTTPS.
+- [ ] Organizer login works.
+- [ ] Organizer can create a team.
+- [ ] Team login works.
+- [ ] Team cannot access organizer pages.
+- [ ] Organizer can upload and activate ground truth.
+- [ ] Team can upload a valid sample submission.
+- [ ] Team can see scores.
+- [ ] Organizer can see private leaderboard.
+- [ ] CSV export works.
+- [ ] Submission bundle download works.
+
+## Production Pre-Deploy
+
+- [ ] Production image tag is immutable.
+- [ ] Staging was verified using the same commit or image.
+- [ ] Production backup completed.
+- [ ] Production `.env` is present.
+- [ ] Production data directory is present.
+- [ ] Nginx production config is enabled.
+- [ ] HTTPS certificate is valid.
+- [ ] Rollback image tag is known.
+
+## Production Post-Deploy
+
+- [ ] `https://submit.<domain>/health` returns success.
+- [ ] Login page loads over HTTPS.
+- [ ] Organizer login works.
+- [ ] Team login works for a test or official account.
+- [ ] Admin pages are inaccessible to team accounts.
+- [ ] Team pages are inaccessible to organizer accounts where expected.
+- [ ] Ground-truth history is intact.
+- [ ] Existing submissions are visible.
+- [ ] Existing evaluation results are visible.
+- [ ] Private leaderboard loads.
+- [ ] Nginx error logs show no deployment-related errors.
+- [ ] Application logs show no startup errors.
+
+## Backup Verification
+
+- [ ] Backup contains SQLite database.
+- [ ] Backup contains storage directory.
+- [ ] Backup has a timestamped manifest.
+- [ ] Backup can be copied off the VPS.
+- [ ] Restore process has been tested on staging.
+
+## Launch Readiness
+
+- [ ] First production organizer account created.
+- [ ] Official teams imported or created.
+- [ ] Team credentials distributed securely.
+- [ ] Normal deadline confirmed as `2026-08-01 15:00 JST`.
+- [ ] Late deadline confirmed as `2026-10-15 23:59 JST`.
+- [ ] Production ground truth uploaded and activated.
+- [ ] Sample validation failure checked.
+- [ ] Sample valid submission checked.
+- [ ] Organizer leaderboard checked.
+- [ ] Backup schedule active.
+- [ ] Rollback procedure understood.
