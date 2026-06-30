@@ -18,7 +18,48 @@ Implemented through the latest Sprint 5 slice:
 - Submission bundle download.
 - Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
 
-Next story: staging deployment rehearsal and production hardening.
+Next story: application-shell UI redesign, followed by staging deployment rehearsal and production hardening.
+
+## Application UI Stories
+
+### Use An Application Shell
+
+As an organizer or participant, I want authenticated pages to share a consistent application shell so that the system feels like one cohesive tool rather than separate pages.
+
+Acceptance criteria:
+
+- Authenticated pages use a shared layout.
+- Desktop users see persistent role-aware navigation.
+- Mobile users can open and close navigation from a compact menu.
+- The current page is visually indicated.
+- The signed-in identity and logout action are easy to find.
+- Organizer-only links are never shown to team accounts.
+- Team-only actions are not shown to organizers.
+
+### Organizer Operations Dashboard
+
+As an organizer, I want a dashboard that summarizes system status so that I can quickly understand submissions, deadlines, ground truth, and recent activity.
+
+Acceptance criteria:
+
+- The dashboard summarizes active teams, evaluated submissions, rejected attempts, and active ground-truth status.
+- The dashboard shows normal and late period status.
+- The dashboard links to team management, ground-truth upload, submissions, leaderboard, CSV export, and bundle download workflows.
+- Recent submissions or validation failures are visible when data exists.
+- The dashboard remains scan-friendly on desktop and mobile.
+
+### Participant Submission Dashboard
+
+As a participant team, I want a dashboard that clearly shows my registered subtasks, open periods, submitted runs, and scores so that I know what action is available next.
+
+Acceptance criteria:
+
+- The dashboard shows team identity and registered subtasks.
+- The dashboard shows normal and late period status.
+- The dashboard shows per-subtask submission status.
+- Upload actions are visible only when the team can submit.
+- Successful scores are easy to find after evaluation.
+- Rejected attempts do not look like successful submissions.
 
 ## Participant Team Stories
 

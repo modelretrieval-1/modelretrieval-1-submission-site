@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the first version of the NTCIR-19 ModelRetrieval submission system interface.
+This document defines the NTCIR-19 ModelRetrieval submission system interface.
 
 The UI should be simple, operational, and fast to scan. It is not a marketing site. The first screen should help users sign in and submit or administer runs.
 
@@ -28,7 +28,26 @@ Implemented through the latest Sprint 5 slice:
 - Submission bundle download.
 - Bootstrap-based UI modernization for global navigation, forms, tables, alerts, badges, filters, dashboards, and responsive layout.
 
-Next story: staging deployment rehearsal and production hardening.
+Next story: application-shell UI redesign, followed by staging deployment rehearsal and production hardening.
+
+## Application UI Redesign
+
+The next UI slice should make the system feel like an application rather than a set of separate web pages.
+
+Source of truth:
+
+- `app-ui-redesign.md`
+
+Key decisions:
+
+- Keep FastAPI, Jinja2, Bootstrap 5, and local CSS.
+- Add an authenticated app shell with persistent role-aware navigation.
+- Use a sidebar and compact top bar for organizer and participant workflows.
+- Treat `/admin` as the organizer operations dashboard.
+- Treat `/team` as the participant submission-status dashboard.
+- Keep pages dense, operational, and scan-friendly.
+- Do not add React, Vue, or a frontend build pipeline.
+- Do not turn the app into a marketing-style site.
 
 ## UI Modernization Direction
 
@@ -51,7 +70,7 @@ Design goals:
 - Make validation errors and evaluation results visually distinct.
 - Preserve accessibility through semantic HTML, form labels, focus states, and color-independent status text.
 
-Core visual system:
+Current visual system:
 
 - Top navigation with role-aware links and active page state.
 - Constrained main content width with consistent vertical rhythm.
@@ -59,6 +78,15 @@ Core visual system:
 - Status badges for `rejected`, `accepted`, `evaluated`, `evaluation_failed`, `normal`, `late`, `open`, `closed`, and `reopened`.
 - Compact filter toolbars for organizer submissions and leaderboard pages.
 - Clear primary and secondary actions on every form.
+
+Target visual system for the application redesign:
+
+- Persistent left sidebar on desktop.
+- Collapsed menu navigation on mobile.
+- Compact top bar with signed-in identity and logout action.
+- Main content workspace with consistent page headers, action placement, filters, and tables.
+- Dashboard summary cards only for meaningful operational status.
+- Role-aware navigation groups for organizer and participant tasks.
 
 ## Roles
 

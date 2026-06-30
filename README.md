@@ -69,11 +69,13 @@ All checks passed
 
 Next recommended work:
 
-- Rehearse the staging deployment on Sakura VPS, verify GitHub Actions staging deployment, then promote production with an immutable `v*` tag after staging passes.
+- Review and implement the application-shell UI redesign, then rehearse the staging deployment on Sakura VPS, verify GitHub Actions staging deployment, and promote production with an immutable `v*` tag after staging passes.
 
 ## UI Direction
 
 The app remains a FastAPI/Jinja2 server-rendered system. The UI now uses Bootstrap 5 for navigation, forms, tables, alerts, badges, and responsive layout, with `app/static/app.css` reserved for project-specific polish. React, Vue, and a separate frontend build pipeline are intentionally not part of this phase.
+
+The next planned UI slice is an application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, and a clearer participant submission dashboard. See `app-ui-redesign.md`.
 
 ## Development Setup
 
@@ -124,6 +126,7 @@ uv lock
 - [requirements.md](requirements.md): product requirements and decisions.
 - [user-stories.md](user-stories.md): participant and organizer stories.
 - [ui-flow.md](ui-flow.md): screen and workflow definitions.
+- [app-ui-redesign.md](app-ui-redesign.md): planned application-shell and dashboard redesign.
 - [data-model.md](data-model.md): database/entity design.
 - [submission-spec.md](submission-spec.md): participant upload format and validation rules.
 - [evaluation-spec.md](evaluation-spec.md): metric definitions and evaluation behavior.

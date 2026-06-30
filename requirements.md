@@ -24,7 +24,7 @@ Completed implementation:
 
 Current sprint target:
 
-- Production deployment documentation.
+- Application-shell UI redesign documentation, then production deployment rehearsal.
 
 ## Users and Roles
 
@@ -224,6 +224,8 @@ The system should retain:
 
 The application remains a server-rendered FastAPI/Jinja2 app. The completed UI modernization improves clarity and usability without introducing a single-page application framework or frontend build pipeline.
 
+The next UI direction is documented in `app-ui-redesign.md`. The product should feel more like an application console than a collection of standalone web pages.
+
 Implemented UI direction:
 
 - Use Bootstrap 5 for the core CSS/component foundation.
@@ -235,6 +237,17 @@ Implemented UI direction:
 - Use consistent status badges for submission states, period states, subtasks, and evaluation states.
 - Keep JavaScript minimal and optional. Use Bootstrap's bundled JavaScript only where needed for navigation or simple components.
 - Do not introduce React, Vue, or a separate frontend build step for this phase.
+
+Planned application UI direction:
+
+- Add a shared authenticated app shell.
+- Use persistent role-aware navigation.
+- Use a desktop sidebar and compact top bar.
+- Use a collapsed mobile navigation menu.
+- Make `/admin` a richer organizer operations dashboard.
+- Make `/team` a clearer participant submission-status dashboard.
+- Normalize page headers, filters, actions, status badges, and tables.
+- Preserve all existing backend behavior, permissions, routes, and server-rendered architecture unless a later document explicitly changes them.
 
 ## Recommended Technical Stack
 

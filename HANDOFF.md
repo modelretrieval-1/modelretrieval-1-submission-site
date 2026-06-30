@@ -16,7 +16,7 @@ Scrum implementation is underway.
 - Sprint 3: complete for the planned evaluation and participant-result scope.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
-- Sprint 6: current sprint, focused on deployment rehearsal and production hardening.
+- Sprint 6: current sprint, focused on application-shell UI redesign, deployment rehearsal, and production hardening.
 
 ## Current Stack
 
@@ -31,6 +31,24 @@ Scrum implementation is underway.
 - Ruff
 - Playwright planned for E2E tests
 - VPS deployment planned with Docker Compose app containers, host Nginx, HTTPS, GHCR images, GitHub Actions, and separate staging/production data directories
+
+## Current UI Direction
+
+The next requested product direction is to make the interface feel more like an application than a collection of web pages.
+
+Documented target:
+
+- `app-ui-redesign.md`
+
+Key points:
+
+- Keep FastAPI, Jinja2, Bootstrap 5, and local CSS.
+- Add a shared authenticated app shell.
+- Use persistent role-aware navigation with a desktop sidebar and compact top bar.
+- Use mobile collapsed navigation.
+- Make `/admin` a richer organizer operations dashboard.
+- Make `/team` a clearer participant submission-status dashboard.
+- Preserve current backend behavior, routes, permissions, and server-rendered architecture.
 
 ## Current Deployment Plan
 
@@ -192,6 +210,7 @@ Key decisions already made:
 - Keep the frontend server-rendered with FastAPI/Jinja2.
 - Use Bootstrap 5 plus a small local CSS layer for UI.
 - Do not introduce React, Vue, or a frontend build pipeline for this phase.
+- Make the next UI slice feel like an application shell rather than standalone pages.
 
 ## Sprint 6 Deployment Documents
 

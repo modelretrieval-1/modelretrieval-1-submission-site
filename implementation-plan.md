@@ -19,6 +19,13 @@ Recommended stack:
 - Playwright for E2E browser tests.
 - Ruff or similar linting.
 
+Current UI direction:
+
+- Continue using FastAPI, Jinja2, Bootstrap 5, and local CSS.
+- Redesign authenticated pages around an application shell with role-aware navigation.
+- Use `app-ui-redesign.md` as the source of truth before implementation.
+- Keep the richer UI operational and dashboard-like, not marketing-style.
+
 ## Scrum Roles
 
 Suggested roles:
@@ -548,6 +555,32 @@ Status:
 - Current project domains are `submission-staging.modelretrieval-1.happysocial.net` and `submission.modelretrieval-1.happysocial.net`.
 - Deployment docs capture the GHCR login path, `APP_IMAGE` meaning, `SECRET_KEY` generation, passwordless deploy user, bind-mounted data ownership fix, and Nginx long-hostname hash bucket fix.
 - Remaining Sprint 6 work is staging rehearsal, GitHub Actions deploy verification, production promotion rehearsal, and final E2E regression coverage.
+
+### Sprint 6A: Application UI Redesign
+
+Goal:
+
+- Make the existing server-rendered system feel like a cohesive application rather than standalone pages.
+
+Deliverables:
+
+- App-shell UI design document.
+- Shared authenticated layout with sidebar and top bar.
+- Role-aware navigation for organizer and participant workflows.
+- Richer organizer dashboard.
+- Clearer participant dashboard.
+- Normalized page headers, action bars, filters, tables, status badges, and detail panels.
+
+Technical decisions:
+
+- Keep FastAPI, Jinja2, Bootstrap 5, and local CSS.
+- Do not introduce React, Vue, or a frontend build pipeline.
+- Preserve route behavior and access control.
+
+Status:
+
+- Documentation started in `app-ui-redesign.md`.
+- Implementation should follow after document review.
 
 ## Initial MVP
 
