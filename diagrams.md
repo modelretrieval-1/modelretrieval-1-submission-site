@@ -37,7 +37,7 @@ Recommended conventions:
 
 ### 1. Deployment Diagram
 
-Priority: highest.
+Priority: highest. Initial version: `deployment-strategy.md`.
 
 Purpose:
 
@@ -65,7 +65,7 @@ Best home:
 
 ### 2. CI/CD Flow Diagram
 
-Priority: high.
+Priority: high. Initial version: `deployment-strategy.md`.
 
 Purpose:
 
@@ -158,7 +158,7 @@ Best home:
 
 ### 5. Submission Sequence Diagram
 
-Priority: high.
+Priority: high. Initial version: `submission-spec.md`.
 
 Purpose:
 
@@ -220,7 +220,7 @@ Best home:
 
 ### 7. Data Model / ER Diagram
 
-Priority: high.
+Priority: high. Initial version: `data-model.md`.
 
 Purpose:
 

@@ -537,7 +537,7 @@ Status:
   - `deployment-environments.md`
   - `deployment-runbook.md`
   - `deployment-checklist.md`
-- Diagram planning has been started in `diagrams.md`.
+- Diagram planning has been started in `diagrams.md`, and initial Mermaid diagrams have been added for deployment, CI/CD, submission workflow, and the data model.
 - Current deployment direction: local development, staging and production on one Sakura VPS, Muumuu Domain DNS, host Nginx, Docker Compose app stacks, automatic staging deployment from `main`, and production deployment from explicit version tags.
 
 ## Initial MVP

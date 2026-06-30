@@ -188,12 +188,12 @@ Created deployment planning documents:
 
 Created `diagrams.md` to define the diagram set and drawing order.
 
-Recommended first diagrams:
+Initial Mermaid diagrams added:
 
-- Deployment diagram.
-- CI/CD flow diagram.
-- Submission sequence diagram.
-- Data model / ER diagram.
+- Deployment diagram in `deployment-strategy.md`.
+- CI/CD flow diagram in `deployment-strategy.md`.
+- Submission sequence diagram in `submission-spec.md`.
+- Data model / ER diagram in `data-model.md`.
 
 Use Mermaid in Markdown for the first version of diagrams.
 

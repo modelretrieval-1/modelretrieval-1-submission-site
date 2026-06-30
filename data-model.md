@@ -30,6 +30,132 @@ Participant upload attempts use:
 
 Submissions store the selected `submission_period_id`, and the partial unique index enforces one successful submission per team, subtask, and selected period.
 
+## ER Diagram
+
+```mermaid
+erDiagram
+  ORGANIZERS ||--o{ TEAMS : creates
+  ORGANIZERS ||--o{ GROUND_TRUTH_VERSIONS : uploads
+  TEAMS ||--o{ TEAM_SUBTASKS : registers
+  TEAMS ||--o{ SUBMISSIONS : submits
+  SUBMISSION_PERIODS ||--o{ SUBMISSIONS : selected_for
+  GROUND_TRUTH_VERSIONS ||--o{ SUBMISSIONS : validates
+  SUBMISSIONS ||--o{ RUNS : contains
+  SUBMISSIONS ||--o{ VALIDATION_ERRORS : records
+  SUBMISSIONS ||--o{ EVALUATION_RESULTS : produces
+  RUNS ||--o{ EVALUATION_RESULTS : scored_as
+  GROUND_TRUTH_VERSIONS ||--o{ EVALUATION_RESULTS : used_for
+
+  ORGANIZERS {
+    integer id PK
+    string username UK
+    string password_hash
+    string display_name
+    boolean is_active
+    string created_at
+    string updated_at
+    string last_login_at
+  }
+
+  TEAMS {
+    integer id PK
+    string team_id UK
+    string password_hash
+    string display_name
+    boolean is_active
+    integer created_by_organizer_id FK
+    string created_at
+    string updated_at
+    string last_login_at
+  }
+
+  TEAM_SUBTASKS {
+    integer id PK
+    integer team_id FK
+    string subtask
+    string created_at
+  }
+
+  SUBMISSION_PERIODS {
+    integer id PK
+    string name UK
+    string starts_at_jst
+    string deadline_at_jst
+    boolean is_open_override
+    string created_at
+    string updated_at
+  }
+
+  GROUND_TRUTH_VERSIONS {
+    integer id PK
+    string subtask
+    string version_label
+    string stored_file_path
+    string file_sha256
+    integer uploaded_by_organizer_id FK
+    string uploaded_at_jst
+    boolean is_active
+    string validation_status
+    string notes
+  }
+
+  SUBMISSIONS {
+    integer id PK
+    integer team_id FK
+    string subtask
+    integer submission_period_id FK
+    string status
+    string original_filename
+    string stored_file_path
+    string file_sha256
+    integer file_size_bytes
+    string submitted_at_jst
+    string validation_summary
+    integer ground_truth_version_id FK
+  }
+
+  RUNS {
+    integer id PK
+    integer submission_id FK
+    string run_id
+    integer line_count
+    integer query_count
+    string created_at
+  }
+
+  VALIDATION_ERRORS {
+    integer id PK
+    integer submission_id FK
+    integer line_number
+    string field_name
+    string error_code
+    string message
+    string severity
+    string created_at
+  }
+
+  EVALUATION_RESULTS {
+    integer id PK
+    integer submission_id FK
+    integer run_id FK
+    integer ground_truth_version_id FK
+    string metric_name
+    float metric_value
+    string created_at_jst
+  }
+
+  AUDIT_EVENTS {
+    integer id PK
+    string actor_type
+    integer actor_id
+    string event_type
+    string entity_type
+    integer entity_id
+    string metadata_json
+    string created_at_jst
+  }
+```
+
 ## organizers
 
 Stores organizer/admin accounts.

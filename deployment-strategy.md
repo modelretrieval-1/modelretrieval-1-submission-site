@@ -42,6 +42,39 @@ These four documents are enough before writing deployment code, service files, o
 
 Use Docker Compose for the FastAPI application, with Nginx running on the VPS host.
 
+```mermaid
+flowchart TB
+  dev[Development laptop]
+  repo[Git repository]
+  dns[Muumuu Domain DNS]
+
+  subgraph vps[Sakura VPS]
+    nginx[Host Nginx and HTTPS]
+
+    subgraph staging[Staging Compose project]
+      staging_app[FastAPI app container]
+      staging_db[(Staging SQLite)]
+      staging_storage[(Staging storage)]
+      staging_app --> staging_db
+      staging_app --> staging_storage
+    end
+
+    subgraph production[Production Compose project]
+      prod_app[FastAPI app container]
+      prod_db[(Production SQLite)]
+      prod_storage[(Production storage)]
+      prod_app --> prod_db
+      prod_app --> prod_storage
+    end
+
+    nginx -->|staging domain to 127.0.0.1:8001| staging_app
+    nginx -->|production domain to 127.0.0.1:8002| prod_app
+  end
+
+  dev -->|commit and push| repo
+  dns -->|staging and production hostnames| nginx
+```
+
 ```text
 Muumuu Domain DNS
   -> Sakura VPS public IP
@@ -145,6 +178,27 @@ Use Certbot with the Nginx plugin or an equivalent Let's Encrypt workflow.
 ## Release Flow
 
 Recommended release flow:
+
+```mermaid
+flowchart LR
+  commit[Commit locally]
+  push[Push to main]
+  ci[CI tests and lint]
+  build[Build Docker image]
+  registry[Push image to registry]
+  staging_deploy[Deploy staging]
+  verify[Manual staging verification]
+  tag[Create v* tag]
+  backup[Production backup]
+  prod_deploy[Deploy production]
+  smoke[Production smoke check]
+  rollback[Rollback to previous image tag]
+
+  commit --> push --> ci --> build --> registry --> staging_deploy --> verify --> tag
+  tag --> backup --> prod_deploy --> smoke
+  smoke -. if failed .-> rollback
+  rollback --> smoke
+```
 
 ```text
 developer laptop

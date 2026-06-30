@@ -34,6 +34,54 @@ Current upload behavior is implemented:
 
 Next implementation focus: production deployment documentation.
 
+## Submission Workflow Diagram
+
+```mermaid
+sequenceDiagram
+  actor Team as Participant Team
+  participant App as FastAPI app
+  participant DB as SQLite
+  participant Storage as Local storage
+  participant Eval as Evaluation logic
+
+  Team->>App: Upload .txt for subtask and period
+  App->>DB: Load session account
+  App->>DB: Check team subtask eligibility
+  App->>DB: Load selected submission period
+  App->>App: Validate deadline or organizer override
+  App->>App: Validate filename and size
+  App->>DB: Check existing successful submission
+
+  alt Existing successful submission
+    App->>DB: Persist rejected attempt
+    App-->>Team: Show already-submitted error
+  else New attempt allowed
+    App->>DB: Load active ground-truth requirements
+    App->>App: Parse TREC_EVAL content
+    App->>App: Validate fields, runs, duplicates, rank and score order
+    App->>App: Validate required queries and candidate models
+
+    alt Validation fails
+      App->>DB: Persist rejected submission
+      App->>DB: Persist validation_errors
+      App-->>Team: Show validation errors
+    else Validation succeeds
+      App->>Storage: Store submitted file
+      App->>DB: Persist accepted submission and runs
+      App->>Eval: Evaluate using active ground truth
+
+      alt Evaluation succeeds
+        Eval->>DB: Persist evaluation_results
+        Eval->>DB: Mark submission evaluated
+        App-->>Team: Show run-level scores
+      else Evaluation fails
+        Eval->>DB: Mark submission evaluation_failed
+        App-->>Team: Show evaluation failure state
+      end
+    end
+  end
+```
+
 ## Submission Turns
 
 The system supports:
