@@ -3,37 +3,188 @@
 {% block title %}Organizer Dashboard - {{ app_name }}{% endblock %}
 
 {% block content %}
+  <div class="page-header app-page-header">
+    <div>
+      <p class="eyebrow">Organizer console</p>
+      <h1>Organizer Dashboard</h1>
+      <p>Monitor task readiness, submissions, periods, and evaluation outputs.</p>
+    </div>
+    <div class="header-actions">
+      <a class="btn btn-primary" href="/admin/submissions">Review submissions</a>
+      <a class="btn btn-outline-secondary" href="/admin/leaderboard">Leaderboard</a>
+    </div>
+  </div>
+
+  <section class="stat-grid" aria-label="Operational summary">
+    <div class="stat-card">
+      <span class="stat-label">Active teams</span>
+      <strong class="stat-value">{{ active_teams }}</strong>
+      <span class="stat-note">{{ total_teams }} total registered</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Evaluated submissions</span>
+      <strong class="stat-value">{{ evaluated_submission_count }}</strong>
+      <span class="stat-note">Successful attempts with scores</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Rejected attempts</span>
+      <strong class="stat-value">{{ rejected_submission_count }}</strong>
+      <span class="stat-note">Validation failures retained</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Active ground truth</span>
+      <strong class="stat-value">
+        {{ 1 if active_ground_truth["A"] else 0 }}/{{ 1 if active_ground_truth["B"] else 0 }}
+      </strong>
+      <span class="stat-note">Subtask A / Subtask B</span>
+    </div>
+  </section>
+
+  <div class="workspace-grid">
+    <section class="panel">
+      <div class="section-header">
+        <div>
+          <h2>Submission Periods</h2>
+          <p>JST deadlines and reopen state.</p>
+        </div>
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/periods">Manage</a>
+      </div>
+      <div class="period-stack">
+        {% for period in periods %}
+          <div class="period-row">
+            <div>
+              <strong>{{ period.name|capitalize }}</strong>
+              <span class="small-muted d-block">{{ period.deadline_at_jst }} JST</span>
+            </div>
+            {% if period.is_open_override %}
+              <span class="badge text-bg-warning">reopened</span>
+            {% else %}
+              <span class="badge text-bg-secondary">scheduled</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <div>
+          <h2>Ground Truth</h2>
+          <p>Active evaluation versions.</p>
+        </div>
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/ground-truth">Manage</a>
+      </div>
+      <div class="period-stack">
+        {% for subtask in ["A", "B"] %}
+          {% set version = active_ground_truth[subtask] %}
+          <div class="period-row">
+            <div>
+              <strong>Subtask {{ subtask }}</strong>
+              <span class="small-muted d-block">
+                {% if version %}{{ version.version_label }}{% else %}No active version{% endif %}
+              </span>
+            </div>
+            {% if version %}
+              <span class="badge text-bg-success">active</span>
+            {% else %}
+              <span class="badge text-bg-danger">missing</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
   <section class="panel">
-    <div class="page-header">
+    <div class="section-header">
       <div>
-        <h1>Organizer Dashboard</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <h2>Submissions By Subtask</h2>
+        <p>Successful or evaluation-failed submissions by selected period.</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Open table</a>
+    </div>
+    <div class="dashboard-grid">
+      {% for subtask in ["A", "B"] %}
+        {% for period in ["normal", "late"] %}
+          <div class="mini-card">
+            <span class="small-muted">Subtask {{ subtask }} / {{ period|capitalize }}</span>
+            <strong>{{ subtask_counts.get((subtask, period), 0) }}</strong>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-header">
+      <div>
+        <h2>Recent Submissions</h2>
+        <p>Latest attempts across teams.</p>
+      </div>
+      <div class="header-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Review all</a>
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions/bundle">Download bundle</a>
       </div>
     </div>
+    {% if recent_submissions %}
+      <div class="table-wrap">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Team</th>
+              <th>Subtask</th>
+              <th>Period</th>
+              <th>Status</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for submission in recent_submissions %}
+              <tr>
+                <td>
+                  <a href="/admin/submissions/{{ submission.submission_id }}">{{ submission.team_public_id }}</a>
+                  <span class="small-muted d-block">{{ submission.team_display_name }}</span>
+                </td>
+                <td>Subtask {{ submission.subtask }}</td>
+                <td>{{ submission.period_name|capitalize }}</td>
+                <td>
+                  <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
+                    {{ submission.status }}
+                  </span>
+                </td>
+                <td>{{ submission.submitted_at_jst }} JST</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No submission attempts yet.</p>
+    {% endif %}
+  </section>
 
+  <section class="panel">
+    <div class="section-header">
+      <div>
+        <h2>Operations</h2>
+        <p>Common organizer workflows.</p>
+      </div>
+    </div>
     <nav class="dashboard-grid" aria-label="Organizer sections">
       <a class="dashboard-tile text-decoration-none" href="/admin/teams">
-        <h2>Teams</h2>
+        <h3>Teams</h3>
         <p class="small-muted mb-0">Register teams and generate passwords.</p>
       </a>
       <a class="dashboard-tile text-decoration-none" href="/admin/users">
-        <h2>Organizer Users</h2>
+        <h3>Organizer Users</h3>
         <p class="small-muted mb-0">Manage organizer access.</p>
       </a>
-      <a class="dashboard-tile text-decoration-none" href="/admin/periods">
-        <h2>Submission Periods</h2>
-        <p class="small-muted mb-0">Set JST deadlines and reopen windows.</p>
-      </a>
       <a class="dashboard-tile text-decoration-none" href="/admin/ground-truth">
-        <h2>Ground Truth</h2>
+        <h3>Ground Truth</h3>
         <p class="small-muted mb-0">Upload, validate, and activate versions.</p>
       </a>
-      <a class="dashboard-tile text-decoration-none" href="/admin/submissions">
-        <h2>Submissions</h2>
-        <p class="small-muted mb-0">Review attempts, failures, and files.</p>
-      </a>
       <a class="dashboard-tile text-decoration-none" href="/admin/leaderboard">
-        <h2>Leaderboard</h2>
+        <h3>Leaderboard</h3>
         <p class="small-muted mb-0">Inspect private run-level scores.</p>
       </a>
     </nav>

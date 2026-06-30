@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import sqlite3
+from collections import Counter
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -795,10 +796,46 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
         if account.role != "organizer":
             return redirect("/team")
 
+        with connect(app_settings.database_path) as connection:
+            teams = list_teams(connection)
+            periods = list_submission_periods(connection)
+            ground_truth_versions = list_ground_truth_versions(connection)
+            submissions = list_admin_submission_summaries(connection)
+
+        active_teams = sum(1 for team in teams if team.is_active)
+        status_counts = Counter(submission.status for submission in submissions)
+        subtask_counts = Counter(
+            (submission.subtask, submission.period_name)
+            for submission in submissions
+            if submission.status in {"evaluated", "accepted", "evaluation_failed"}
+        )
+        active_ground_truth = {
+            subtask: next(
+                (
+                    version
+                    for version in ground_truth_versions
+                    if version.subtask == subtask and version.is_active
+                ),
+                None,
+            )
+            for subtask in ("A", "B")
+        }
+
         return templates.TemplateResponse(
             request,
             "admin_dashboard.html",
-            {"app_name": app_settings.app_name, "account": account},
+            {
+                "app_name": app_settings.app_name,
+                "account": account,
+                "active_teams": active_teams,
+                "total_teams": len(teams),
+                "evaluated_submission_count": status_counts.get("evaluated", 0),
+                "rejected_submission_count": status_counts.get("rejected", 0),
+                "periods": periods,
+                "active_ground_truth": active_ground_truth,
+                "recent_submissions": submissions[:6],
+                "subtask_counts": subtask_counts,
+            },
         )
 
     @app.get("/admin/teams", response_class=HTMLResponse)
