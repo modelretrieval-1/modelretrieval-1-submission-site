@@ -184,6 +184,19 @@ Created deployment planning documents:
 - `deployment-runbook.md`: setup, deploy, promote, rollback, backup, restore, logs, and smoke-test operations.
 - `deployment-checklist.md`: pre-code, one-time VPS, staging, production, backup, and launch-readiness checklist.
 
+## Diagram Documents
+
+Created `diagrams.md` to define the diagram set and drawing order.
+
+Recommended first diagrams:
+
+- Deployment diagram.
+- CI/CD flow diagram.
+- Submission sequence diagram.
+- Data model / ER diagram.
+
+Use Mermaid in Markdown for the first version of diagrams.
+
 ## Completed Latest Story
 
 Implement organizer team management.

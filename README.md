@@ -118,6 +118,7 @@ uv lock
 - [submission-spec.md](submission-spec.md): participant upload format and validation rules.
 - [evaluation-spec.md](evaluation-spec.md): metric definitions and evaluation behavior.
 - [architecture.md](architecture.md): VPS deployment architecture.
+- [diagrams.md](diagrams.md): required diagrams, drawing order, and Mermaid conventions.
 - [deployment-strategy.md](deployment-strategy.md): environment model and deployment approach.
 - [deployment-environments.md](deployment-environments.md): development, staging, and production configuration.
 - [deployment-runbook.md](deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
