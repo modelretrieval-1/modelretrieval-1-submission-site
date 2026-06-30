@@ -4,7 +4,16 @@
 
 This runbook describes the operational flow for deploying and maintaining staging and production.
 
-The exact Compose, Nginx, and CI files will be added separately. This document defines the intended commands and order of operations.
+The repository includes the first Docker deployment files:
+
+- `Dockerfile`
+- `.dockerignore`
+- `compose.staging.yml`
+- `compose.production.yml`
+- `deployment/staging.env.example`
+- `deployment/production.env.example`
+
+Nginx and CI/CD files will be added separately.
 
 ## One-Time VPS Setup
 
@@ -36,6 +45,20 @@ Set restrictive permissions:
 ```bash
 sudo chmod 600 /opt/modelretrieval/staging/.env
 sudo chmod 600 /opt/modelretrieval/production/.env
+```
+
+Copy Compose files into each environment directory:
+
+```bash
+sudo cp compose.staging.yml /opt/modelretrieval/staging/compose.yml
+sudo cp compose.production.yml /opt/modelretrieval/production/compose.yml
+```
+
+Create environment files from templates and replace secrets:
+
+```bash
+sudo cp deployment/staging.env.example /opt/modelretrieval/staging/.env
+sudo cp deployment/production.env.example /opt/modelretrieval/production/.env
 ```
 
 ## DNS Setup

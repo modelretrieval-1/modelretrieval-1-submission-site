@@ -102,6 +102,14 @@ Staging and production should be separate Compose projects with separate persist
   backups/
 ```
 
+Repository deployment files:
+
+- `Dockerfile`: production-oriented FastAPI/Uvicorn image.
+- `compose.staging.yml`: staging Compose project on `127.0.0.1:8001`.
+- `compose.production.yml`: production Compose project on `127.0.0.1:8002`.
+- `deployment/staging.env.example`: staging environment template.
+- `deployment/production.env.example`: production environment template.
+
 ## Why Docker Compose
 
 Docker Compose is recommended because:

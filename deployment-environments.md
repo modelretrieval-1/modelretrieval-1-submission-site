@@ -64,6 +64,10 @@ SECRET_KEY=<unique-staging-secret>
 MAX_UPLOAD_BYTES=10485760
 ```
 
+Template:
+
+- `deployment/staging.env.example`
+
 Recommended public hostname:
 
 ```text
@@ -103,6 +107,10 @@ STORAGE_ROOT=/data/storage
 SECRET_KEY=<unique-production-secret>
 MAX_UPLOAD_BYTES=10485760
 ```
+
+Template:
+
+- `deployment/production.env.example`
 
 Recommended public hostname:
 
@@ -170,6 +178,27 @@ Bind app ports only to localhost on the VPS:
 ```
 
 Do not expose Uvicorn directly to the public internet.
+
+## Compose Files
+
+The repository includes two image-based Compose files:
+
+- `compose.staging.yml`: staging stack, localhost port `8001`.
+- `compose.production.yml`: production stack, localhost port `8002`, requires an immutable `APP_IMAGE`.
+
+Expected VPS file placement:
+
+```text
+/opt/modelretrieval/staging/compose.yml
+/opt/modelretrieval/staging/.env
+/opt/modelretrieval/staging/data/
+
+/opt/modelretrieval/production/compose.yml
+/opt/modelretrieval/production/.env
+/opt/modelretrieval/production/data/
+```
+
+The deployed `compose.yml` files may be copied from the repository's environment-specific Compose files.
 
 ## First Admin Creation
 

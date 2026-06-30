@@ -197,6 +197,19 @@ Initial Mermaid diagrams added:
 
 Use Mermaid in Markdown for the first version of diagrams.
 
+## Docker Deployment Files
+
+Initial Docker deployment files added:
+
+- `Dockerfile`
+- `.dockerignore`
+- `compose.staging.yml`
+- `compose.production.yml`
+- `deployment/staging.env.example`
+- `deployment/production.env.example`
+
+Staging binds the app to `127.0.0.1:8001`. Production binds the app to `127.0.0.1:8002` and requires `APP_IMAGE` to reference an immutable image tag.
+
 ## Completed Latest Story
 
 Implement organizer team management.

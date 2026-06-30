@@ -85,6 +85,12 @@ Run the app:
 uv run uvicorn app.main:app --reload
 ```
 
+Build the deployment image locally:
+
+```bash
+docker build -t modelretrieval-submissions:local .
+```
+
 Create the first organizer account:
 
 ```bash

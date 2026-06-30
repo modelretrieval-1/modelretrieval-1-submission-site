@@ -29,6 +29,8 @@ This checklist is used before launch and before each production deployment.
 - [ ] `/opt/modelretrieval/staging` exists.
 - [ ] `/opt/modelretrieval/production` exists.
 - [ ] `/opt/modelretrieval/backups` exists.
+- [ ] `compose.staging.yml` has been copied to staging as `compose.yml`.
+- [ ] `compose.production.yml` has been copied to production as `compose.yml`.
 - [ ] Staging `.env` exists and is not committed.
 - [ ] Production `.env` exists and is not committed.
 - [ ] Staging and production use different `SECRET_KEY` values.
@@ -55,6 +57,7 @@ This checklist is used before launch and before each production deployment.
 ## Production Pre-Deploy
 
 - [ ] Production image tag is immutable.
+- [ ] Production `APP_IMAGE` is set in `/opt/modelretrieval/production/.env`.
 - [ ] Staging was verified using the same commit or image.
 - [ ] Production backup completed.
 - [ ] Production `.env` is present.
