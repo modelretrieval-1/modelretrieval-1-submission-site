@@ -180,8 +180,9 @@ Content:
 
 - Team ID.
 - Registered subtasks.
-- Normal submission deadline: August 1, 2026 at 15:00 JST.
-- Late submission deadline: October 15, 2026 at 23:59 JST.
+- Current normal submission deadline from the configured submission-period row.
+- Current late submission deadline from the configured submission-period row.
+- Reopen status for each configured submission period.
 - Submission status for each registered subtask and period.
 - Link to upload page for open periods without a successful submission.
 - Links to score pages for successful submissions.

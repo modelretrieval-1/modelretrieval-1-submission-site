@@ -95,6 +95,7 @@ For each team, subtask, and submission turn:
 - Once a submission succeeds, the system must prevent another successful submission for that same team, subtask, and turn.
 - If a team attempts to submit again after a successful submission, the system must show an error.
 - Organizers can reopen a submission period after it closes.
+- Participant-facing dashboard and upload pages must display the currently configured period deadlines and reopen state, not hardcoded default deadline text.
 
 ## Run Limits
 

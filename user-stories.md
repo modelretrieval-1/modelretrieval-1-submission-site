@@ -55,7 +55,7 @@ As a participant team, I want a dashboard that clearly shows my registered subta
 Acceptance criteria:
 
 - The dashboard shows team identity and registered subtasks.
-- The dashboard shows normal and late period status.
+- The dashboard shows normal and late period status using the currently configured deadlines and reopen state.
 - The dashboard shows per-subtask submission status.
 - Upload actions are visible only when the team can submit.
 - Successful scores are easy to find after evaluation.

@@ -31,13 +31,19 @@
     </div>
     <div class="stat-card">
       <span class="stat-label">Normal deadline</span>
-      <strong class="stat-value stat-date">Aug 1</strong>
-      <span class="stat-note">2026 at 15:00 JST</span>
+      {% set normal_period = periods|selectattr("name", "equalto", "normal")|first %}
+      <strong class="stat-value stat-date">Normal</strong>
+      <span class="stat-note">
+        {% if normal_period %}{{ normal_period.deadline_at_jst }} JST{% else %}Not configured{% endif %}
+      </span>
     </div>
     <div class="stat-card">
       <span class="stat-label">Late deadline</span>
-      <strong class="stat-value stat-date">Oct 15</strong>
-      <span class="stat-note">2026 at 23:59 JST</span>
+      {% set late_period = periods|selectattr("name", "equalto", "late")|first %}
+      <strong class="stat-value stat-date">Late</strong>
+      <span class="stat-note">
+        {% if late_period %}{{ late_period.deadline_at_jst }} JST{% else %}Not configured{% endif %}
+      </span>
     </div>
   </section>
 
@@ -123,20 +129,20 @@
       </div>
     </div>
     <div class="period-stack">
-      <div class="period-row">
-        <div>
-          <strong>Normal submission</strong>
-          <span class="small-muted d-block">August 1, 2026 at 15:00 JST</span>
+      {% for period in periods %}
+        <div class="period-row">
+          <div>
+            <strong>{{ period.name|capitalize }} submission</strong>
+            <span class="small-muted d-block">{{ period.deadline_at_jst }} JST</span>
+            {% if period.starts_at_jst %}
+              <span class="small-muted d-block">Starts {{ period.starts_at_jst }} JST</span>
+            {% endif %}
+          </div>
+          <span class="badge text-bg-{% if period.is_open_override %}warning{% elif period.name == 'normal' %}info{% else %}dark{% endif %}">
+            {% if period.is_open_override %}reopened{% else %}{{ period.name }}{% endif %}
+          </span>
         </div>
-        <span class="badge text-bg-info">normal</span>
-      </div>
-      <div class="period-row">
-        <div>
-          <strong>Late submission</strong>
-          <span class="small-muted d-block">October 15, 2026 at 23:59 JST</span>
-        </div>
-        <span class="badge text-bg-dark">late</span>
-      </div>
+      {% endfor %}
     </div>
   </section>
 {% endblock %}

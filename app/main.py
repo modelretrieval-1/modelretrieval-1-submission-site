@@ -554,6 +554,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
 
         with connect(app_settings.database_path) as connection:
             subtasks = sorted(get_team_subtasks(connection, account.id))
+            periods = list_submission_periods(connection)
             submission_summaries = list_latest_team_submission_summaries(
                 connection,
                 internal_team_id=account.id,
@@ -566,6 +567,7 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
                 "app_name": app_settings.app_name,
                 "account": account,
                 "subtasks": subtasks,
+                "periods": periods,
                 "submission_summaries": submission_summaries,
             },
         )

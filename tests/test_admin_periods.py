@@ -124,6 +124,33 @@ def test_organizer_can_update_submission_period_deadline_and_override():
         assert row["is_open_override"] == 1
 
 
+def test_team_dashboard_uses_configured_submission_period_deadlines():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "admin", organizer.password)
+
+        client.post(
+            "/admin/periods/normal",
+            data={
+                "starts_at_jst": "",
+                "deadline_at_jst": "2026-08-03 09:45:00",
+                "is_open_override": "on",
+            },
+        )
+
+        client.get("/logout")
+        login(client, "team-001", team.password)
+
+        response = client.get("/team")
+
+        assert response.status_code == 200
+        assert "2026-08-03 09:45:00 JST" in response.text
+        assert "reopened" in response.text
+        assert "August 1, 2026 at 15:00 JST" not in response.text
+
+
 def test_organizer_can_clear_submission_period_start_and_override():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
