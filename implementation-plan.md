@@ -540,6 +540,7 @@ Status:
 - Diagram planning has been started in `diagrams.md`, and initial Mermaid diagrams have been added for deployment, CI/CD, submission workflow, and the data model.
 - Initial Docker deployment files have been added: `Dockerfile`, `.dockerignore`, `compose.staging.yml`, `compose.production.yml`, and environment templates under `deployment/`.
 - Initial Nginx templates have been added under `deployment/nginx/` for staging and production reverse proxying.
+- Initial backup and restore tooling has been added under `deployment/scripts/backup.sh` and `deployment/restore.md`.
 - Current deployment direction: local development, staging and production on one Sakura VPS, Muumuu Domain DNS, host Nginx, Docker Compose app stacks, automatic staging deployment from `main`, and production deployment from explicit version tags.
 
 ## Initial MVP

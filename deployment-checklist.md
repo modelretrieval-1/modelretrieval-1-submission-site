@@ -33,6 +33,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] `/opt/modelretrieval/staging` exists.
 - [ ] `/opt/modelretrieval/production` exists.
 - [ ] `/opt/modelretrieval/backups` exists.
+- [ ] `deployment/scripts/backup.sh` is available on the VPS or runnable from the checkout.
 - [ ] `compose.staging.yml` has been copied to staging as `compose.yml`.
 - [ ] `compose.production.yml` has been copied to production as `compose.yml`.
 - [ ] Staging `.env` exists and is not committed.
@@ -92,6 +93,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Backup contains SQLite database.
 - [ ] Backup contains storage directory.
 - [ ] Backup has a timestamped manifest.
+- [ ] Backup env snapshot is protected or intentionally omitted.
 - [ ] Backup can be copied off the VPS.
 - [ ] Restore process has been tested on staging.
 

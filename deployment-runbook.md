@@ -16,6 +16,8 @@ The repository includes the first Docker deployment files:
 - `deployment/nginx/production.bootstrap.conf.example`
 - `deployment/nginx/staging.conf.example`
 - `deployment/nginx/production.conf.example`
+- `deployment/scripts/backup.sh`
+- `deployment/restore.md`
 
 CI/CD files will be added separately.
 
@@ -166,7 +168,7 @@ Before deployment:
 
 ```bash
 cd /opt/modelretrieval/production
-./backup.sh
+ENVIRONMENT=production deployment/scripts/backup.sh
 ```
 
 Deploy:
@@ -249,6 +251,32 @@ Recommended backup output:
   manifest.txt
 ```
 
+Run the backup script from the repository or copy it to the VPS:
+
+```bash
+ENVIRONMENT=production deployment/scripts/backup.sh
+```
+
+Useful overrides:
+
+```bash
+APP_ROOT=/opt/modelretrieval
+ENVIRONMENT=production
+BACKUP_ROOT=/opt/modelretrieval/backups
+DATABASE_PATH=/opt/modelretrieval/production/data/app.sqlite3
+STORAGE_ROOT=/opt/modelretrieval/production/data/storage
+ENV_FILE=/opt/modelretrieval/production/.env
+```
+
+The script writes:
+
+- `app.sqlite3`
+- `storage.tar.gz`
+- `env.snapshot` when an env file is present
+- `manifest.txt`
+
+`env.snapshot` contains secrets and must be protected like the original `.env` file.
+
 ## Restore
 
 Restore database and storage from the same backup timestamp.
@@ -263,6 +291,8 @@ restore storage archive into data/storage
 docker compose up -d
 curl -fsS https://submit.<domain>/health
 ```
+
+See `deployment/restore.md` for a full restore guide.
 
 After restore, verify organizer login, team login, ground-truth history, and recent submissions.
 

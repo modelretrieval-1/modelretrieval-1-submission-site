@@ -219,6 +219,15 @@ Initial Nginx templates added:
 
 The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 12m`, proxy timeouts, forwarded headers, and localhost upstreams for staging and production.
 
+## Backup Deployment Files
+
+Initial backup and restore files added:
+
+- `deployment/scripts/backup.sh`
+- `deployment/restore.md`
+
+The backup script creates timestamped backups containing `app.sqlite3`, `storage.tar.gz`, optional `env.snapshot`, and `manifest.txt`.
+
 ## Completed Latest Story
 
 Implement organizer team management.

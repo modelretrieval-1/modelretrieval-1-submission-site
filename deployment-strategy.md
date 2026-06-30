@@ -282,6 +282,11 @@ Backup content:
 - Generated bundles and exports if needed.
 - Production `.env` file or an encrypted copy of operational secrets.
 
+The repository provides:
+
+- `deployment/scripts/backup.sh`: creates a timestamped SQLite/storage backup with a manifest.
+- `deployment/restore.md`: describes how to restore database and storage together.
+
 ## Rollback Strategy
 
 Application rollback:
