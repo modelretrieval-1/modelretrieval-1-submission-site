@@ -210,6 +210,15 @@ Initial Docker deployment files added:
 
 Staging binds the app to `127.0.0.1:8001`. Production binds the app to `127.0.0.1:8002` and requires `APP_IMAGE` to reference an immutable image tag.
 
+## Nginx Deployment Files
+
+Initial Nginx templates added:
+
+- `deployment/nginx/staging.conf.example`
+- `deployment/nginx/production.conf.example`
+
+The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 12m`, proxy timeouts, forwarded headers, and localhost upstreams for staging and production.
+
 ## Completed Latest Story
 
 Implement organizer team management.

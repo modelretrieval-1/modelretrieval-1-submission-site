@@ -109,6 +109,10 @@ Repository deployment files:
 - `compose.production.yml`: production Compose project on `127.0.0.1:8002`.
 - `deployment/staging.env.example`: staging environment template.
 - `deployment/production.env.example`: production environment template.
+- `deployment/nginx/staging.bootstrap.conf.example`: temporary HTTP staging template for first certificate issuance.
+- `deployment/nginx/production.bootstrap.conf.example`: temporary HTTP production template for first certificate issuance.
+- `deployment/nginx/staging.conf.example`: Nginx staging reverse-proxy template.
+- `deployment/nginx/production.conf.example`: Nginx production reverse-proxy template.
 
 ## Why Docker Compose
 
@@ -182,6 +186,8 @@ submit.example.jp  -> 127.0.0.1:8002
 ```
 
 Use Certbot with the Nginx plugin or an equivalent Let's Encrypt workflow.
+
+Nginx should preserve forwarded headers, allow uploads larger than the app's 10 MB limit, and keep staging and production upstreams bound to localhost only.
 
 ## Release Flow
 

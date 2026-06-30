@@ -12,8 +12,12 @@ The repository includes the first Docker deployment files:
 - `compose.production.yml`
 - `deployment/staging.env.example`
 - `deployment/production.env.example`
+- `deployment/nginx/staging.bootstrap.conf.example`
+- `deployment/nginx/production.bootstrap.conf.example`
+- `deployment/nginx/staging.conf.example`
+- `deployment/nginx/production.conf.example`
 
-Nginx and CI/CD files will be added separately.
+CI/CD files will be added separately.
 
 ## One-Time VPS Setup
 
@@ -81,7 +85,63 @@ Configure two Nginx server blocks:
 - `staging.<domain>` proxies to `http://127.0.0.1:8001`.
 - `submit.<domain>` proxies to `http://127.0.0.1:8002`.
 
-Enable HTTPS using Certbot after the HTTP server blocks are reachable.
+For first-time certificate issuance, start with the temporary HTTP-only bootstrap configs:
+
+```bash
+sudo cp deployment/nginx/staging.bootstrap.conf.example /etc/nginx/sites-available/modelretrieval-staging
+sudo cp deployment/nginx/production.bootstrap.conf.example /etc/nginx/sites-available/modelretrieval-production
+```
+
+Edit the copied files:
+
+- Replace `staging.example.jp` with the real staging hostname.
+- Replace `submit.example.jp` with the real production hostname.
+- Keep staging proxying to `127.0.0.1:8001`.
+- Keep production proxying to `127.0.0.1:8002`.
+
+Enable the sites:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/modelretrieval-staging /etc/nginx/sites-enabled/modelretrieval-staging
+sudo ln -s /etc/nginx/sites-available/modelretrieval-production /etc/nginx/sites-enabled/modelretrieval-production
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Issue certificates:
+
+```bash
+sudo certbot --nginx -d staging.<domain>
+sudo certbot --nginx -d submit.<domain>
+```
+
+After Certbot succeeds, replace the bootstrap configs with the HTTPS examples:
+
+```bash
+sudo cp deployment/nginx/staging.conf.example /etc/nginx/sites-available/modelretrieval-staging
+sudo cp deployment/nginx/production.conf.example /etc/nginx/sites-available/modelretrieval-production
+```
+
+Edit the copied files again with the real hostnames. The HTTPS examples assume Certbot's Nginx SSL snippets exist:
+
+```text
+/etc/letsencrypt/options-ssl-nginx.conf
+/etc/letsencrypt/ssl-dhparams.pem
+```
+
+After installing the HTTPS examples, verify and reload:
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Keep these settings in both final configs:
+
+- `client_max_body_size 12m`
+- proxy headers
+- proxy timeouts
+- upstream ports `8001` and `8002`
 
 ## Staging Deployment
 

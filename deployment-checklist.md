@@ -26,6 +26,10 @@ This checklist is used before launch and before each production deployment.
 - [ ] Docker Compose plugin is installed.
 - [ ] Nginx is installed.
 - [ ] Certbot is installed.
+- [ ] Staging Nginx config has real hostname and proxies to `127.0.0.1:8001`.
+- [ ] Production Nginx config has real hostname and proxies to `127.0.0.1:8002`.
+- [ ] Nginx config includes `client_max_body_size 12m` or larger.
+- [ ] `sudo nginx -t` passes.
 - [ ] `/opt/modelretrieval/staging` exists.
 - [ ] `/opt/modelretrieval/production` exists.
 - [ ] `/opt/modelretrieval/backups` exists.
@@ -43,6 +47,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Staging deploy completes.
 - [ ] `https://staging.<domain>/health` returns success.
 - [ ] Login page loads over HTTPS.
+- [ ] Upload-size behavior is not blocked by Nginx before the app's 10 MB validation rule.
 - [ ] Organizer login works.
 - [ ] Organizer can create a team.
 - [ ] Team login works.
@@ -64,6 +69,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Production data directory is present.
 - [ ] Nginx production config is enabled.
 - [ ] HTTPS certificate is valid.
+- [ ] Production Nginx config preserves `X-Forwarded-*` headers.
 - [ ] Rollback image tag is known.
 
 ## Production Post-Deploy
