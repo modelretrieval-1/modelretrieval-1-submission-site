@@ -35,6 +35,7 @@ Participants submit runs as a team. A team can submit to one or both subtasks if
 Participant teams can:
 
 - Sign in using a shared team account.
+- Change their shared team account password after signing in.
 - Upload run files for registered subtasks.
 - See validation results immediately.
 - See evaluation scores immediately after a successful submission.
@@ -65,6 +66,8 @@ Organizers can:
 - Teams are identified by `team_id`.
 - Each team has one shared account.
 - Organizers add teams to the system and generate passwords.
+- Participants can change the shared team account password after signing in by entering the current password and confirming the new password.
+- Organizer password regeneration remains available and invalidates the previous team password.
 - No additional manual approval step is required after the organizer creates the team account.
 
 ## Submission Periods

@@ -78,7 +78,7 @@ Participant navigation:
 - Dashboard: `/team`
 - Upload: `/team/submissions/new`
 - Results: contextual links from dashboard and upload/results pages
-- Password: optional if team password change is implemented later
+- Password: `/account/password`
 
 Navigation should be role-aware. Teams must never see organizer-only links.
 
@@ -197,4 +197,3 @@ Recommended order:
 - Existing routes and backend behavior are preserved unless explicitly documented.
 - The app remains server-rendered with Bootstrap and local CSS.
 - The UI remains usable on mobile and desktop viewports.
-

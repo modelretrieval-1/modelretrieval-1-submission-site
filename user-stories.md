@@ -74,6 +74,22 @@ Acceptance criteria:
 - The system blocks unknown or unregistered teams.
 - The system knows which subtasks the team is registered for.
 
+### Change Team Password
+
+As a participant team, I want to change my shared team account password so that the team can rotate credentials after receiving the organizer-generated initial password.
+
+Acceptance criteria:
+
+- A signed-in team can open the shared password-change page.
+- The team must enter the current password.
+- The team must enter and confirm the new password.
+- The system rejects an incorrect current password.
+- The system rejects mismatched new-password confirmation.
+- A successful change invalidates the previous team password.
+- The team remains signed in after a successful password change.
+- Organizer accounts can still change their own password from the same password-change page.
+- Team accounts cannot access organizer-only account management pages.
+
 ### Select Subtask
 
 As a participant team, I want to choose Subtask A or Subtask B before uploading a submission so that the system validates and evaluates the file against the correct rules.

@@ -23,6 +23,7 @@ Completed foundation:
 - Organizer team management page.
 - Team creation with visible generated passwords.
 - Team password regeneration.
+- Planned participant team self-service password change.
 - Organizer user management page.
 - Organizer creation with visible generated passwords.
 - Organizer password regeneration.

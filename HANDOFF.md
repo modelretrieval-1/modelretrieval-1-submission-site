@@ -186,6 +186,7 @@ Key decisions already made:
 - Teams are identified by `team_id`.
 - Each team has one shared account.
 - Organizers add teams and generate visible passwords.
+- Participant team self-service password change is now documented as the next account feature.
 - Only registered teams can submit.
 - Subtask A and Subtask B submissions are uploaded separately.
 - Upload format is one `.txt` file, no zip, maximum 10 MB.

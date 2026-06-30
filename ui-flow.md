@@ -141,8 +141,8 @@ URL:
 
 Purpose:
 
-- Allow signed-in organizers to change their password.
-- Optional for teams in v1 unless implementation is simple.
+- Allow signed-in organizers to change their own password.
+- Allow signed-in participant teams to change their shared team account password.
 
 Fields:
 
@@ -155,11 +155,14 @@ Required states:
 - Success.
 - Current password incorrect.
 - New password confirmation mismatch.
+- Signed-in organizer changing organizer password.
+- Signed-in team changing team password.
 
 UI modernization notes:
 
 - Use consistent form grouping, password fields, and success/error alerts.
 - Place submit and cancel/navigation actions predictably at the bottom of the form.
+- In the application shell, show the password page in both organizer and participant navigation.
 
 ## Participant Team Flow
 

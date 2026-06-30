@@ -232,6 +232,7 @@ Stories:
 - Logout.
 - Password hashing.
 - Organizer password change.
+- Participant team password change.
 - Organizer creates team with generated password.
 - Organizer creates organizer user with generated password.
 
@@ -239,6 +240,7 @@ Required tests:
 
 - Unit tests for password helpers.
 - Integration tests for login and session behavior.
+- Integration tests for organizer and team password changes.
 - E2E tests for organizer login and team login.
 
 ### Epic 3: Team Dashboard and Submission Periods
@@ -428,7 +430,7 @@ Status:
 
 - Complete for the planned v1 account scope.
 - Completed: account primitives, password generation/hashing, authentication, signed sessions, login/logout, minimal role dashboards, `/admin/teams`, team creation form, generated password display, subtask assignment UI, team password regeneration, `/admin/users`, organizer creation form, organizer generated password display, organizer password regeneration, `/account/password`, organizer password change flow.
-- Remaining account polish can be handled later if needed.
+- Next account polish: allow signed-in participant teams to change their shared team account password from `/account/password`.
 
 ### Sprint 2: Ground Truth and Validation Core
 
