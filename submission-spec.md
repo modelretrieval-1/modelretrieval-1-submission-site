@@ -32,7 +32,7 @@ Current upload behavior is implemented:
 - Organizers can download submission bundles with metadata and stored files.
 - Submission, validation-error, and organizer review pages have been modernized with Bootstrap forms, tables, alerts, badges, filters, and responsive layout.
 
-Next implementation focus: production deployment documentation.
+Current implementation focus: staging deployment rehearsal and production hardening.
 
 ## Submission Workflow Diagram
 

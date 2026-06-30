@@ -14,7 +14,7 @@ Current implementation checkpoint:
 - Sprint 4 leaderboard CSV export is complete.
 - Sprint 4 submission bundle download is complete.
 - Sprint 5 UI modernization is complete.
-- Next implementation focus: production deployment documentation.
+- Current implementation focus: staging deployment rehearsal and production hardening.
 
 ## Authentication and Team Data
 
@@ -102,8 +102,8 @@ Recommendation:
 - Use FastAPI with Jinja2 templates for the web app.
 - Use SQLite for persistent data.
 - Use the server local filesystem for submissions, ground truth, exports, and bundles.
-- Deploy on a VPS behind a reverse proxy such as Nginx or Caddy.
-- Run the application as a managed service, for example with systemd.
+- Deploy on Sakura VPS with Docker Compose app containers behind host Nginx.
+- Use GitHub Actions and GHCR for automated staging and tagged production deployment.
 
 Note:
 

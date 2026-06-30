@@ -14,7 +14,7 @@ The implemented stack matches this recommendation:
 - `uv`, Pytest, and Ruff are configured.
 - Participant validation, evaluation, score display, deadline controls, selected-period uploads, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, and Bootstrap-based UI modernization are implemented.
 
-The next implementation focus is production deployment documentation and hardening.
+The current implementation focus is staging and production deployment rehearsal and hardening.
 
 Recommended stack:
 
@@ -25,9 +25,11 @@ Recommended stack:
 - uv for Python dependency management and reproducible installs.
 - SQLite for relational data.
 - Local filesystem storage for uploaded submissions, ground truth, validation logs, and export bundles.
-- Nginx or Caddy as the public reverse proxy.
+- Host Nginx as the public reverse proxy.
 - HTTPS using Let's Encrypt.
-- systemd to run the app as a long-lived service.
+- Docker Compose to run separate staging and production app containers.
+- GitHub Container Registry for deployment images.
+- GitHub Actions for CI/CD.
 
 ## Why This Stack
 
@@ -49,38 +51,47 @@ Local filesystem storage is appropriate because:
 
 ## VPS Deployment Model
 
-The application should run on a VPS as a normal Python service.
+The application should run on Sakura VPS with Docker Compose app containers behind host Nginx.
 
-Suggested production layout:
+Suggested VPS layout:
 
 ```text
-/opt/modelretrieval-submissions/
-  app/
-  data/
-    app.sqlite3
-    submissions/
-    ground-truth/
-    bundles/
-    exports/
-  logs/
+/opt/modelretrieval/
+  staging/
+    compose.yml
+    .env
+    data/
+      app.sqlite3
+      storage/
+  production/
+    compose.yml
+    .env
+    data/
+      app.sqlite3
+      storage/
+    backup.sh
   backups/
 ```
 
 Suggested runtime:
 
-- Uvicorn runs the FastAPI app on localhost.
-- Nginx or Caddy terminates HTTPS and proxies requests to Uvicorn.
-- systemd starts and restarts the app service.
-- uv installs dependencies from `uv.lock`.
-- SQLite database and local files are backed up together.
+- Docker Compose runs the app containers on localhost-only ports.
+- Staging listens on `127.0.0.1:8001`; production listens on `127.0.0.1:8002`.
+- Host Nginx terminates HTTPS and proxies requests by hostname.
+- GitHub Actions builds and publishes images to GHCR.
+- Staging deploys from `main`; production deploys from immutable `v*` tags.
+- SQLite database and local storage files are backed up together.
 
 ## Reverse Proxy
 
-Use either Nginx or Caddy.
+Use Nginx on the VPS host.
 
-Caddy is simpler if automatic HTTPS is preferred.
+Current project hostnames:
 
-Nginx is also fine if the server already uses it or the organizer is more familiar with it.
+- Staging: `submission-staging.modelretrieval-1.happysocial.net`.
+- Production: `submission.modelretrieval-1.happysocial.net`.
+
+If Nginx reports `could not build server_names_hash`, set `server_names_hash_bucket_size 128;` inside the `http { ... }` block in `/etc/nginx/nginx.conf`, then run `sudo nginx -t`.
 
 ## Backup Requirements
 

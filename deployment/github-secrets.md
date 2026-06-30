@@ -14,7 +14,7 @@ Secrets may be configured as repository secrets or environment-specific secrets.
 | `STAGING_USER` | `deploy` | SSH user for staging deployment. |
 | `STAGING_SSH_KEY` | private key text | Private SSH key matching the VPS deploy user's authorized key. |
 | `STAGING_PATH` | `/opt/modelretrieval/staging` | Directory containing staging `compose.yml` and `.env`. |
-| `STAGING_URL` | `https://staging.<domain>` | Public staging URL used by smoke checks. |
+| `STAGING_URL` | `https://submission-staging.modelretrieval-1.happysocial.net` | Public staging URL used by smoke checks. |
 
 ## Required Production Secrets
 
@@ -24,7 +24,7 @@ Secrets may be configured as repository secrets or environment-specific secrets.
 | `PRODUCTION_USER` | `deploy` | SSH user for production deployment. |
 | `PRODUCTION_SSH_KEY` | private key text | Private SSH key matching the VPS deploy user's authorized key. |
 | `PRODUCTION_PATH` | `/opt/modelretrieval/production` | Directory containing production `compose.yml`, `.env`, and `backup.sh`. |
-| `PRODUCTION_URL` | `https://submit.<domain>` | Public production URL used by smoke checks. |
+| `PRODUCTION_URL` | `https://submission.modelretrieval-1.happysocial.net` | Public production URL used by smoke checks. |
 
 ## Built-In GitHub Token
 

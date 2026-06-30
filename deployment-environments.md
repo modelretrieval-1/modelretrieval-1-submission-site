@@ -74,6 +74,12 @@ Recommended public hostname:
 staging.<domain>
 ```
 
+Current project value:
+
+```text
+submission-staging.modelretrieval-1.happysocial.net
+```
+
 Recommended local upstream:
 
 ```text
@@ -116,6 +122,12 @@ Recommended public hostname:
 
 ```text
 submit.<domain>
+```
+
+Current project value:
+
+```text
+submission.modelretrieval-1.happysocial.net
 ```
 
 Recommended local upstream:
@@ -164,6 +176,13 @@ Example:
 ```text
 staging.<domain>  A  <sakura-vps-ip>
 submit.<domain>   A  <sakura-vps-ip>
+```
+
+Current project values:
+
+```text
+submission-staging.modelretrieval-1.happysocial.net  A  <sakura-vps-ip>
+submission.modelretrieval-1.happysocial.net          A  <sakura-vps-ip>
 ```
 
 Nginx should route requests by hostname to the correct local upstream.

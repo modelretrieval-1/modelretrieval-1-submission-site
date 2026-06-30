@@ -180,13 +180,12 @@ Purpose:
 
 Expected setup:
 
-- FastAPI app served by Uvicorn.
-- Reverse proxy using Nginx or Caddy.
-- HTTPS.
-- systemd service.
-- Dependencies installed from `uv.lock`.
-- SQLite and uploaded files on persistent disk.
-- Backup script.
+- Docker Compose app container.
+- Host Nginx reverse proxy with HTTPS.
+- GitHub Container Registry image pulls.
+- GitHub Actions CI/CD.
+- SQLite and uploaded files on persistent bind-mounted disk.
+- Backup and restore scripts or runbooks.
 
 ## Product Backlog
 
@@ -350,11 +349,13 @@ Goal:
 Stories:
 
 - Add production configuration guide.
-- Add systemd service file template.
-- Add Nginx or Caddy reverse proxy example.
-- Add backup script or backup instructions.
+- Add Dockerfile and environment-specific Docker Compose files.
+- Add Nginx reverse proxy examples.
+- Add GitHub Actions workflow for CI, image publishing, staging deploy, and tagged production deploy.
+- Add backup script and restore instructions.
 - Add deployment checklist.
 - Add first-admin creation command.
+- Add Sakura VPS setup and GitHub secrets guides.
 
 Required tests:
 
@@ -379,7 +380,7 @@ Current implementation status:
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
 - Sprint 5 UI modernization is complete.
-- Next item: production deployment documentation.
+- Sprint 6 deployment documentation and tooling are implemented; next item is staging deployment rehearsal on Sakura VPS.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -479,7 +480,7 @@ Status:
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
-- Next continue with production deployment documentation.
+- Next continue with staging deployment rehearsal and production promotion hardening.
 
 Demo:
 
@@ -532,18 +533,21 @@ Demo:
 
 Status:
 
-- Deployment planning documents have been started:
+- Deployment planning documents have been added and updated:
   - `deployment-strategy.md`
   - `deployment-environments.md`
   - `deployment-runbook.md`
   - `deployment-checklist.md`
-- Diagram planning has been started in `diagrams.md`, and initial Mermaid diagrams have been added for deployment, CI/CD, submission workflow, and the data model.
-- Initial Docker deployment files have been added: `Dockerfile`, `.dockerignore`, `compose.staging.yml`, `compose.production.yml`, and environment templates under `deployment/`.
-- Initial Nginx templates have been added under `deployment/nginx/` for staging and production reverse proxying.
-- Initial backup and restore tooling has been added under `deployment/scripts/backup.sh` and `deployment/restore.md`.
-- Initial CI/CD workflow has been added in `.github/workflows/ci-cd.yml` with smoke checks via `deployment/scripts/smoke-check.sh`.
+- Diagram planning is in `diagrams.md`, and Mermaid diagrams have been added for deployment, CI/CD, submission workflow, and the data model.
+- Docker deployment files have been added: `Dockerfile`, `.dockerignore`, `compose.staging.yml`, `compose.production.yml`, and environment templates under `deployment/`.
+- Nginx templates have been added under `deployment/nginx/` for staging and production reverse proxying.
+- Backup and restore tooling has been added under `deployment/scripts/backup.sh` and `deployment/restore.md`.
+- CI/CD workflow has been added in `.github/workflows/ci-cd.yml` with smoke checks via `deployment/scripts/smoke-check.sh`.
 - Operator setup docs have been added in `deployment/vps-setup.md` and `deployment/github-secrets.md`.
 - Current deployment direction: local development, staging and production on one Sakura VPS, Muumuu Domain DNS, host Nginx, Docker Compose app stacks, automatic staging deployment from `main`, and production deployment from explicit version tags.
+- Current project domains are `submission-staging.modelretrieval-1.happysocial.net` and `submission.modelretrieval-1.happysocial.net`.
+- Deployment docs capture the GHCR login path, `APP_IMAGE` meaning, `SECRET_KEY` generation, passwordless deploy user, bind-mounted data ownership fix, and Nginx long-hostname hash bucket fix.
+- Remaining Sprint 6 work is staging rehearsal, GitHub Actions deploy verification, production promotion rehearsal, and final E2E regression coverage.
 
 ## Initial MVP
 

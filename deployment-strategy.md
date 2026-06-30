@@ -148,6 +148,7 @@ Staging runs on the Sakura VPS and should mirror production as closely as practi
 Recommended behavior:
 
 - Domain: `staging.<domain>`.
+- Current project domain: `submission-staging.modelretrieval-1.happysocial.net`.
 - Host Nginx proxies to `127.0.0.1:8001`.
 - Compose project name: `modelretrieval-staging`.
 - Persistent data path: `/opt/modelretrieval/staging/data`.
@@ -161,6 +162,7 @@ Production runs on the same Sakura VPS.
 Recommended behavior:
 
 - Domain: `submit.<domain>` or the official task domain.
+- Current project domain: `submission.modelretrieval-1.happysocial.net`.
 - Host Nginx proxies to `127.0.0.1:8002`.
 - Compose project name: `modelretrieval-production`.
 - Persistent data path: `/opt/modelretrieval/production/data`.

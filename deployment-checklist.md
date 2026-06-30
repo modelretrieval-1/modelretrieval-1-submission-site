@@ -4,19 +4,21 @@
 
 This checklist is used before launch and before each production deployment.
 
-## Before Writing Deployment Code
+## Confirmed Deployment Inputs
 
-- [ ] Confirm staging hostname.
-- [ ] Confirm production hostname.
-- [ ] Confirm Sakura VPS OS version.
-- [ ] Confirm Docker Engine and Compose plugin installation plan.
-- [ ] Confirm Nginx is the reverse proxy.
-- [ ] Confirm HTTPS certificate method.
-- [ ] Confirm Git hosting provider and container registry.
-- [ ] Confirm whether production deploys are tag-based.
+- [x] Staging hostname: `submission-staging.modelretrieval-1.happysocial.net`.
+- [x] Production hostname: `submission.modelretrieval-1.happysocial.net`.
+- [x] Sakura VPS hosts staging and production on the same machine.
+- [x] Docker Engine and Docker Compose are used for app containers.
+- [x] Host Nginx is the reverse proxy.
+- [x] HTTPS certificates are issued with Certbot.
+- [x] GitHub Container Registry stores deployment images.
+- [x] GitHub Actions handles CI/CD.
+- [x] Staging deploys from `main`.
+- [x] Production deploys from immutable `v*` tags.
+- [x] Deploy user uses SSH key authentication and no usable password login.
 - [ ] Confirm backup retention period.
 - [ ] Confirm who has SSH access to the VPS.
-- [ ] Confirm GitHub Actions environments and deployment secrets.
 - [ ] `deployment/vps-setup.md` has been followed for the target VPS.
 - [ ] `deployment/github-secrets.md` has been followed for GitHub Actions.
 
@@ -62,7 +64,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Docker image was pushed to GitHub Container Registry.
 - [ ] Staging deploy completes.
 - [ ] Staging `APP_IMAGE` was updated in remote `.env`.
-- [ ] `https://staging.<domain>/health` returns success.
+- [ ] `https://submission-staging.modelretrieval-1.happysocial.net/health` returns success.
 - [ ] Login page loads over HTTPS.
 - [ ] Upload-size behavior is not blocked by Nginx before the app's 10 MB validation rule.
 - [ ] Organizer login works.
@@ -92,7 +94,7 @@ This checklist is used before launch and before each production deployment.
 
 ## Production Post-Deploy
 
-- [ ] `https://submit.<domain>/health` returns success.
+- [ ] `https://submission.modelretrieval-1.happysocial.net/health` returns success.
 - [ ] Login page loads over HTTPS.
 - [ ] Organizer login works.
 - [ ] Team login works for a test or official account.

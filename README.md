@@ -4,7 +4,7 @@ This repository contains the submission and evaluation system for the NTCIR-19 M
 
 ## Current Status
 
-The project is entering **Sprint 6: Production Hardening**.
+The project is in **Sprint 6: Production Hardening**.
 
 Participant upload, validation, evaluation, score display, period controls, selected normal/late upload period, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, and Bootstrap-based UI modernization are complete for the planned scope.
 
@@ -51,6 +51,10 @@ Completed foundation:
 - Organizer private leaderboard view.
 - Leaderboard CSV export.
 - Submission bundle download.
+- Docker image and Docker Compose deployment foundation.
+- Host Nginx reverse-proxy templates for staging and production.
+- VPS setup, GitHub Actions deployment, backup, restore, and smoke-check documentation.
+- Backup, restore, and deployment smoke-check scripts.
 - Tests for settings, storage, database initialization, app startup, accounts, sessions, and login flow.
 
 Current test status:
@@ -63,9 +67,9 @@ uv run --extra dev ruff check .
 All checks passed
 ```
 
-Next recommended story:
+Next recommended work:
 
-- Add production deployment documentation.
+- Rehearse the staging deployment on Sakura VPS, verify GitHub Actions staging deployment, then promote production with an immutable `v*` tag after staging passes.
 
 ## UI Direction
 
@@ -128,6 +132,7 @@ uv lock
 - [deployment-strategy.md](deployment-strategy.md): environment model and deployment approach.
 - [deployment-environments.md](deployment-environments.md): development, staging, and production configuration.
 - [deployment-runbook.md](deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
+- [deployment/restore.md](deployment/restore.md): restore procedure.
 - [deployment-checklist.md](deployment-checklist.md): launch and release verification checklist.
 - [deployment/vps-setup.md](deployment/vps-setup.md): Sakura VPS setup procedure.
 - [deployment/github-secrets.md](deployment/github-secrets.md): GitHub Actions secret configuration.

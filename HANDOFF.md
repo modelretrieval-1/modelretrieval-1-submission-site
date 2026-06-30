@@ -16,7 +16,7 @@ Scrum implementation is underway.
 - Sprint 3: complete for the planned evaluation and participant-result scope.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
-- Sprint 6: next/current sprint, focused on production deployment documentation.
+- Sprint 6: current sprint, focused on deployment rehearsal and production hardening.
 
 ## Current Stack
 
@@ -30,7 +30,25 @@ Scrum implementation is underway.
 - Pytest
 - Ruff
 - Playwright planned for E2E tests
-- VPS deployment planned with Docker Compose app containers, host Nginx, HTTPS, and separate staging/production data directories
+- VPS deployment planned with Docker Compose app containers, host Nginx, HTTPS, GHCR images, GitHub Actions, and separate staging/production data directories
+
+## Current Deployment Plan
+
+- Development runs on the developer laptop with `uv run uvicorn app.main:app --reload`.
+- Staging and production run on the same Sakura VPS.
+- Host Nginx terminates HTTPS and routes by hostname.
+- Staging domain: `submission-staging.modelretrieval-1.happysocial.net`.
+- Production domain: `submission.modelretrieval-1.happysocial.net`.
+- Staging upstream: `127.0.0.1:8001`.
+- Production upstream: `127.0.0.1:8002`.
+- Docker images are published to GHCR.
+- Staging deploys automatically from `main`.
+- Production deploys from immutable `v*` tags.
+- The VPS deploy user should be passwordless and use SSH key authentication.
+- Staging and production may use the same SSH deploy key, but they must not share `.env`, `SECRET_KEY`, database, storage directory, or Compose project name.
+- If GHCR pull returns unauthorized, log in on the VPS with a GitHub PAT that has `read:packages`.
+- If the container cannot create `/data/storage`, fix ownership of `/opt/modelretrieval/<env>/data` to match the app container UID/GID.
+- If Nginx cannot build `server_names_hash`, set `server_names_hash_bucket_size 128;` in the `http { ... }` block.
 
 ## Setup Commands
 
@@ -177,12 +195,12 @@ Key decisions already made:
 
 ## Sprint 6 Deployment Documents
 
-Created deployment planning documents:
+Deployment planning documents:
 
 - `deployment-strategy.md`: environment model, release flow, Docker Compose recommendation, DNS/Nginx shape, backup and rollback strategy.
 - `deployment-environments.md`: development, staging, and production domains, data paths, environment variables, and secret rules.
 - `deployment-runbook.md`: setup, deploy, promote, rollback, backup, restore, logs, and smoke-test operations.
-- `deployment-checklist.md`: pre-code, one-time VPS, staging, production, backup, and launch-readiness checklist.
+- `deployment-checklist.md`: confirmed inputs, one-time VPS, staging, production, backup, and launch-readiness checklist.
 
 ## Diagram Documents
 
@@ -199,7 +217,7 @@ Use Mermaid in Markdown for the first version of diagrams.
 
 ## Docker Deployment Files
 
-Initial Docker deployment files added:
+Docker deployment files added:
 
 - `Dockerfile`
 - `.dockerignore`
@@ -212,7 +230,7 @@ Staging binds the app to `127.0.0.1:8001`. Production binds the app to `127.0.0.
 
 ## Nginx Deployment Files
 
-Initial Nginx templates added:
+Nginx templates added:
 
 - `deployment/nginx/staging.conf.example`
 - `deployment/nginx/production.conf.example`
@@ -221,7 +239,7 @@ The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate p
 
 ## Backup Deployment Files
 
-Initial backup and restore files added:
+Backup and restore files added:
 
 - `deployment/scripts/backup.sh`
 - `deployment/scripts/smoke-check.sh`
@@ -231,7 +249,7 @@ The backup script creates timestamped backups containing `app.sqlite3`, `storage
 
 ## CI/CD Deployment Files
 
-Initial GitHub Actions workflow added:
+GitHub Actions workflow added:
 
 - `.github/workflows/ci-cd.yml`
 
@@ -244,7 +262,18 @@ Added operator-facing setup docs:
 - `deployment/vps-setup.md`: Sakura VPS, Docker, Nginx, Certbot, directories, first manual deploy, and first admin setup.
 - `deployment/github-secrets.md`: GitHub Actions secrets, SSH key expectations, remote paths, image behavior, and environment protection.
 
-## Completed Latest Story
+Current deployment notes captured in docs:
+
+- `APP_IMAGE` is the GHCR image reference used by Compose.
+- VPS GHCR pulls may require `docker login ghcr.io` with a GitHub PAT that has `read:packages`.
+- `SECRET_KEY` should be generated with a high-entropy command such as `openssl rand -hex 32`, and staging/production must use different values.
+- A passwordless deploy user can be created with `sudo adduser --disabled-password --gecos "" deploy`.
+- The same SSH key may be used for staging and production, although separate keys give cleaner rotation.
+- Bind-mounted `data/` ownership must match the app container UID/GID to avoid `/data/storage` permission errors.
+- Long hostnames may require `server_names_hash_bucket_size 128;` in Nginx.
+- Home page startup copy was changed from the old Sprint 0 placeholder to task-specific NTCIR-19 ModelRetrieval copy.
+
+## Completed Story
 
 Implement organizer team management.
 
@@ -279,7 +308,7 @@ Status:
 - Implemented routes: `GET /admin/teams`, `POST /admin/teams`, `POST /admin/teams/{team_id}/password`.
 - Implemented tests in `tests/test_admin_teams.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Implement organizer user management.
 
@@ -313,7 +342,7 @@ Status:
 - Implemented routes: `GET /admin/users`, `POST /admin/users`, `POST /admin/users/{username}/password`.
 - Implemented tests in `tests/test_admin_users.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Implement ground-truth upload scaffolding.
 
@@ -348,7 +377,7 @@ Status:
 - Implemented routes: `GET /admin/ground-truth`, `POST /admin/ground-truth`.
 - Implemented tests in `tests/test_ground_truth.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Implement ground-truth file format validation.
 
@@ -378,7 +407,7 @@ Status:
 - Invalid uploads are rejected before file storage and database row creation.
 - Valid uploads are stored with `validation_status = validated`.
 
-## Completed Latest Story
+## Completed Story
 
 Implement ground-truth version activation.
 
@@ -405,7 +434,7 @@ Status:
 - Activating one subtask does not affect the other subtask.
 - Only validated versions can be activated.
 
-## Completed Latest Story
+## Completed Story
 
 Implement TREC_EVAL parser and participant submission validation core.
 
@@ -442,7 +471,7 @@ Status:
 - More than 5 distinct runs is rejected.
 - Query/model completeness was implemented in a later validation slice.
 
-## Completed Latest Story
+## Completed Story
 
 Implement duplicate row validation and score-vs-rank order validation.
 
@@ -472,7 +501,7 @@ Status:
 - Score-derived ordering is checked per `RunID` and `topicID`.
 - Rank/order mismatches are rejected with warning severity.
 
-## Completed Latest Story
+## Completed Story
 
 Implement query/model completeness validation.
 
@@ -505,7 +534,7 @@ Status:
 - Unknown model IDs are rejected.
 - Completeness is checked independently per `RunID`.
 
-## Completed Latest Story
+## Completed Story
 
 Derive required query/model IDs from active ground truth and wire participant upload validation.
 
@@ -534,7 +563,7 @@ Status:
 - Missing active ground truth now returns a clear `missing_active_ground_truth` validation error.
 - Implemented tests in `tests/test_ground_truth.py` and `tests/test_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Build participant submission upload UI and persist validation failures.
 
@@ -572,7 +601,7 @@ Status:
 - Valid submissions are stored as `accepted` and run metadata is written to `runs`.
 - Implemented tests in `tests/test_team_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Implement evaluation metric calculation core.
 
@@ -597,7 +626,7 @@ Status:
 - Implemented `dcg`, `ndcg_at`, `mean_reciprocal_rank`, `evaluate_subtask_a`, and `evaluate_subtask_b`.
 - Implemented tests in `tests/test_evaluation.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Evaluate accepted submissions and persist metric results.
 
@@ -627,7 +656,7 @@ Status:
 - Missing evaluation setup can mark submissions as `evaluation_failed`.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Show participant scores after evaluated submissions.
 
@@ -653,7 +682,7 @@ Status:
 - Team-visible result queries only use the signed-in team's submissions.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Enforce one successful submission per team/subtask/period.
 
@@ -680,7 +709,7 @@ Status:
 - The database partial unique index remains the backstop for this rule.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Enforce submission periods and JST deadlines.
 
@@ -707,7 +736,7 @@ Status:
 - Closed-period uploads are blocked before storing the submitted file.
 - Implemented tests in `tests/test_submissions.py` and `tests/test_team_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Add organizer submission-period controls.
 
@@ -735,7 +764,7 @@ Status:
 - Team users are redirected away from period controls.
 - Implemented tests in `tests/test_admin_periods.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Let participants choose normal or late submission during upload.
 
@@ -775,7 +804,7 @@ Status:
 - Successful and rejected attempts are recorded under the selected period.
 - Implemented integration tests in `tests/test_team_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Add organizer submissions table and detail view.
 
@@ -806,7 +835,7 @@ Status:
 - Team users are redirected away from organizer submission views.
 - Implemented integration tests in `tests/test_admin_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Add organizer private leaderboard view.
 
@@ -836,7 +865,7 @@ Status:
 - Subtask B rows show `mrr`.
 - Implemented integration tests in `tests/test_admin_leaderboard.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Add leaderboard CSV export.
 
@@ -865,7 +894,7 @@ Status:
 - Team users are redirected away from the CSV export.
 - Implemented integration tests in `tests/test_admin_leaderboard.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Add submission bundle download.
 
@@ -895,7 +924,7 @@ Status:
 - Team users are redirected away from bundle downloads.
 - Implemented integration tests in `tests/test_admin_submissions.py`.
 
-## Completed Latest Story
+## Completed Story
 
 Modernize the server-rendered UI with Bootstrap 5 and project-specific CSS.
 
@@ -924,22 +953,25 @@ Status:
 - Kept generated-password markup compatible with existing tests.
 - Browser plugin backend was unavailable in this session, so visual smoke verification was limited to local server availability plus automated HTML/integration tests.
 
-## Next Recommended Story
+## Next Recommended Work
 
-Add production deployment documentation.
+Rehearse deployment on Sakura VPS and verify the CI/CD path end to end.
 
 Target behavior:
 
-- Document VPS deployment steps.
-- Provide systemd service guidance.
-- Provide Nginx or Caddy reverse proxy guidance.
-- Document persistent storage and SQLite backup/restore approach.
-- Document first organizer creation and operational checklist.
+- Complete the first manual staging deploy.
+- Create the first staging organizer account.
+- Verify Nginx HTTPS routing for staging.
+- Confirm GitHub Actions can deploy staging from `main`.
+- Take a production backup before each production update.
+- Promote production only from an immutable `v*` tag after staging passes.
 
-Suggested tests:
+Suggested checks:
 
-- Keep automated suite green.
-- Add smoke-test/deployment checklist where appropriate.
+- `docker compose ps`
+- `curl -fsS https://submission-staging.modelretrieval-1.happysocial.net/health`
+- `deployment/scripts/smoke-check.sh https://submission-staging.modelretrieval-1.happysocial.net`
+- Production backup script before production deploy.
 
 ## Docs To Read First In A New Session
 
@@ -948,9 +980,15 @@ Suggested tests:
 3. `implementation-plan.md`
 4. `ui-flow.md`
 5. `data-model.md`
-6. `submission-spec.md`
-7. `evaluation-spec.md`
-8. `requirements.md`
-9. `user-stories.md`
-10. `architecture.md`
+6. `deployment-strategy.md`
+7. `deployment-environments.md`
+8. `deployment-runbook.md`
+9. `deployment-checklist.md`
+10. `deployment/vps-setup.md`
+11. `deployment/github-secrets.md`
+12. `submission-spec.md`
+13. `evaluation-spec.md`
+14. `requirements.md`
+15. `user-stories.md`
+16. `architecture.md`
 11. `open-questions.md`

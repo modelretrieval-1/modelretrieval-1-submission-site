@@ -37,6 +37,13 @@ staging.<domain> -> 127.0.0.1:8001
 submit.<domain>  -> 127.0.0.1:8002
 ```
 
+Current project routes:
+
+```text
+submission-staging.modelretrieval-1.happysocial.net -> 127.0.0.1:8001
+submission.modelretrieval-1.happysocial.net         -> 127.0.0.1:8002
+```
+
 ## 1. DNS
 
 In Muumuu Domain, create A records pointing to the Sakura VPS public IP.
@@ -44,6 +51,13 @@ In Muumuu Domain, create A records pointing to the Sakura VPS public IP.
 ```text
 staging.<domain>  A  <sakura-vps-ip>
 submit.<domain>   A  <sakura-vps-ip>
+```
+
+For this project:
+
+```text
+submission-staging.modelretrieval-1.happysocial.net  A  <sakura-vps-ip>
+submission.modelretrieval-1.happysocial.net          A  <sakura-vps-ip>
 ```
 
 Wait for DNS propagation before issuing certificates.
@@ -324,6 +338,13 @@ sudo certbot --nginx -d staging.<domain>
 sudo certbot --nginx -d submit.<domain>
 ```
 
+For this project:
+
+```bash
+sudo certbot --nginx -d submission-staging.modelretrieval-1.happysocial.net
+sudo certbot --nginx -d submission.modelretrieval-1.happysocial.net
+```
+
 Replace bootstrap configs with final HTTPS configs:
 
 ```bash
@@ -379,6 +400,12 @@ Smoke check:
 curl -fsS https://staging.<domain>/health
 ```
 
+For this project:
+
+```bash
+curl -fsS https://submission-staging.modelretrieval-1.happysocial.net/health
+```
+
 Create first staging organizer if needed:
 
 ```bash
@@ -404,6 +431,12 @@ Smoke check:
 
 ```bash
 curl -fsS https://submit.<domain>/health
+```
+
+For this project:
+
+```bash
+curl -fsS https://submission.modelretrieval-1.happysocial.net/health
 ```
 
 Create first production organizer:

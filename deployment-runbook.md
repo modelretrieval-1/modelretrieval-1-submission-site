@@ -156,6 +156,13 @@ staging.<domain>  A  <sakura-vps-ip>
 submit.<domain>   A  <sakura-vps-ip>
 ```
 
+Current project values:
+
+```text
+submission-staging.modelretrieval-1.happysocial.net  A  <sakura-vps-ip>
+submission.modelretrieval-1.happysocial.net          A  <sakura-vps-ip>
+```
+
 Wait for DNS propagation before issuing HTTPS certificates.
 
 ## Nginx Setup
@@ -164,6 +171,11 @@ Configure two Nginx server blocks:
 
 - `staging.<domain>` proxies to `http://127.0.0.1:8001`.
 - `submit.<domain>` proxies to `http://127.0.0.1:8002`.
+
+Current project hostnames:
+
+- `submission-staging.modelretrieval-1.happysocial.net` proxies to `http://127.0.0.1:8001`.
+- `submission.modelretrieval-1.happysocial.net` proxies to `http://127.0.0.1:8002`.
 
 For first-time certificate issuance, start with the temporary HTTP-only bootstrap configs:
 
@@ -193,6 +205,13 @@ Issue certificates:
 ```bash
 sudo certbot --nginx -d staging.<domain>
 sudo certbot --nginx -d submit.<domain>
+```
+
+For this project:
+
+```bash
+sudo certbot --nginx -d submission-staging.modelretrieval-1.happysocial.net
+sudo certbot --nginx -d submission.modelretrieval-1.happysocial.net
 ```
 
 After Certbot succeeds, replace the bootstrap configs with the HTTPS examples:
@@ -336,9 +355,9 @@ Recommended values:
 
 ```text
 STAGING_PATH=/opt/modelretrieval/staging
-STAGING_URL=https://staging.<domain>
+STAGING_URL=https://submission-staging.modelretrieval-1.happysocial.net
 PRODUCTION_PATH=/opt/modelretrieval/production
-PRODUCTION_URL=https://submit.<domain>
+PRODUCTION_URL=https://submission.modelretrieval-1.happysocial.net
 ```
 
 The staging deploy job updates `APP_IMAGE` in the remote staging `.env`, pulls the image, starts the Compose stack, and runs `deployment/scripts/smoke-check.sh`.
@@ -426,6 +445,13 @@ Run smoke checks with:
 ```bash
 deployment/scripts/smoke-check.sh https://staging.<domain>
 deployment/scripts/smoke-check.sh https://submit.<domain>
+```
+
+For this project:
+
+```bash
+deployment/scripts/smoke-check.sh https://submission-staging.modelretrieval-1.happysocial.net
+deployment/scripts/smoke-check.sh https://submission.modelretrieval-1.happysocial.net
 ```
 
 The script checks:

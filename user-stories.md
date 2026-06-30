@@ -18,7 +18,7 @@ Implemented through the latest Sprint 5 slice:
 - Submission bundle download.
 - Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
 
-Next story: production deployment documentation.
+Next story: staging deployment rehearsal and production hardening.
 
 ## Participant Team Stories
 
