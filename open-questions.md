@@ -13,8 +13,7 @@ Current implementation checkpoint:
 - Sprint 4 organizer private leaderboard view is complete.
 - Sprint 4 leaderboard CSV export is complete.
 - Sprint 4 submission bundle download is complete.
-- Next implementation focus: UI modernization using Bootstrap 5 and project-specific CSS.
-- Follow-on implementation focus: production deployment documentation.
+- Next implementation focus: production deployment documentation.
 
 ## Authentication and Team Data
 

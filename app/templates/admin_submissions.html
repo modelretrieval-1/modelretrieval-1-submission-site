@@ -10,47 +10,48 @@
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
       <div class="header-actions">
-        <a href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download Bundle</a>
-        <a href="/admin">Dashboard</a>
+        <a class="btn btn-outline-primary btn-sm" href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download Bundle</a>
       </div>
     </div>
 
-    <form method="get" action="/admin/submissions" class="form-grid">
-      <label>
-        Team ID
-        <input name="team_id" type="text" value="{{ filters.team_id }}" placeholder="team-001">
-      </label>
-      <label>
-        Subtask
-        <select name="subtask">
-          <option value="">All</option>
-          <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
-          <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
-        </select>
-      </label>
-      <label>
-        Period
-        <select name="period">
-          <option value="">All</option>
-          <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
-          <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
-        </select>
-      </label>
-      <label>
-        Status
-        <select name="status">
-          <option value="">All</option>
-          {% for status in ("rejected", "accepted", "evaluated", "evaluation_failed") %}
-            <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <button type="submit">Filter</button>
-    </form>
+    <div class="filter-panel">
+      <form method="get" action="/admin/submissions" class="form-grid">
+        <div>
+          <label class="form-label" for="filter_team_id">Team ID</label>
+          <input class="form-control" id="filter_team_id" name="team_id" type="text" value="{{ filters.team_id }}" placeholder="team-001">
+        </div>
+        <div>
+          <label class="form-label" for="filter_subtask">Subtask</label>
+          <select class="form-select" id="filter_subtask" name="subtask">
+            <option value="">All</option>
+            <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
+            <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="filter_period">Period</label>
+          <select class="form-select" id="filter_period" name="period">
+            <option value="">All</option>
+            <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
+            <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="filter_status">Status</label>
+          <select class="form-select" id="filter_status" name="status">
+            <option value="">All</option>
+            {% for status in ("rejected", "accepted", "evaluated", "evaluation_failed") %}
+              <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Filter</button>
+      </form>
+    </div>
 
     <div class="table-wrap">
-      <table>
-        <thead>
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
           <tr>
             <th>ID</th>
             <th>Team</th>
@@ -68,17 +69,25 @@
             <tr>
               <td>{{ submission.submission_id }}</td>
               <td>{{ submission.team_public_id }}<br>{{ submission.team_display_name }}</td>
-              <td>{{ submission.subtask }}</td>
-              <td>{{ submission.period_name }}</td>
-              <td>{{ submission.status }}</td>
+              <td><span class="badge text-bg-info">Subtask {{ submission.subtask }}</span></td>
+              <td>
+                <span class="badge text-bg-{% if submission.period_name == 'normal' %}primary{% else %}info{% endif %}">
+                  {{ submission.period_name }}
+                </span>
+              </td>
+              <td>
+                <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
+                  {{ submission.status }}
+                </span>
+              </td>
               <td>{{ submission.original_filename }}</td>
               <td>{{ submission.submitted_at_jst }} JST</td>
               <td>{{ submission.validation_summary or "" }}</td>
-              <td><a href="/admin/submissions/{{ submission.submission_id }}">Open</a></td>
+              <td><a class="btn btn-outline-primary btn-sm" href="/admin/submissions/{{ submission.submission_id }}">Open</a></td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="9">No submissions match these filters.</td>
+              <td colspan="9"><p class="empty-state">No submissions match these filters.</p></td>
             </tr>
           {% endfor %}
         </tbody>

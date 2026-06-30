@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <section class="panel">
+  <section class="panel auth-panel">
     <h1>{{ app_name }}</h1>
-    <p>Sprint 0 foundation is running.</p>
-    <p><a href="/health">Health check</a></p>
+    <p class="text-muted">Sprint 0 foundation is running.</p>
+    <div class="action-row">
+      <a class="btn btn-primary" href="/login">Sign In</a>
+      <a class="btn btn-outline-secondary" href="/health">Health check</a>
+    </div>
   </section>
 {% endblock %}
-

@@ -9,47 +9,46 @@
         <h1>Ground Truth</h1>
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
-      <a href="/admin">Dashboard</a>
     </div>
 
     {% if error %}
-      <p class="alert" role="alert">{{ error }}</p>
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
     {% endif %}
 
     {% if success %}
-      <p class="notice" role="status">{{ success }}</p>
+      <div class="alert alert-success" role="status">{{ success }}</div>
     {% endif %}
 
     <h2>Upload Version</h2>
     <form method="post" action="/admin/ground-truth" enctype="multipart/form-data" class="form-grid">
-      <label>
-        Subtask
-        <select name="subtask" required>
+      <div>
+        <label class="form-label" for="ground_truth_subtask">Subtask</label>
+        <select class="form-select" id="ground_truth_subtask" name="subtask" required>
           <option value="A">Subtask A</option>
           <option value="B">Subtask B</option>
         </select>
-      </label>
-      <label>
-        Version Label
-        <input type="text" name="version_label" required>
-      </label>
-      <label>
-        Notes
-        <input type="text" name="notes">
-      </label>
-      <label>
-        File
-        <input type="file" name="file" required>
-      </label>
-      <button type="submit">Upload</button>
+      </div>
+      <div>
+        <label class="form-label" for="version_label">Version Label</label>
+        <input class="form-control" id="version_label" type="text" name="version_label" required>
+      </div>
+      <div>
+        <label class="form-label" for="notes">Notes</label>
+        <input class="form-control" id="notes" type="text" name="notes">
+      </div>
+      <div>
+        <label class="form-label" for="ground_truth_file">File</label>
+        <input class="form-control" id="ground_truth_file" type="file" name="file" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Upload</button>
     </form>
   </section>
 
   <section class="panel">
     <h2>Version History</h2>
     <div class="table-wrap">
-      <table>
-        <thead>
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
           <tr>
             <th>Subtask</th>
             <th>Version</th>
@@ -64,24 +63,34 @@
         <tbody>
           {% for version in versions %}
             <tr>
-              <td>Subtask {{ version.subtask }}</td>
+              <td><span class="badge text-bg-info">Subtask {{ version.subtask }}</span></td>
               <td>{{ version.version_label }}</td>
-              <td>{{ version.validation_status }}</td>
-              <td>{{ "Yes" if version.is_active else "No" }}</td>
+              <td>
+                <span class="badge status-badge text-bg-{% if version.validation_status == 'validated' %}success{% else %}danger{% endif %}">
+                  {{ version.validation_status }}
+                </span>
+              </td>
+              <td>
+                {% if version.is_active %}
+                  <span class="badge text-bg-primary">Yes</span>
+                {% else %}
+                  <span class="badge text-bg-secondary">No</span>
+                {% endif %}
+              </td>
               <td>{{ version.uploaded_at_jst }} JST</td>
               <td><code>{{ version.file_sha256 }}</code></td>
               <td>{{ version.notes or "" }}</td>
               <td>
                 {% if version.validation_status == "validated" and not version.is_active %}
                   <form method="post" action="/admin/ground-truth/{{ version.id }}/activate">
-                    <button type="submit">Activate</button>
+                    <button class="btn btn-outline-primary btn-sm" type="submit">Activate</button>
                   </form>
                 {% endif %}
               </td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="8">No ground-truth versions uploaded.</td>
+              <td colspan="8"><p class="empty-state">No ground-truth versions uploaded.</p></td>
             </tr>
           {% endfor %}
         </tbody>

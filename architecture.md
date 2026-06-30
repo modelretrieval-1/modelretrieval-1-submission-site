@@ -14,7 +14,7 @@ The implemented stack matches this recommendation:
 - `uv`, Pytest, and Ruff are configured.
 - Participant validation, evaluation, score display, deadline controls, selected-period uploads, organizer submission review, private leaderboard, leaderboard CSV export, and submission bundle download are implemented.
 
-The next implementation focus is UI modernization. Production deployment documentation and hardening should follow after the UI slice.
+The next implementation focus is production deployment documentation and hardening.
 
 Recommended stack:
 

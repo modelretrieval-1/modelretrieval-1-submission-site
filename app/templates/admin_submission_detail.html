@@ -10,18 +10,21 @@
         <p>{{ submission.team_display_name }} ({{ submission.team_public_id }})</p>
       </div>
       <div class="header-actions">
-        <a href="/admin/submissions">Submissions</a>
-        <a href="/admin">Dashboard</a>
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Submissions</a>
       </div>
     </div>
 
     <dl class="detail-list">
       <dt>Subtask</dt>
-      <dd>{{ submission.subtask }}</dd>
+      <dd><span class="badge text-bg-info">Subtask {{ submission.subtask }}</span></dd>
       <dt>Period</dt>
-      <dd>{{ submission.period_name }}</dd>
+      <dd><span class="badge text-bg-{% if submission.period_name == 'normal' %}primary{% else %}info{% endif %}">{{ submission.period_name }}</span></dd>
       <dt>Status</dt>
-      <dd>{{ submission.status }}</dd>
+      <dd>
+        <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
+          {{ submission.status }}
+        </span>
+      </dd>
       <dt>File</dt>
       <dd>{{ submission.original_filename }}</dd>
       <dt>Submitted</dt>
@@ -41,8 +44,8 @@
     <h2>Runs</h2>
     {% if runs %}
       <div class="table-wrap">
-        <table>
-          <thead>
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
             <tr>
               <th>RunID</th>
               <th>Lines</th>
@@ -61,14 +64,14 @@
         </table>
       </div>
     {% else %}
-      <p>No run metadata recorded.</p>
+      <p class="empty-state">No run metadata recorded.</p>
     {% endif %}
 
     <h2>Metrics</h2>
     {% if metrics %}
       <div class="table-wrap">
-        <table>
-          <thead>
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
             <tr>
               <th>RunID</th>
               <th>Metric</th>
@@ -80,21 +83,21 @@
               <tr>
                 <td>{{ metric.run_id }}</td>
                 <td>{{ metric.metric_name }}</td>
-                <td>{{ "%.6f"|format(metric.metric_value) }}</td>
+                <td class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     {% else %}
-      <p>No metrics recorded.</p>
+      <p class="empty-state">No metrics recorded.</p>
     {% endif %}
 
     <h2>Validation Errors</h2>
     {% if validation_errors %}
       <div class="table-wrap">
-        <table>
-          <thead>
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
             <tr>
               <th>Line</th>
               <th>Field</th>
@@ -109,7 +112,11 @@
                 <td>{{ error.line_number or "" }}</td>
                 <td>{{ error.field_name or "" }}</td>
                 <td>{{ error.error_code }}</td>
-                <td>{{ error.severity }}</td>
+                <td>
+                  <span class="badge text-bg-{% if error.severity == 'warning' %}warning{% else %}danger{% endif %}">
+                    {{ error.severity }}
+                  </span>
+                </td>
                 <td>{{ error.message }}</td>
               </tr>
             {% endfor %}
@@ -117,7 +124,7 @@
         </table>
       </div>
     {% else %}
-      <p>No validation errors recorded.</p>
+      <p class="empty-state">No validation errors recorded.</p>
     {% endif %}
   </section>
 {% endblock %}

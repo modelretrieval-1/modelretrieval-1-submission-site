@@ -10,17 +10,16 @@
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
       <div class="header-actions">
-        <a href="/team">Team dashboard</a>
-        <a href="/logout">Logout</a>
+        <a class="btn btn-outline-secondary btn-sm" href="/team">Team dashboard</a>
       </div>
     </div>
 
     {% if success %}
-      <div class="notice">{{ success }}</div>
+      <div class="alert alert-success" role="status">{{ success }}</div>
     {% endif %}
 
     {% if errors %}
-      <div class="alert">
+      <div class="alert alert-danger" role="alert">
         <strong>Submission rejected.</strong>
         <ul>
           {% for error in errors %}
@@ -36,8 +35,8 @@
     {% if metrics %}
       <h2>Scores</h2>
       <div class="table-wrap">
-        <table>
-          <thead>
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
             <tr>
               <th>RunID</th>
               <th>Metric</th>
@@ -49,7 +48,7 @@
               <tr>
                 <td>{{ metric.run_id }}</td>
                 <td>{{ metric.metric_name }}</td>
-                <td>{{ "%.6f"|format(metric.metric_value) }}</td>
+                <td class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -58,29 +57,39 @@
     {% endif %}
 
     <form class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
-      <fieldset>
+      <fieldset class="border rounded p-3">
         <legend>Submission period</legend>
         {% for period in periods %}
-          <label>
+          <label class="form-check mb-2">
             <input
+              class="form-check-input"
               name="submission_period"
               type="radio"
               value="{{ period.name }}"
               {% if selected_period == period.name %}checked{% endif %}
               required
             >
-            {{ period.name|capitalize }}
-            <span class="hint">
+            <span class="form-check-label">
+              {{ period.name|capitalize }}
+              {% if period.is_open_override %}
+                <span class="badge text-bg-warning">reopened</span>
+              {% endif %}
+            </span>
+            <span class="form-text d-block">
               Deadline: {{ period.deadline_at_jst }} JST{% if period.is_open_override %}; reopened by organizer{% endif %}
             </span>
           </label>
         {% endfor %}
       </fieldset>
-      <label>
-        Submission file
-        <input name="file" type="file" accept=".txt" required>
-      </label>
-      <button type="submit">Upload</button>
+      <div>
+        <label class="form-label" for="submission_file">Submission file</label>
+        <input class="form-control" id="submission_file" name="file" type="file" accept=".txt" required>
+        <div class="form-text">Upload one TREC_EVAL `.txt` file, maximum 10 MB and up to 5 RunID values.</div>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-primary" type="submit">Upload</button>
+        <a class="btn btn-outline-secondary" href="/team">Cancel</a>
+      </div>
     </form>
   </section>
 {% endblock %}

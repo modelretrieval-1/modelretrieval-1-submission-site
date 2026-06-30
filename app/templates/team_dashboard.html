@@ -9,24 +9,24 @@
         <h1>Team Dashboard</h1>
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
-      <a href="/logout">Logout</a>
     </div>
 
     <h2>Registered Subtasks</h2>
-    <ul>
+    <div class="dashboard-grid mb-4">
       {% for subtask in subtasks %}
-        <li>
-          Subtask {{ subtask }}
-          <a href="/team/submissions/{{ subtask }}/new">Upload submission</a>
-        </li>
+        <div class="dashboard-tile">
+          <h3>Subtask {{ subtask }}</h3>
+          <p class="small-muted">Upload a normal or late submission for this registered subtask.</p>
+          <a class="btn btn-primary btn-sm" href="/team/submissions/{{ subtask }}/new">Upload submission</a>
+        </div>
       {% endfor %}
-    </ul>
+    </div>
 
     <h2>Latest Submissions</h2>
     {% if submission_summaries %}
       <div class="table-wrap">
-        <table>
-          <thead>
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
             <tr>
               <th>Subtask</th>
               <th>Status</th>
@@ -39,7 +39,11 @@
             {% for submission in submission_summaries %}
               <tr>
                 <td>Subtask {{ submission.subtask }}</td>
-                <td>{{ submission.status }}</td>
+                <td>
+                  <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
+                    {{ submission.status }}
+                  </span>
+                </td>
                 <td>{{ submission.original_filename }}</td>
                 <td>{{ submission.submitted_at_jst }} JST</td>
                 <td>
@@ -48,12 +52,12 @@
                       {% for metric in submission.metrics %}
                         <li>
                           {{ metric.run_id }} {{ metric.metric_name }}:
-                          {{ "%.6f"|format(metric.metric_value) }}
+                          <span class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</span>
                         </li>
                       {% endfor %}
                     </ul>
                   {% else %}
-                    No scores yet
+                    <span class="text-muted">No scores yet</span>
                   {% endif %}
                 </td>
               </tr>
@@ -62,15 +66,19 @@
         </table>
       </div>
     {% else %}
-      <p>No submissions yet.</p>
+      <p class="empty-state">No submissions yet.</p>
     {% endif %}
 
     <h2>Deadlines</h2>
-    <dl>
-      <dt>Normal submission</dt>
-      <dd>August 1, 2026 at 15:00 JST</dd>
-      <dt>Late submission</dt>
-      <dd>October 15, 2026 at 23:59 JST</dd>
-    </dl>
+    <div class="dashboard-grid">
+      <div class="dashboard-tile">
+        <h3>Normal submission</h3>
+        <p class="mb-0">August 1, 2026 at 15:00 JST</p>
+      </div>
+      <div class="dashboard-tile">
+        <h3>Late submission</h3>
+        <p class="mb-0">October 15, 2026 at 23:59 JST</p>
+      </div>
+    </div>
   </section>
 {% endblock %}

@@ -23,7 +23,7 @@ Completed implementation:
 
 Current sprint target:
 
-- UI modernization for navigation, forms, tables, status states, and page layout.
+- Production deployment documentation.
 
 ## Users and Roles
 

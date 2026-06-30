@@ -9,15 +9,14 @@
         <h1>Teams</h1>
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
-      <a href="/admin">Dashboard</a>
     </div>
 
     {% if error %}
-      <p class="alert" role="alert">{{ error }}</p>
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
     {% endif %}
 
     {% if generated_password %}
-      <div class="notice" role="status">
+      <div class="alert alert-success" role="status">
         <h2>Generated Password</h2>
         <p>Team: <strong>{{ generated_team_id }}</strong></p>
         <code>{{ generated_password }}</code>
@@ -26,34 +25,38 @@
 
     <h2>Add Team</h2>
     <form method="post" action="/admin/teams" class="form-grid">
-      <label>
-        Team ID
-        <input type="text" name="team_id" required>
-      </label>
-      <label>
-        Display Name
-        <input type="text" name="display_name" required>
-      </label>
-      <fieldset>
+      <div>
+        <label class="form-label" for="team_id">Team ID</label>
+        <input class="form-control" id="team_id" type="text" name="team_id" required>
+      </div>
+      <div>
+        <label class="form-label" for="display_name">Display Name</label>
+        <input class="form-control" id="display_name" type="text" name="display_name" required>
+      </div>
+      <fieldset class="border rounded p-3">
         <legend>Registered Subtasks</legend>
-        <label class="inline-choice">
-          <input type="checkbox" name="subtasks" value="A">
+        <label class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="subtasks" value="A">
+          <span class="form-check-label">
           Subtask A
+          </span>
         </label>
-        <label class="inline-choice">
-          <input type="checkbox" name="subtasks" value="B">
+        <label class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="subtasks" value="B">
+          <span class="form-check-label">
           Subtask B
+          </span>
         </label>
       </fieldset>
-      <button type="submit">Add Team</button>
+      <button class="btn btn-primary" type="submit">Add Team</button>
     </form>
   </section>
 
   <section class="panel">
     <h2>Registered Teams</h2>
     <div class="table-wrap">
-      <table>
-        <thead>
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
           <tr>
             <th>Team ID</th>
             <th>Name</th>
@@ -71,21 +74,25 @@
               <td>{{ team.display_name }}</td>
               <td>
                 {% for subtask in team.subtasks %}
-                  <span class="tag">Subtask {{ subtask }}</span>
+                  <span class="badge text-bg-info tag">Subtask {{ subtask }}</span>
                 {% endfor %}
               </td>
-              <td>{{ "Active" if team.is_active else "Disabled" }}</td>
+              <td>
+                <span class="badge status-badge text-bg-{% if team.is_active %}success{% else %}secondary{% endif %}">
+                  {{ "Active" if team.is_active else "Disabled" }}
+                </span>
+              </td>
               <td>{{ team.created_at }}</td>
               <td>{{ team.last_login_at or "Never" }}</td>
               <td>
                 <form method="post" action="/admin/teams/{{ team.team_id }}/password">
-                  <button type="submit">Generate Password</button>
+                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate Password</button>
                 </form>
               </td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="7">No teams yet.</td>
+              <td colspan="7"><p class="empty-state">No teams yet.</p></td>
             </tr>
           {% endfor %}
         </tbody>
@@ -93,4 +100,3 @@
     </div>
   </section>
 {% endblock %}
-

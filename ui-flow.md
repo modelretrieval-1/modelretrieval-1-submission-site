@@ -27,16 +27,16 @@ Implemented through the latest Sprint 4 slice:
 - Leaderboard CSV export.
 - Submission bundle download.
 
-Next story: UI modernization using Bootstrap 5 and project-specific CSS.
+Next story: production deployment documentation.
 
 ## UI Modernization Direction
 
-The next UI iteration should improve the existing server-rendered pages rather than replace the frontend architecture.
+The UI modernization slice improved the existing server-rendered pages rather than replacing the frontend architecture.
 
 Decision:
 
 - Keep FastAPI and Jinja2 templates.
-- Add Bootstrap 5 as the primary CSS/component foundation.
+- Use Bootstrap 5 as the primary CSS/component foundation.
 - Keep a local `app/static/app.css` file for project-specific polish.
 - Do not add React, Vue, or a separate JavaScript build pipeline in this phase.
 - Use minimal JavaScript, limited to Bootstrap components or small progressive enhancements.

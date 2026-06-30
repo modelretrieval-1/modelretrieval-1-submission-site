@@ -10,34 +10,35 @@
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
       <div class="header-actions">
-        <a href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
-        <a href="/admin">Dashboard</a>
+        <a class="btn btn-outline-primary btn-sm" href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
       </div>
     </div>
 
-    <form method="get" action="/admin/leaderboard" class="form-grid">
-      <label>
-        Subtask
-        <select name="subtask">
-          <option value="">All</option>
-          <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
-          <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
-        </select>
-      </label>
-      <label>
-        Period
-        <select name="period">
-          <option value="">All</option>
-          <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
-          <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
-        </select>
-      </label>
-      <button type="submit">Filter</button>
-    </form>
+    <div class="filter-panel">
+      <form method="get" action="/admin/leaderboard" class="form-grid">
+        <div>
+          <label class="form-label" for="leaderboard_subtask">Subtask</label>
+          <select class="form-select" id="leaderboard_subtask" name="subtask">
+            <option value="">All</option>
+            <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
+            <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="leaderboard_period">Period</label>
+          <select class="form-select" id="leaderboard_period" name="period">
+            <option value="">All</option>
+            <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
+            <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Filter</button>
+      </form>
+    </div>
 
     <div class="table-wrap">
-      <table>
-        <thead>
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
           <tr>
             <th>Team</th>
             <th>Subtask</th>
@@ -54,25 +55,29 @@
           {% for row in rows %}
             <tr>
               <td>{{ row.team_public_id }}<br>{{ row.team_display_name }}</td>
-              <td>{{ row.subtask }}</td>
-              <td>{{ row.period_name }}</td>
-              <td>{{ row.run_id }}</td>
+              <td><span class="badge text-bg-info">Subtask {{ row.subtask }}</span></td>
               <td>
+                <span class="badge text-bg-{% if row.period_name == 'normal' %}primary{% else %}info{% endif %}">
+                  {{ row.period_name }}
+                </span>
+              </td>
+              <td>{{ row.run_id }}</td>
+              <td class="metric-value">
                 {% if row.metric_values.get("ndcg@1") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("ndcg@1")) }}
                 {% endif %}
               </td>
-              <td>
+              <td class="metric-value">
                 {% if row.metric_values.get("ndcg@3") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("ndcg@3")) }}
                 {% endif %}
               </td>
-              <td>
+              <td class="metric-value">
                 {% if row.metric_values.get("ndcg@5") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("ndcg@5")) }}
                 {% endif %}
               </td>
-              <td>
+              <td class="metric-value">
                 {% if row.metric_values.get("mrr") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("mrr")) }}
                 {% endif %}
@@ -81,7 +86,7 @@
             </tr>
           {% else %}
             <tr>
-              <td colspan="9">No evaluated submissions match these filters.</td>
+              <td colspan="9"><p class="empty-state">No evaluated submissions match these filters.</p></td>
             </tr>
           {% endfor %}
         </tbody>

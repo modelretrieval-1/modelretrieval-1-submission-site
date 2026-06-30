@@ -9,20 +9,19 @@
         <h1>Submission Periods</h1>
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
-      <a href="/admin">Dashboard</a>
     </div>
 
     {% if error %}
-      <p class="alert" role="alert">{{ error }}</p>
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
     {% endif %}
 
     {% if success %}
-      <p class="notice" role="status">{{ success }}</p>
+      <div class="alert alert-success" role="status">{{ success }}</div>
     {% endif %}
 
     <div class="table-wrap">
-      <table>
-        <thead>
+      <table class="table table-sm align-middle">
+        <thead class="table-light">
           <tr>
             <th>Period</th>
             <th>Start JST</th>
@@ -34,37 +33,46 @@
         <tbody>
           {% for period in periods %}
             <tr>
-              <td>{{ period.name }}</td>
+              <td>
+                <span class="badge text-bg-{% if period.name == 'normal' %}primary{% else %}info{% endif %}">
+                  {{ period.name }}
+                </span>
+              </td>
               <td colspan="4">
                 <form method="post" action="/admin/periods/{{ period.name }}" class="form-grid">
-                  <label>
-                    Start JST
+                  <div>
+                    <label class="form-label" for="{{ period.name }}_starts_at_jst">Start JST</label>
                     <input
+                      class="form-control"
+                      id="{{ period.name }}_starts_at_jst"
                       type="text"
                       name="starts_at_jst"
                       value="{{ period.starts_at_jst or '' }}"
                       placeholder="YYYY-MM-DD HH:MM:SS"
                     >
-                  </label>
-                  <label>
-                    Deadline JST
+                  </div>
+                  <div>
+                    <label class="form-label" for="{{ period.name }}_deadline_at_jst">Deadline JST</label>
                     <input
+                      class="form-control"
+                      id="{{ period.name }}_deadline_at_jst"
                       type="text"
                       name="deadline_at_jst"
                       value="{{ period.deadline_at_jst }}"
                       placeholder="YYYY-MM-DD HH:MM:SS"
                       required
                     >
-                  </label>
-                  <label class="inline-choice">
+                  </div>
+                  <label class="form-check">
                     <input
+                      class="form-check-input"
                       type="checkbox"
                       name="is_open_override"
                       {% if period.is_open_override %}checked{% endif %}
                     >
-                    Reopen
+                    <span class="form-check-label">Reopen</span>
                   </label>
-                  <button type="submit">Save</button>
+                  <button class="btn btn-primary" type="submit">Save</button>
                 </form>
               </td>
             </tr>

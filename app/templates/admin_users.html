@@ -9,15 +9,14 @@
         <h1>Organizer Users</h1>
         <p>{{ account.display_name }} ({{ account.user_id }})</p>
       </div>
-      <a href="/admin">Dashboard</a>
     </div>
 
     {% if error %}
-      <p class="alert" role="alert">{{ error }}</p>
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
     {% endif %}
 
     {% if generated_password %}
-      <div class="notice" role="status">
+      <div class="alert alert-success" role="status">
         <h2>Generated Password</h2>
         <p>Organizer: <strong>{{ generated_username }}</strong></p>
         <code>{{ generated_password }}</code>
@@ -26,23 +25,23 @@
 
     <h2>Add Organizer</h2>
     <form method="post" action="/admin/users" class="form-grid">
-      <label>
-        Username
-        <input type="text" name="username" required>
-      </label>
-      <label>
-        Display Name
-        <input type="text" name="display_name" required>
-      </label>
-      <button type="submit">Add Organizer</button>
+      <div>
+        <label class="form-label" for="username">Username</label>
+        <input class="form-control" id="username" type="text" name="username" required>
+      </div>
+      <div>
+        <label class="form-label" for="organizer_display_name">Display Name</label>
+        <input class="form-control" id="organizer_display_name" type="text" name="display_name" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Add Organizer</button>
     </form>
   </section>
 
   <section class="panel">
     <h2>Organizers</h2>
     <div class="table-wrap">
-      <table>
-        <thead>
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
           <tr>
             <th>Username</th>
             <th>Name</th>
@@ -57,18 +56,22 @@
             <tr>
               <td>{{ organizer.username }}</td>
               <td>{{ organizer.display_name }}</td>
-              <td>{{ "Active" if organizer.is_active else "Disabled" }}</td>
+              <td>
+                <span class="badge status-badge text-bg-{% if organizer.is_active %}success{% else %}secondary{% endif %}">
+                  {{ "Active" if organizer.is_active else "Disabled" }}
+                </span>
+              </td>
               <td>{{ organizer.created_at }}</td>
               <td>{{ organizer.last_login_at or "Never" }}</td>
               <td>
                 <form method="post" action="/admin/users/{{ organizer.username }}/password">
-                  <button type="submit">Generate Password</button>
+                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate Password</button>
                 </form>
               </td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="6">No organizers yet.</td>
+              <td colspan="6"><p class="empty-state">No organizers yet.</p></td>
             </tr>
           {% endfor %}
         </tbody>
@@ -76,4 +79,3 @@
     </div>
   </section>
 {% endblock %}
-

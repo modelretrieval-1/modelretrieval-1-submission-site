@@ -5,20 +5,20 @@
 {% block content %}
   <section class="panel auth-panel">
     <h1>Login</h1>
+    <p class="text-muted">Sign in with your team or organizer account.</p>
     {% if error %}
-      <p class="alert" role="alert">{{ error }}</p>
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
     {% endif %}
     <form method="post" action="/login" class="form-stack">
-      <label>
-        User ID
-        <input type="text" name="user_id" autocomplete="username" required>
-      </label>
-      <label>
-        Password
-        <input type="password" name="password" autocomplete="current-password" required>
-      </label>
-      <button type="submit">Sign In</button>
+      <div>
+        <label class="form-label" for="user_id">User ID</label>
+        <input class="form-control" id="user_id" type="text" name="user_id" autocomplete="username" required autofocus>
+      </div>
+      <div>
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" id="password" type="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Sign In</button>
     </form>
   </section>
 {% endblock %}
-

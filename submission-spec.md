@@ -31,9 +31,7 @@ Current upload behavior is implemented:
 - Organizers can export leaderboard rows as CSV.
 - Organizers can download submission bundles with metadata and stored files.
 
-Next implementation focus: UI modernization using Bootstrap 5 and project-specific CSS.
-
-Follow-on focus: production deployment documentation.
+Next implementation focus: production deployment documentation.
 
 ## Submission Turns
 

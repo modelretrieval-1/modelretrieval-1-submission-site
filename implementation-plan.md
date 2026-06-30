@@ -378,7 +378,7 @@ Current implementation status:
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
-- Next item: UI modernization before production deployment documentation.
+- Next item: production deployment documentation.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -478,7 +478,7 @@ Status:
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
-- Next continue with UI modernization before production deployment documentation.
+- Next continue with production deployment documentation.
 
 Demo:
 
@@ -511,7 +511,7 @@ Demo:
 
 Status:
 
-- Next/current sprint.
+- Complete for the planned UI modernization scope.
 
 ### Sprint 6: Production Hardening
 

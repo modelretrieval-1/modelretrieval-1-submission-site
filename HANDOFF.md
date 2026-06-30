@@ -15,7 +15,8 @@ Scrum implementation is underway.
 - Sprint 2: complete for the planned validation-core scope.
 - Sprint 3: complete for the planned evaluation and participant-result scope.
 - Sprint 4: complete for the planned organizer-operations scope.
-- Sprint 5: next/current sprint, focused on UI modernization before production deployment documentation.
+- Sprint 5: complete for the planned UI modernization scope.
+- Sprint 6: next/current sprint, focused on production deployment documentation.
 
 ## Current Stack
 
@@ -23,7 +24,7 @@ Scrum implementation is underway.
 - uv
 - FastAPI
 - Jinja2
-- Bootstrap 5 planned for UI modernization
+- Bootstrap 5
 - SQLite
 - Local filesystem storage
 - Pytest
@@ -118,6 +119,7 @@ Templates:
 - `app/templates/admin_submissions.html`
 - `app/templates/admin_submission_detail.html`
 - `app/templates/admin_leaderboard.html`
+- `app/static/app.css`: Bootstrap companion styling for layout, navigation, badges, tables, forms, and responsive polish.
 
 Tests:
 
@@ -165,7 +167,7 @@ Key decisions already made:
 - No email notifications.
 - VPS deployment.
 - Keep the frontend server-rendered with FastAPI/Jinja2.
-- Use Bootstrap 5 plus a small local CSS layer for the next UI modernization slice.
+- Use Bootstrap 5 plus a small local CSS layer for UI.
 - Do not introduce React, Vue, or a frontend build pipeline for this phase.
 
 ## Completed Latest Story
@@ -819,7 +821,7 @@ Status:
 - Team users are redirected away from bundle downloads.
 - Implemented integration tests in `tests/test_admin_submissions.py`.
 
-## Next Recommended Story
+## Completed Latest Story
 
 Modernize the server-rendered UI with Bootstrap 5 and project-specific CSS.
 
@@ -838,11 +840,21 @@ Suggested tests:
 - Add focused HTML/response assertions only where navigation or page structure changes affect behavior.
 - Run a manual browser smoke check for login, team upload, admin teams, ground truth, periods, submissions, and leaderboard.
 
-Follow-on story:
+Status:
 
-- Add production deployment documentation.
+- Complete.
+- Added Bootstrap 5 to the shared base template.
+- Added role-aware top navigation with active page state.
+- Improved login, password, team dashboard, team upload, organizer dashboard, teams, users, ground truth, periods, submissions, submission detail, and leaderboard templates.
+- Added Bootstrap form controls, tables, alerts, badges, filter panels, and responsive layout polish.
+- Kept generated-password markup compatible with existing tests.
+- Browser plugin backend was unavailable in this session, so visual smoke verification was limited to local server availability plus automated HTML/integration tests.
 
-Follow-on target behavior:
+## Next Recommended Story
+
+Add production deployment documentation.
+
+Target behavior:
 
 - Document VPS deployment steps.
 - Provide systemd service guidance.
@@ -850,7 +862,7 @@ Follow-on target behavior:
 - Document persistent storage and SQLite backup/restore approach.
 - Document first organizer creation and operational checklist.
 
-Follow-on suggested tests:
+Suggested tests:
 
 - Keep automated suite green.
 - Add smoke-test/deployment checklist where appropriate.

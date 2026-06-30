@@ -4,9 +4,9 @@ This repository contains the submission and evaluation system for the NTCIR-19 M
 
 ## Current Status
 
-The project is entering **Sprint 5: UI Modernization**.
+The project is entering **Sprint 6: Production Hardening**.
 
-Participant upload, validation, evaluation, score display, period controls, selected normal/late upload period, organizer submission review, private leaderboard, leaderboard CSV export, and submission bundle download are complete for the planned scope.
+Participant upload, validation, evaluation, score display, period controls, selected normal/late upload period, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, and the planned Bootstrap-based UI modernization are complete for the planned scope.
 
 Completed foundation:
 
@@ -65,15 +65,11 @@ All checks passed
 
 Next recommended story:
 
-- Modernize the server-rendered UI with Bootstrap 5 and project-specific CSS.
-
-Follow-on story:
-
 - Add production deployment documentation.
 
 ## UI Direction
 
-The app should remain a FastAPI/Jinja2 server-rendered system. The next UI slice should add Bootstrap 5 for navigation, forms, tables, alerts, badges, and responsive layout, with `app/static/app.css` reserved for project-specific polish. Do not add React, Vue, or a separate frontend build pipeline for this phase.
+The app remains a FastAPI/Jinja2 server-rendered system. The UI now uses Bootstrap 5 for navigation, forms, tables, alerts, badges, and responsive layout, with `app/static/app.css` reserved for project-specific polish. React, Vue, and a separate frontend build pipeline are intentionally not part of this phase.
 
 ## Development Setup
 
