@@ -2,7 +2,7 @@
 
 ## Current Implementation Checkpoint
 
-Implemented through the latest Sprint 4 slice:
+Implemented through the latest Sprint 5 slice:
 
 - Team and organizer login.
 - Organizer team and organizer-user management.
@@ -16,6 +16,7 @@ Implemented through the latest Sprint 4 slice:
 - Organizer private leaderboard view.
 - Leaderboard CSV export.
 - Submission bundle download.
+- Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
 
 Next story: production deployment documentation.
 

@@ -17,7 +17,7 @@ Core entities:
 
 ## Current Implementation Checkpoint
 
-As of the current handoff, persistence is implemented through participant upload, validation, evaluation, score display, period controls, and participant-selected submission turns.
+As of the current handoff, persistence is implemented through participant upload, validation, evaluation, score display, period controls, participant-selected submission turns, organizer operations, and UI modernization.
 
 Implemented tables include `organizers`, `teams`, `team_subtasks`, `submission_periods`, `ground_truth_versions`, `submissions`, `runs`, `validation_errors`, `evaluation_results`, and `audit_events`.
 

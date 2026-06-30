@@ -11,7 +11,7 @@ The system supports:
 
 ## Current Implementation Checkpoint
 
-The project is in Sprint 4 organizer operations.
+The project has completed Sprint 5 UI modernization and is entering Sprint 6 production hardening.
 
 Completed implementation:
 
@@ -20,6 +20,7 @@ Completed implementation:
 - Sprint 2 ground-truth management, TREC_EVAL validation, participant upload UI, validation-failure persistence, and accepted submission/run persistence.
 - Sprint 3 evaluation metrics, participant score display, one-successful-submission enforcement, JST deadline enforcement, and organizer submission-period controls.
 - Sprint 4 participant-selected normal/late upload period, organizer submission review, private leaderboard view, leaderboard CSV export, and submission bundle download.
+- Sprint 5 Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
 
 Current sprint target:
 
@@ -221,9 +222,9 @@ The system should retain:
 
 ## UI and Frontend Requirements
 
-The application should remain a server-rendered FastAPI/Jinja2 app. The UI modernization should improve clarity and usability without introducing a single-page application framework or frontend build pipeline.
+The application remains a server-rendered FastAPI/Jinja2 app. The completed UI modernization improves clarity and usability without introducing a single-page application framework or frontend build pipeline.
 
-Approved UI direction:
+Implemented UI direction:
 
 - Use Bootstrap 5 for the core CSS/component foundation.
 - Use a small local stylesheet for project-specific spacing, density, status colors, and task branding.

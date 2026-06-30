@@ -30,6 +30,7 @@ Current upload behavior is implemented:
 - Organizers can view a private leaderboard of evaluated run metrics.
 - Organizers can export leaderboard rows as CSV.
 - Organizers can download submission bundles with metadata and stored files.
+- Submission, validation-error, and organizer review pages have been modernized with Bootstrap forms, tables, alerts, badges, filters, and responsive layout.
 
 Next implementation focus: production deployment documentation.
 

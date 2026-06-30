@@ -8,7 +8,7 @@ The UI should be simple, operational, and fast to scan. It is not a marketing si
 
 ## Current Implementation Checkpoint
 
-Implemented through the latest Sprint 4 slice:
+Implemented through the latest Sprint 5 slice:
 
 - Login/logout.
 - Team dashboard with registered subtask upload links.
@@ -26,6 +26,7 @@ Implemented through the latest Sprint 4 slice:
 - Organizer private leaderboard view.
 - Leaderboard CSV export.
 - Submission bundle download.
+- Bootstrap-based UI modernization for global navigation, forms, tables, alerts, badges, filters, dashboards, and responsive layout.
 
 Next story: production deployment documentation.
 

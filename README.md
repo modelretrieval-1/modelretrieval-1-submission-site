@@ -6,7 +6,7 @@ This repository contains the submission and evaluation system for the NTCIR-19 M
 
 The project is entering **Sprint 6: Production Hardening**.
 
-Participant upload, validation, evaluation, score display, period controls, selected normal/late upload period, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, and the planned Bootstrap-based UI modernization are complete for the planned scope.
+Participant upload, validation, evaluation, score display, period controls, selected normal/late upload period, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, and Bootstrap-based UI modernization are complete for the planned scope.
 
 Completed foundation:
 

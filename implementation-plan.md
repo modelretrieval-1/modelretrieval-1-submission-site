@@ -378,6 +378,7 @@ Current implementation status:
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
+- Sprint 5 UI modernization is complete.
 - Next item: production deployment documentation.
 
 ### Sprint 0: Planning and Scaffolding

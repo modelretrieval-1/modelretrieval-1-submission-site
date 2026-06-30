@@ -28,6 +28,7 @@ Implemented behavior:
 - Organizer submission detail views show run-level metric rows for evaluated submissions.
 - Organizer private leaderboard view shows evaluated run rows with metrics and period filters.
 - Organizer leaderboard rows can be exported as CSV with the current filters.
+- Evaluation and leaderboard pages have been modernized with Bootstrap tables, filters, badges, and responsive layout.
 
 Next implementation focus: production deployment documentation.
 
