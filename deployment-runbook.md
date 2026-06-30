@@ -17,9 +17,11 @@ The repository includes the first Docker deployment files:
 - `deployment/nginx/staging.conf.example`
 - `deployment/nginx/production.conf.example`
 - `deployment/scripts/backup.sh`
+- `deployment/scripts/smoke-check.sh`
 - `deployment/restore.md`
+- `.github/workflows/ci-cd.yml`
 
-CI/CD files will be added separately.
+The GitHub Actions workflow runs tests, linting, image publishing, staging deployment, production backup, production deployment, and smoke checks.
 
 ## One-Time VPS Setup
 
@@ -65,6 +67,13 @@ Create environment files from templates and replace secrets:
 ```bash
 sudo cp deployment/staging.env.example /opt/modelretrieval/staging/.env
 sudo cp deployment/production.env.example /opt/modelretrieval/production/.env
+```
+
+Copy deployment scripts to the VPS environment directories:
+
+```bash
+sudo cp deployment/scripts/backup.sh /opt/modelretrieval/production/backup.sh
+sudo chmod 700 /opt/modelretrieval/production/backup.sh
 ```
 
 ## DNS Setup
@@ -147,7 +156,7 @@ Keep these settings in both final configs:
 
 ## Staging Deployment
 
-Staging should deploy automatically after CI passes on `main`.
+Staging should deploy automatically after CI passes on `main` or `master`.
 
 Deployment command shape:
 
@@ -210,6 +219,47 @@ Example tag:
 git tag v2026.07.01
 git push origin v2026.07.01
 ```
+
+## GitHub Actions Setup
+
+The workflow is defined in `.github/workflows/ci-cd.yml`.
+
+Required GitHub environment or repository secrets:
+
+```text
+STAGING_HOST
+STAGING_USER
+STAGING_SSH_KEY
+STAGING_PATH
+STAGING_URL
+
+PRODUCTION_HOST
+PRODUCTION_USER
+PRODUCTION_SSH_KEY
+PRODUCTION_PATH
+PRODUCTION_URL
+```
+
+Recommended values:
+
+```text
+STAGING_PATH=/opt/modelretrieval/staging
+STAGING_URL=https://staging.<domain>
+PRODUCTION_PATH=/opt/modelretrieval/production
+PRODUCTION_URL=https://submit.<domain>
+```
+
+The staging deploy job updates `APP_IMAGE` in the remote staging `.env`, pulls the image, starts the Compose stack, and runs `deployment/scripts/smoke-check.sh`.
+
+The production deploy job runs `./backup.sh` in the remote production directory before updating `APP_IMAGE`, pulling the image, starting the Compose stack, and running the smoke check.
+
+The workflow publishes images to GitHub Container Registry using the repository's `GITHUB_TOKEN`.
+
+Image tags:
+
+- Branch pushes: `ghcr.io/<owner>/<repo>:main-<short-sha>`
+- Staging convenience tag: `ghcr.io/<owner>/<repo>:latest-staging`
+- Version tags: `ghcr.io/<owner>/<repo>:vYYYY.MM.DD`
 
 ## Rollback
 
@@ -276,6 +326,20 @@ The script writes:
 - `manifest.txt`
 
 `env.snapshot` contains secrets and must be protected like the original `.env` file.
+
+## Smoke Checks
+
+Run smoke checks with:
+
+```bash
+deployment/scripts/smoke-check.sh https://staging.<domain>
+deployment/scripts/smoke-check.sh https://submit.<domain>
+```
+
+The script checks:
+
+- `/health`
+- `/login`
 
 ## Restore
 

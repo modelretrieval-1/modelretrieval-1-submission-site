@@ -16,6 +16,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Confirm whether production deploys are tag-based.
 - [ ] Confirm backup retention period.
 - [ ] Confirm who has SSH access to the VPS.
+- [ ] Confirm GitHub Actions environments and deployment secrets.
 
 ## One-Time VPS Checklist
 
@@ -34,6 +35,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] `/opt/modelretrieval/production` exists.
 - [ ] `/opt/modelretrieval/backups` exists.
 - [ ] `deployment/scripts/backup.sh` is available on the VPS or runnable from the checkout.
+- [ ] `/opt/modelretrieval/production/backup.sh` exists and is executable.
 - [ ] `compose.staging.yml` has been copied to staging as `compose.yml`.
 - [ ] `compose.production.yml` has been copied to production as `compose.yml`.
 - [ ] Staging `.env` exists and is not committed.
@@ -45,7 +47,9 @@ This checklist is used before launch and before each production deployment.
 
 - [ ] CI tests pass.
 - [ ] CI lint passes.
+- [ ] Docker image was pushed to GitHub Container Registry.
 - [ ] Staging deploy completes.
+- [ ] Staging `APP_IMAGE` was updated in remote `.env`.
 - [ ] `https://staging.<domain>/health` returns success.
 - [ ] Login page loads over HTTPS.
 - [ ] Upload-size behavior is not blocked by Nginx before the app's 10 MB validation rule.
@@ -64,6 +68,7 @@ This checklist is used before launch and before each production deployment.
 
 - [ ] Production image tag is immutable.
 - [ ] Production `APP_IMAGE` is set in `/opt/modelretrieval/production/.env`.
+- [ ] Production deployment is triggered by a `v*` tag.
 - [ ] Staging was verified using the same commit or image.
 - [ ] Production backup completed.
 - [ ] Production `.env` is present.
@@ -87,6 +92,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Private leaderboard loads.
 - [ ] Nginx error logs show no deployment-related errors.
 - [ ] Application logs show no startup errors.
+- [ ] `deployment/scripts/smoke-check.sh` passes against production URL.
 
 ## Backup Verification
 

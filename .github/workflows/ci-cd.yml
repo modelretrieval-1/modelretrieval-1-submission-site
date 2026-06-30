@@ -1,0 +1,168 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  test:
+    name: Test and lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        run: python -m pip install uv
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Run tests
+        run: uv run --extra dev pytest
+
+      - name: Run lint
+        run: uv run --extra dev ruff check .
+
+  build:
+    name: Build and publish image
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Compute image tag
+        id: image
+        shell: bash
+        run: |
+          image_name="ghcr.io/${GITHUB_REPOSITORY,,}"
+          short_sha="${GITHUB_SHA::12}"
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            image="${image_name}:${GITHUB_REF_NAME}"
+          else
+            image="${image_name}:main-${short_sha}"
+          fi
+          echo "image=${image}" >> "$GITHUB_OUTPUT"
+          echo "image_name=${image_name}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build image
+        run: docker build -t "${{ steps.image.outputs.image }}" .
+
+      - name: Add staging convenience tag
+        if: github.ref_type == 'branch'
+        run: docker tag "${{ steps.image.outputs.image }}" "${{ steps.image.outputs.image_name }}:latest-staging"
+
+      - name: Push image
+        run: docker push "${{ steps.image.outputs.image }}"
+
+      - name: Push staging convenience tag
+        if: github.ref_type == 'branch'
+        run: docker push "${{ steps.image.outputs.image_name }}:latest-staging"
+
+  deploy-staging:
+    name: Deploy staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref_type == 'branch'
+    environment: staging
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_HOST: ${{ secrets.STAGING_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy over SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.STAGING_HOST }}
+          SSH_USER: ${{ secrets.STAGING_USER }}
+          DEPLOY_PATH: ${{ secrets.STAGING_PATH }}
+          IMAGE: ${{ needs.build.outputs.image }}
+        run: |
+          ssh -i ~/.ssh/deploy_key "${SSH_USER}@${SSH_HOST}" \
+            "cd '${DEPLOY_PATH}' && \
+             if grep -q '^APP_IMAGE=' .env; then sed -i.bak \"s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE}|\" .env; else printf '\nAPP_IMAGE=${IMAGE}\n' >> .env; fi && \
+             docker compose pull && \
+             docker compose up -d"
+
+      - name: Smoke check staging
+        env:
+          BASE_URL: ${{ secrets.STAGING_URL }}
+        run: deployment/scripts/smoke-check.sh
+
+  deploy-production:
+    name: Deploy production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    environment: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Backup and deploy over SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+          SSH_USER: ${{ secrets.PRODUCTION_USER }}
+          DEPLOY_PATH: ${{ secrets.PRODUCTION_PATH }}
+          IMAGE: ${{ needs.build.outputs.image }}
+        run: |
+          ssh -i ~/.ssh/deploy_key "${SSH_USER}@${SSH_HOST}" \
+            "cd '${DEPLOY_PATH}' && \
+             ENVIRONMENT=production ./backup.sh && \
+             if grep -q '^APP_IMAGE=' .env; then sed -i.bak \"s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE}|\" .env; else printf '\nAPP_IMAGE=${IMAGE}\n' >> .env; fi && \
+             docker compose pull && \
+             docker compose up -d"
+
+      - name: Smoke check production
+        env:
+          BASE_URL: ${{ secrets.PRODUCTION_URL }}
+        run: deployment/scripts/smoke-check.sh

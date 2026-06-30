@@ -228,7 +228,7 @@ developer laptop
 
 Use the following mapping:
 
-- Push to `main`: deploy staging.
+- Push to `main` or `master`: deploy staging.
 - Tag `v*`: deploy production.
 
 This keeps staging fast and production deliberate.
@@ -244,6 +244,15 @@ Recommended tags:
 - `latest-staging` may be convenient, but production should use immutable tags.
 
 Production should record the deployed image tag in deployment logs.
+
+The repository provides `.github/workflows/ci-cd.yml` for:
+
+- test and lint on pull requests and pushes;
+- Docker image publishing to GitHub Container Registry on pushes;
+- automatic staging deployment from branch pushes;
+- production deployment from `v*` tags;
+- production backup before deployment;
+- smoke checks after deployment.
 
 ## Persistent Data
 

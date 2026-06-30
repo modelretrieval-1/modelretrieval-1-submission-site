@@ -224,9 +224,18 @@ The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate p
 Initial backup and restore files added:
 
 - `deployment/scripts/backup.sh`
+- `deployment/scripts/smoke-check.sh`
 - `deployment/restore.md`
 
 The backup script creates timestamped backups containing `app.sqlite3`, `storage.tar.gz`, optional `env.snapshot`, and `manifest.txt`.
+
+## CI/CD Deployment Files
+
+Initial GitHub Actions workflow added:
+
+- `.github/workflows/ci-cd.yml`
+
+The workflow runs tests and lint, builds and pushes GHCR images, deploys staging from branch pushes, deploys production from `v*` tags, runs production backup before deploy, and runs smoke checks after deploy.
 
 ## Completed Latest Story
 
