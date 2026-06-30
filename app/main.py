@@ -20,6 +20,7 @@ from fastapi.templating import Jinja2Templates
 from app.accounts import (
     authenticate,
     change_organizer_password,
+    change_team_password,
     create_organizer,
     create_team,
     get_organizer_account,
@@ -1104,16 +1105,16 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
 
     @app.get("/account/password", response_class=HTMLResponse)
     def password_change_form(request: Request) -> Response:
-        account, redirect_response = require_organizer(request)
-        if redirect_response is not None:
-            return redirect_response
+        account = get_session_account(request)
+        if account is None:
+            return redirect("/login")
         return render_password_change(request, account=account)
 
     @app.post("/account/password", response_class=HTMLResponse)
     async def password_change(request: Request) -> Response:
-        account, redirect_response = require_organizer(request)
-        if redirect_response is not None:
-            return redirect_response
+        account = get_session_account(request)
+        if account is None:
+            return redirect("/login")
 
         form = await request.form()
         current_password = str(form.get("current_password", ""))
@@ -1135,12 +1136,20 @@ def create_app(app_settings: Settings = settings) -> FastAPI:
             )
 
         with connect(app_settings.database_path) as connection:
-            changed = change_organizer_password(
-                connection,
-                organizer_id=account.id,
-                current_password=current_password,
-                new_password=new_password,
-            )
+            if account.role == "organizer":
+                changed = change_organizer_password(
+                    connection,
+                    organizer_id=account.id,
+                    current_password=current_password,
+                    new_password=new_password,
+                )
+            else:
+                changed = change_team_password(
+                    connection,
+                    internal_team_id=account.id,
+                    current_password=current_password,
+                    new_password=new_password,
+                )
 
         if not changed:
             return render_password_change(

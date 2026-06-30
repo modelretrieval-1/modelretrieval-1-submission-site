@@ -361,3 +361,33 @@ def change_organizer_password(
     )
     connection.commit()
     return True
+
+
+def change_team_password(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+    current_password: str,
+    new_password: str,
+) -> bool:
+    row = connection.execute(
+        """
+        SELECT password_hash
+        FROM teams
+        WHERE id = ? AND is_active = 1
+        """,
+        (internal_team_id,),
+    ).fetchone()
+    if row is None or not verify_password(current_password, row["password_hash"]):
+        return False
+
+    connection.execute(
+        """
+        UPDATE teams
+        SET password_hash = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (hash_password(new_password), internal_team_id),
+    )
+    connection.commit()
+    return True

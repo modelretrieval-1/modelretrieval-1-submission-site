@@ -62,17 +62,18 @@ def test_organizer_can_view_password_change_page():
         assert "Current Password" in response.text
 
 
-def test_team_cannot_view_password_change_page_in_v1():
+def test_team_can_view_password_change_page():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
         _organizer, team = seed_accounts(settings)
         client = TestClient(create_app(settings))
         login(client, "team-001", team.password)
 
-        response = client.get("/account/password", follow_redirects=False)
+        response = client.get("/account/password")
 
-        assert response.status_code == 303
-        assert response.headers["location"] == "/team"
+        assert response.status_code == 200
+        assert "Change Password" in response.text
+        assert "Team 001" in response.text
 
 
 def test_incorrect_current_password_shows_error():
@@ -138,3 +139,30 @@ def test_successful_password_change_invalidates_old_password():
             assert authenticate(connection, "admin", organizer.password) is None
             assert authenticate(connection, "admin", "new-secret") is not None
 
+
+def test_successful_team_password_change_invalidates_old_password_and_keeps_session():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        _organizer, team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.post(
+            "/account/password",
+            data={
+                "current_password": team.password,
+                "new_password": "new-team-secret",
+                "confirm_password": "new-team-secret",
+            },
+        )
+
+        assert response.status_code == 200
+        assert "Password changed." in response.text
+
+        dashboard_response = client.get("/team")
+        assert dashboard_response.status_code == 200
+        assert "Team Dashboard" in dashboard_response.text
+
+        with connect(settings.database_path) as connection:
+            assert authenticate(connection, "team-001", team.password) is None
+            assert authenticate(connection, "team-001", "new-team-secret") is not None
