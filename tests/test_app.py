@@ -18,4 +18,4 @@ def test_home_page_renders():
     response = client.get("/")
 
     assert response.status_code == 200
-    assert "Sprint 0 foundation is running." in response.text
+    assert "Submission and evaluation system for NTCIR-19 ModelRetrieval." in response.text
