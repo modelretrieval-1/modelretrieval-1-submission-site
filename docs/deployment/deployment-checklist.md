@@ -19,8 +19,8 @@ This checklist is used before launch and before each production deployment.
 - [x] Deploy user uses SSH key authentication and no usable password login.
 - [ ] Confirm backup retention period.
 - [ ] Confirm who has SSH access to the VPS.
-- [ ] `deployment/vps-setup.md` has been followed for the target VPS.
-- [ ] `deployment/github-secrets.md` has been followed for GitHub Actions.
+- [ ] `vps-setup.md` has been followed for the target VPS.
+- [ ] `github-secrets.md` has been followed for GitHub Actions.
 
 ## One-Time VPS Checklist
 

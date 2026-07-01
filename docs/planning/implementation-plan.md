@@ -23,12 +23,12 @@ Current UI direction:
 
 - Continue using FastAPI, Jinja2, Bootstrap 5, and local CSS.
 - Redesign authenticated pages around an application shell with role-aware navigation.
-- Use `app-ui-redesign.md` as the source of truth before implementation.
+- Use `../ui/app-ui-redesign.md` as the source of truth before implementation.
 - Keep the richer UI operational and dashboard-like, not marketing-style.
 
 Current refactor state:
 
-- The initial route/web-layer refactor from `refactor-plan.md` is implemented.
+- The initial route/web-layer refactor from `../technical/refactor-plan.md` is implemented.
 - `app/main.py` now focuses on app assembly and router registration.
 - Shared helpers live in `app/web.py`, with auth, team, and admin routes under `app/routes/`.
 - Domain modules, schema, routes, permissions, templates, and deployment behavior were left unchanged.
@@ -550,16 +550,16 @@ Demo:
 Status:
 
 - Deployment planning documents have been added and updated:
-  - `deployment-strategy.md`
-  - `deployment-environments.md`
-  - `deployment-runbook.md`
-  - `deployment-checklist.md`
-- Diagram planning is in `diagrams.md`, and Mermaid diagrams have been added for deployment, CI/CD, submission workflow, and the data model.
+  - `../deployment/deployment-strategy.md`
+  - `../deployment/deployment-environments.md`
+  - `../deployment/deployment-runbook.md`
+  - `../deployment/deployment-checklist.md`
+- Diagram planning is in `../technical/diagrams.md`, and Mermaid diagrams have been added for deployment, CI/CD, submission workflow, and the data model.
 - Docker deployment files have been added: `Dockerfile`, `.dockerignore`, `compose.staging.yml`, `compose.production.yml`, and environment templates under `deployment/`.
 - Nginx templates have been added under `deployment/nginx/` for staging and production reverse proxying.
-- Backup and restore tooling has been added under `deployment/scripts/backup.sh` and `deployment/restore.md`.
+- Backup and restore tooling has been added under `deployment/scripts/backup.sh` and `../deployment/restore.md`.
 - CI/CD workflow has been added in `.github/workflows/ci-cd.yml` with smoke checks via `deployment/scripts/smoke-check.sh`.
-- Operator setup docs have been added in `deployment/vps-setup.md` and `deployment/github-secrets.md`.
+- Operator setup docs have been added in `../deployment/vps-setup.md` and `../deployment/github-secrets.md`.
 - Current deployment direction: local development, staging and production on one Sakura VPS, Muumuu Domain DNS, host Nginx, Docker Compose app stacks, automatic staging deployment from `main`, and production deployment from explicit version tags.
 - Current project domains are `submission-staging.modelretrieval-1.happysocial.net` and `submission.modelretrieval-1.happysocial.net`.
 - Deployment docs capture the GHCR login path, `APP_IMAGE` meaning, `SECRET_KEY` generation, passwordless deploy user, bind-mounted data ownership fix, and Nginx long-hostname hash bucket fix.
@@ -588,7 +588,7 @@ Technical decisions:
 
 Status:
 
-- Documentation started in `app-ui-redesign.md`.
+- Documentation started in `../ui/app-ui-redesign.md`.
 - Implementation should follow after document review.
 
 ## Initial MVP

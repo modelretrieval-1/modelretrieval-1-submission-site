@@ -38,7 +38,7 @@ The next requested product direction is to make the interface feel more like an 
 
 Documented target:
 
-- `app-ui-redesign.md`
+- `docs/ui/app-ui-redesign.md`
 
 Key points:
 
@@ -52,7 +52,7 @@ Key points:
 
 ## Current Refactor State
 
-The initial small, document-driven route/web-layer refactor is implemented. Use `refactor-plan.md` as the source of truth and implementation record.
+The initial small, document-driven route/web-layer refactor is implemented. Use `docs/technical/refactor-plan.md` as the source of truth and implementation record.
 
 Key points:
 
@@ -63,6 +63,20 @@ Key points:
 - Team dashboard and participant upload routes live in `app/routes/team.py`.
 - Organizer routes and download helpers live in `app/routes/admin.py`.
 - Domain modules such as `app/submissions.py`, `app/evaluation.py`, `app/accounts.py`, and `app/ground_truth.py` remain intact.
+
+## Current Documentation Layout
+
+Project documentation is organized under `docs/`, with `README.md` and `HANDOFF.md` kept at the repository root for quick orientation.
+
+Key groups:
+
+- `docs/product/`: requirements, user stories, and resolved questions.
+- `docs/ui/`: UI flow and application-shell redesign.
+- `docs/technical/`: architecture, data model, submission/evaluation specs, diagrams, and refactor plan.
+- `docs/planning/`: Scrum implementation plan.
+- `docs/deployment/`: deployment strategy, environments, runbook, checklist, restore, VPS setup, and GitHub secrets.
+
+The repository-level `deployment/` directory is reserved for runtime deployment assets such as Nginx templates, environment examples, and shell scripts.
 
 ## Current Deployment Plan
 
@@ -225,21 +239,21 @@ Key decisions already made:
 
 Deployment planning documents:
 
-- `deployment-strategy.md`: environment model, release flow, Docker Compose recommendation, DNS/Nginx shape, backup and rollback strategy.
-- `deployment-environments.md`: development, staging, and production domains, data paths, environment variables, and secret rules.
-- `deployment-runbook.md`: setup, deploy, promote, rollback, backup, restore, logs, and smoke-test operations.
-- `deployment-checklist.md`: confirmed inputs, one-time VPS, staging, production, backup, and launch-readiness checklist.
+- `docs/deployment/deployment-strategy.md`: environment model, release flow, Docker Compose recommendation, DNS/Nginx shape, backup and rollback strategy.
+- `docs/deployment/deployment-environments.md`: development, staging, and production domains, data paths, environment variables, and secret rules.
+- `docs/deployment/deployment-runbook.md`: setup, deploy, promote, rollback, backup, restore, logs, and smoke-test operations.
+- `docs/deployment/deployment-checklist.md`: confirmed inputs, one-time VPS, staging, production, backup, and launch-readiness checklist.
 
 ## Diagram Documents
 
-Created `diagrams.md` to define the diagram set and drawing order.
+Created `docs/technical/diagrams.md` to define the diagram set and drawing order.
 
 Initial Mermaid diagrams added:
 
-- Deployment diagram in `deployment-strategy.md`.
-- CI/CD flow diagram in `deployment-strategy.md`.
-- Submission sequence diagram in `submission-spec.md`.
-- Data model / ER diagram in `data-model.md`.
+- Deployment diagram in `docs/deployment/deployment-strategy.md`.
+- CI/CD flow diagram in `docs/deployment/deployment-strategy.md`.
+- Submission sequence diagram in `docs/technical/submission-spec.md`.
+- Data model / ER diagram in `docs/technical/data-model.md`.
 
 Use Mermaid in Markdown for the first version of diagrams.
 
@@ -271,7 +285,7 @@ Backup and restore files added:
 
 - `deployment/scripts/backup.sh`
 - `deployment/scripts/smoke-check.sh`
-- `deployment/restore.md`
+- `docs/deployment/restore.md`
 
 The backup script creates timestamped backups containing `app.sqlite3`, `storage.tar.gz`, optional `env.snapshot`, and `manifest.txt`.
 
@@ -287,8 +301,8 @@ The workflow runs tests and lint, builds and pushes GHCR images, deploys staging
 
 Added operator-facing setup docs:
 
-- `deployment/vps-setup.md`: Sakura VPS, Docker, Nginx, Certbot, directories, first manual deploy, and first admin setup.
-- `deployment/github-secrets.md`: GitHub Actions secrets, SSH key expectations, remote paths, image behavior, and environment protection.
+- `docs/deployment/vps-setup.md`: Sakura VPS, Docker, Nginx, Certbot, directories, first manual deploy, and first admin setup.
+- `docs/deployment/github-secrets.md`: GitHub Actions secrets, SSH key expectations, remote paths, image behavior, and environment protection.
 
 Current deployment notes captured in docs:
 
@@ -1005,18 +1019,19 @@ Suggested checks:
 
 1. `HANDOFF.md`
 2. `README.md`
-3. `implementation-plan.md`
-4. `ui-flow.md`
-5. `data-model.md`
-6. `deployment-strategy.md`
-7. `deployment-environments.md`
-8. `deployment-runbook.md`
-9. `deployment-checklist.md`
-10. `deployment/vps-setup.md`
-11. `deployment/github-secrets.md`
-12. `submission-spec.md`
-13. `evaluation-spec.md`
-14. `requirements.md`
-15. `user-stories.md`
-16. `architecture.md`
-11. `open-questions.md`
+3. `docs/index.md`
+4. `docs/planning/implementation-plan.md`
+5. `docs/ui/ui-flow.md`
+6. `docs/technical/data-model.md`
+7. `docs/deployment/deployment-strategy.md`
+8. `docs/deployment/deployment-environments.md`
+9. `docs/deployment/deployment-runbook.md`
+10. `docs/deployment/deployment-checklist.md`
+11. `docs/deployment/vps-setup.md`
+12. `docs/deployment/github-secrets.md`
+13. `docs/technical/submission-spec.md`
+14. `docs/technical/evaluation-spec.md`
+15. `docs/product/requirements.md`
+16. `docs/product/user-stories.md`
+17. `docs/technical/architecture.md`
+18. `docs/product/open-questions.md`

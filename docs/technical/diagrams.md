@@ -10,16 +10,16 @@ The goal is to keep diagrams practical and version-controlled. Use Mermaid diagr
 
 The diagrams should support the existing documents rather than replace them.
 
-- `requirements.md`: source for roles, product rules, and security expectations.
-- `user-stories.md`: source for use cases and actor goals.
+- `../product/requirements.md`: source for roles, product rules, and security expectations.
+- `../product/user-stories.md`: source for use cases and actor goals.
 - `architecture.md`: source for system and deployment architecture.
-- `deployment-strategy.md`: source for environment and release-flow diagrams.
-- `deployment-environments.md`: source for staging and production configuration boundaries.
-- `deployment-runbook.md`: source for operational flow diagrams.
+- `../deployment/deployment-strategy.md`: source for environment and release-flow diagrams.
+- `../deployment/deployment-environments.md`: source for staging and production configuration boundaries.
+- `../deployment/deployment-runbook.md`: source for operational flow diagrams.
 - `data-model.md`: source for the ER diagram.
 - `submission-spec.md`: source for the submission validation sequence.
 - `evaluation-spec.md`: source for evaluation and leaderboard behavior.
-- `ui-flow.md`: source for user-facing workflows.
+- `../ui/ui-flow.md`: source for user-facing workflows.
 
 ## Diagram Format
 
@@ -37,7 +37,7 @@ Recommended conventions:
 
 ### 1. Deployment Diagram
 
-Priority: highest. Initial version: `deployment-strategy.md`.
+Priority: highest. Initial version: `../deployment/deployment-strategy.md`.
 
 Purpose:
 
@@ -60,12 +60,12 @@ Should show:
 
 Best home:
 
-- `deployment-strategy.md`
+- `../deployment/deployment-strategy.md`
 - Optionally duplicated or summarized in `architecture.md`
 
 ### 2. CI/CD Flow Diagram
 
-Priority: high. Initial version: `deployment-strategy.md`.
+Priority: high. Initial version: `../deployment/deployment-strategy.md`.
 
 Purpose:
 
@@ -88,8 +88,8 @@ Should show:
 
 Best home:
 
-- `deployment-strategy.md`
-- `deployment-runbook.md`
+- `../deployment/deployment-strategy.md`
+- `../deployment/deployment-runbook.md`
 
 ### 3. System Context Diagram
 
@@ -153,8 +153,8 @@ Organizer use cases:
 
 Best home:
 
-- `user-stories.md`
-- `ui-flow.md`
+- `../product/user-stories.md`
+- `../ui/ui-flow.md`
 
 ### 5. Submission Sequence Diagram
 
@@ -216,7 +216,7 @@ Should show:
 Best home:
 
 - `evaluation-spec.md`
-- `ui-flow.md`
+- `../ui/ui-flow.md`
 
 ### 7. Data Model / ER Diagram
 

@@ -451,7 +451,7 @@ Store the generated password securely.
 
 After manual staging works:
 
-1. Add GitHub Actions secrets from `deployment/github-secrets.md`.
+1. Add GitHub Actions secrets from `github-secrets.md`.
 2. Push to `main` or `master`.
 3. Confirm staging deploys.
 4. Verify staging manually.

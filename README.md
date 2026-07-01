@@ -76,7 +76,7 @@ Next recommended work:
 
 The app remains a FastAPI/Jinja2 server-rendered system. The UI now uses Bootstrap 5 for navigation, forms, tables, alerts, badges, and responsive layout, with `app/static/app.css` reserved for project-specific polish. React, Vue, and a separate frontend build pipeline are intentionally not part of this phase.
 
-The next planned UI slice is an application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, and a clearer participant submission dashboard. See `app-ui-redesign.md`.
+The next planned UI slice is an application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, and a clearer participant submission dashboard. See `docs/ui/app-ui-redesign.md`.
 
 ## Development Setup
 
@@ -124,23 +124,11 @@ uv lock
 
 ## Important Documents
 
-- [requirements.md](requirements.md): product requirements and decisions.
-- [user-stories.md](user-stories.md): participant and organizer stories.
-- [ui-flow.md](ui-flow.md): screen and workflow definitions.
-- [app-ui-redesign.md](app-ui-redesign.md): planned application-shell and dashboard redesign.
-- [refactor-plan.md](refactor-plan.md): small behavior-preserving route/web-layer refactor plan and implementation record.
-- [data-model.md](data-model.md): database/entity design.
-- [submission-spec.md](submission-spec.md): participant upload format and validation rules.
-- [evaluation-spec.md](evaluation-spec.md): metric definitions and evaluation behavior.
-- [architecture.md](architecture.md): VPS deployment architecture.
-- [diagrams.md](diagrams.md): required diagrams, drawing order, and Mermaid conventions.
-- [deployment-strategy.md](deployment-strategy.md): environment model and deployment approach.
-- [deployment-environments.md](deployment-environments.md): development, staging, and production configuration.
-- [deployment-runbook.md](deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
-- [deployment/restore.md](deployment/restore.md): restore procedure.
-- [deployment-checklist.md](deployment-checklist.md): launch and release verification checklist.
-- [deployment/vps-setup.md](deployment/vps-setup.md): Sakura VPS setup procedure.
-- [deployment/github-secrets.md](deployment/github-secrets.md): GitHub Actions secret configuration.
-- [open-questions.md](open-questions.md): resolved product and implementation decisions.
-- [implementation-plan.md](implementation-plan.md): Scrum plan, epics, testing strategy, sprint plan.
+- [docs/index.md](docs/index.md): organized documentation index.
+- [docs/product/requirements.md](docs/product/requirements.md): product requirements and decisions.
+- [docs/ui/app-ui-redesign.md](docs/ui/app-ui-redesign.md): planned application-shell and dashboard redesign.
+- [docs/technical/data-model.md](docs/technical/data-model.md): database/entity design.
+- [docs/technical/submission-spec.md](docs/technical/submission-spec.md): participant upload format and validation rules.
+- [docs/deployment/deployment-runbook.md](docs/deployment/deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
+- [docs/planning/implementation-plan.md](docs/planning/implementation-plan.md): Scrum plan, epics, testing strategy, sprint plan.
 - [HANDOFF.md](HANDOFF.md): concise continuation guide for a new Codex session.

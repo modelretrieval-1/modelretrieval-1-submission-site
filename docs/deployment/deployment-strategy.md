@@ -16,14 +16,14 @@ The deployment model should keep staging and production isolated while staying s
 
 The existing repository documents remain useful and should not be replaced.
 
-- `requirements.md`: product and policy requirements.
-- `architecture.md`: high-level VPS architecture.
-- `implementation-plan.md`: Sprint 6 production-hardening scope.
-- `HANDOFF.md`: continuation guide for future Codex sessions.
-- `data-model.md`: database and persistence expectations.
-- `submission-spec.md`: participant upload contract.
-- `evaluation-spec.md`: evaluation and leaderboard behavior.
-- `ui-flow.md`: user-facing workflow expectations.
+- `../product/requirements.md`: product and policy requirements.
+- `../technical/architecture.md`: high-level VPS architecture.
+- `../planning/implementation-plan.md`: Sprint 6 production-hardening scope.
+- `../../HANDOFF.md`: continuation guide for future Codex sessions.
+- `../technical/data-model.md`: database and persistence expectations.
+- `../technical/submission-spec.md`: participant upload contract.
+- `../technical/evaluation-spec.md`: evaluation and leaderboard behavior.
+- `../ui/ui-flow.md`: user-facing workflow expectations.
 
 This deployment document set adds operational detail for Sprint 6.
 
@@ -296,7 +296,7 @@ Backup content:
 The repository provides:
 
 - `deployment/scripts/backup.sh`: creates a timestamped SQLite/storage backup with a manifest.
-- `deployment/restore.md`: describes how to restore database and storage together.
+- `restore.md`: describes how to restore database and storage together.
 
 ## Rollback Strategy
 

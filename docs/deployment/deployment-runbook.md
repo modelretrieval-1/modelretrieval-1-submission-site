@@ -18,16 +18,16 @@ The repository includes the first Docker deployment files:
 - `deployment/nginx/production.conf.example`
 - `deployment/scripts/backup.sh`
 - `deployment/scripts/smoke-check.sh`
-- `deployment/restore.md`
-- `deployment/vps-setup.md`
-- `deployment/github-secrets.md`
+- `restore.md`
+- `vps-setup.md`
+- `github-secrets.md`
 - `.github/workflows/ci-cd.yml`
 
 The GitHub Actions workflow runs tests, linting, image publishing, staging deployment, production backup, production deployment, and smoke checks.
 
-For first-time VPS setup, start with `deployment/vps-setup.md`.
+For first-time VPS setup, start with `vps-setup.md`.
 
-For GitHub Actions secret configuration, use `deployment/github-secrets.md`.
+For GitHub Actions secret configuration, use `github-secrets.md`.
 
 The VPS deploy user should be passwordless and use SSH key authentication only.
 
@@ -474,7 +474,7 @@ docker compose up -d
 curl -fsS https://submit.<domain>/health
 ```
 
-See `deployment/restore.md` for a full restore guide.
+See `restore.md` for a full restore guide.
 
 After restore, verify organizer login, team login, ground-truth history, and recent submissions.
 
