@@ -102,10 +102,22 @@ jobs:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
           SSH_HOST: ${{ secrets.STAGING_HOST }}
         run: |
-          mkdir -p ~/.ssh
+          if [[ -z "${SSH_KEY}" ]]; then
+            echo "::error::STAGING_SSH_KEY is not configured."
+            exit 1
+          fi
+          if [[ -z "${SSH_HOST}" ]]; then
+            echo "::error::STAGING_HOST is not configured."
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          if ! ssh-keyscan -T 15 -H "$SSH_HOST" > ~/.ssh/known_hosts; then
+            echo "::error::Unable to scan SSH host key for STAGING_HOST. Check that the host is correct, DNS has propagated, and port 22 is reachable from GitHub Actions."
+            exit 1
+          fi
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Deploy over SSH
         shell: bash
@@ -142,10 +154,22 @@ jobs:
           SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
           SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
         run: |
-          mkdir -p ~/.ssh
+          if [[ -z "${SSH_KEY}" ]]; then
+            echo "::error::PRODUCTION_SSH_KEY is not configured."
+            exit 1
+          fi
+          if [[ -z "${SSH_HOST}" ]]; then
+            echo "::error::PRODUCTION_HOST is not configured."
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          if ! ssh-keyscan -T 15 -H "$SSH_HOST" > ~/.ssh/known_hosts; then
+            echo "::error::Unable to scan SSH host key for PRODUCTION_HOST. Check that the host is correct, DNS has propagated, and port 22 is reachable from GitHub Actions."
+            exit 1
+          fi
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Backup and deploy over SSH
         shell: bash
