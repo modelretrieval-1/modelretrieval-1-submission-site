@@ -7,13 +7,19 @@
     <div class="page-header">
       <div>
         <h1>Submission {{ submission.submission_id }}</h1>
-        <p>{{ submission.team_display_name }} ({{ submission.team_public_id }})</p>
+        <p>{{ submission.team_display_name }} ({{ submission.team_public_id }}) / Subtask {{ submission.subtask }} / {{ submission.period_name|capitalize }}</p>
       </div>
       <div class="header-actions">
-        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Submissions</a>
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Back to submissions</a>
       </div>
     </div>
 
+    <div class="section-header">
+      <div>
+        <h2>Submission Metadata</h2>
+        <p>Stored file, selected period, status, and evaluation context.</p>
+      </div>
+    </div>
     <dl class="detail-list">
       <dt>Subtask</dt>
       <dd><span class="badge text-bg-info">Subtask {{ submission.subtask }}</span></dd>
@@ -41,7 +47,12 @@
       <dd>{{ submission.validation_summary or "" }}</dd>
     </dl>
 
-    <h2>Runs</h2>
+    <div class="section-header detail-section-header">
+      <div>
+        <h2>Runs</h2>
+        <p>RunID metadata recorded for accepted submissions.</p>
+      </div>
+    </div>
     {% if runs %}
       <div class="table-wrap">
         <table class="table table-sm table-hover align-middle">
@@ -67,7 +78,12 @@
       <p class="empty-state">No run metadata recorded.</p>
     {% endif %}
 
-    <h2>Metrics</h2>
+    <div class="section-header detail-section-header">
+      <div>
+        <h2>Metrics</h2>
+        <p>Persisted run-level evaluation results.</p>
+      </div>
+    </div>
     {% if metrics %}
       <div class="table-wrap">
         <table class="table table-sm table-hover align-middle">
@@ -93,7 +109,12 @@
       <p class="empty-state">No metrics recorded.</p>
     {% endif %}
 
-    <h2>Validation Errors</h2>
+    <div class="section-header detail-section-header">
+      <div>
+        <h2>Validation Errors</h2>
+        <p>Line-level validation errors for rejected attempts.</p>
+      </div>
+    </div>
     {% if validation_errors %}
       <div class="table-wrap">
         <table class="table table-sm table-hover align-middle">

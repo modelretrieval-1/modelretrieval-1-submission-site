@@ -146,6 +146,9 @@ def test_organizer_can_view_private_leaderboard_with_subtask_metrics():
 
         assert response.status_code == 200
         assert "Leaderboard" in response.text
+        assert "Private organizer view of evaluated run-level metrics." in response.text
+        assert "Clear filters" in response.text
+        assert "Showing 2 evaluated runs." in response.text
         assert "team-001" in response.text
         assert "run-a" in response.text
         assert "run-b" in response.text
@@ -169,6 +172,7 @@ def test_organizer_can_filter_leaderboard_by_subtask_and_period():
         response = client.get("/admin/leaderboard?subtask=B&period=late")
 
         assert response.status_code == 200
+        assert "Showing 1 evaluated run." in response.text
         assert "run-b" in response.text
         assert "run-a" not in response.text
         assert "late" in response.text

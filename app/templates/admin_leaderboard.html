@@ -7,7 +7,7 @@
     <div class="page-header">
       <div>
         <h1>Leaderboard</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <p>Private organizer view of evaluated run-level metrics.</p>
       </div>
       <div class="header-actions">
         <a class="btn btn-outline-primary btn-sm" href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
@@ -15,6 +15,13 @@
     </div>
 
     <div class="filter-panel">
+      <div class="section-header compact-section-header">
+        <div>
+          <h2>Filters</h2>
+          <p>Filter the private leaderboard before review or CSV export.</p>
+        </div>
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/leaderboard">Clear filters</a>
+      </div>
       <form method="get" action="/admin/leaderboard" class="form-grid">
         <div>
           <label class="form-label" for="leaderboard_subtask">Subtask</label>
@@ -34,6 +41,13 @@
         </div>
         <button class="btn btn-primary" type="submit">Filter</button>
       </form>
+    </div>
+
+    <div class="section-header">
+      <div>
+        <h2>Run Metrics</h2>
+        <p>Showing {{ rows|length }} evaluated run{% if rows|length != 1 %}s{% endif %}.</p>
+      </div>
     </div>
 
     <div class="table-wrap">

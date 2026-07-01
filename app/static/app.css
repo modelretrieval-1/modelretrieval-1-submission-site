@@ -516,6 +516,19 @@ legend {
   color: var(--app-muted);
 }
 
+.compact-section-header {
+  margin-bottom: 14px;
+}
+
+.compact-section-header h2,
+.detail-section-header h2 {
+  font-size: 18px;
+}
+
+.detail-section-header {
+  margin-top: 28px;
+}
+
 .period-stack {
   display: grid;
   gap: 10px;

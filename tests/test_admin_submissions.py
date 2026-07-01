@@ -116,6 +116,12 @@ def test_organizer_can_view_submissions_table_and_filter_by_status():
 
         assert response.status_code == 200
         assert "Submissions" in response.text
+        assert (
+            "Review accepted submissions, rejected attempts, evaluation state, and retained files."
+            in response.text
+        )
+        assert "Clear filters" in response.text
+        assert "Showing 2 submissions." in response.text
         assert "team-001" in response.text
         assert "rejected" in response.text
         assert "evaluated" in response.text
@@ -127,6 +133,7 @@ def test_organizer_can_view_submissions_table_and_filter_by_status():
         filtered = client.get("/admin/submissions?status=evaluated")
 
         assert filtered.status_code == 200
+        assert "Showing 1 submission." in filtered.text
         assert "evaluated" in filtered.text
         assert "good.txt" in filtered.text
         assert "bad.txt" not in filtered.text
@@ -185,6 +192,8 @@ def test_organizer_can_view_rejected_submission_detail_with_validation_errors():
 
         assert response.status_code == 200
         assert "Submission" in response.text
+        assert "Submission Metadata" in response.text
+        assert "Back to submissions" in response.text
         assert "bad.txt" in response.text
         assert "Validation Errors" in response.text
         assert "invalid_q0" in response.text
@@ -210,6 +219,7 @@ def test_organizer_can_view_evaluated_submission_detail_with_runs_and_metrics():
 
         assert response.status_code == 200
         assert "good.txt" in response.text
+        assert "Submission Metadata" in response.text
         assert "run1" in response.text
         assert "ndcg@1" in response.text
         assert "ndcg@3" in response.text

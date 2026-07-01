@@ -7,14 +7,21 @@
     <div class="page-header">
       <div>
         <h1>Submissions</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <p>Review accepted submissions, rejected attempts, evaluation state, and retained files.</p>
       </div>
       <div class="header-actions">
-        <a class="btn btn-outline-primary btn-sm" href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download Bundle</a>
+        <a class="btn btn-outline-primary btn-sm" href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download bundle</a>
       </div>
     </div>
 
     <div class="filter-panel">
+      <div class="section-header compact-section-header">
+        <div>
+          <h2>Filters</h2>
+          <p>Filter the retained submission history before review or bundle download.</p>
+        </div>
+        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Clear filters</a>
+      </div>
       <form method="get" action="/admin/submissions" class="form-grid">
         <div>
           <label class="form-label" for="filter_team_id">Team ID</label>
@@ -47,6 +54,13 @@
         </div>
         <button class="btn btn-primary" type="submit">Filter</button>
       </form>
+    </div>
+
+    <div class="section-header">
+      <div>
+        <h2>Submission History</h2>
+        <p>Showing {{ submissions|length }} submission{% if submissions|length != 1 %}s{% endif %}.</p>
+      </div>
     </div>
 
     <div class="table-wrap">
