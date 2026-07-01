@@ -16,7 +16,7 @@ Scrum implementation is underway.
 - Sprint 3: complete for the planned evaluation and participant-result scope.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
-- Sprint 6: current sprint, focused on application-shell UI redesign, deployment rehearsal, and production hardening.
+- Sprint 6: current sprint, focused on application-shell UI redesign, deployment rehearsal, and production hardening after the initial route/web-layer refactor.
 
 ## Current Stack
 
@@ -49,6 +49,20 @@ Key points:
 - Make `/admin` a richer organizer operations dashboard.
 - Make `/team` a clearer participant submission-status dashboard.
 - Preserve current backend behavior, routes, permissions, and server-rendered architecture.
+
+## Current Refactor State
+
+The initial small, document-driven route/web-layer refactor is implemented. Use `refactor-plan.md` as the source of truth and implementation record.
+
+Key points:
+
+- Routes, permissions, templates, database schema, and deployment behavior were kept unchanged.
+- `app/main.py` now focuses on app assembly, lifespan startup, static mounting, health/home routes, and router registration.
+- Shared web helpers live in `app/web.py`.
+- Auth/password routes live in `app/routes/auth.py`.
+- Team dashboard and participant upload routes live in `app/routes/team.py`.
+- Organizer routes and download helpers live in `app/routes/admin.py`.
+- Domain modules such as `app/submissions.py`, `app/evaluation.py`, `app/accounts.py`, and `app/ground_truth.py` remain intact.
 
 ## Current Deployment Plan
 
@@ -100,7 +114,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-129 passed
+131 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -113,17 +127,11 @@ Foundation:
 - `app/config.py`: settings and environment loading.
 - `app/storage.py`: local storage directory bootstrap.
 - `app/db.py`: SQLite schema and default submission periods.
-- `app/main.py`: FastAPI app, lifespan startup, health page, login/logout, dashboards.
-- `app/main.py`: also includes organizer team management routes.
-- `app/main.py`: also includes organizer user management routes.
-- `app/main.py`: also includes organizer password change routes.
-- `app/main.py`: also includes ground-truth upload routes.
-- `app/main.py`: also includes team submission upload routes.
-- `app/main.py`: also includes organizer submission-period control routes.
-- `app/main.py`: also includes organizer submission list and detail routes.
-- `app/main.py`: also includes organizer private leaderboard route.
-- `app/main.py`: also includes organizer leaderboard CSV export route.
-- `app/main.py`: also includes organizer submission bundle download route.
+- `app/main.py`: FastAPI app assembly, lifespan startup, static mounting, health page, home page, and router registration.
+- `app/web.py`: shared Jinja templates, redirects, session account lookup, and role guards.
+- `app/routes/auth.py`: login, logout, and password-change routes.
+- `app/routes/team.py`: team dashboard and participant submission upload routes.
+- `app/routes/admin.py`: organizer dashboard, team/user management, ground-truth upload/activation, submission-period controls, submission review/detail, private leaderboard, CSV export, and submission bundle download routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.

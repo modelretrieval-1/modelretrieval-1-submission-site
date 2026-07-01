@@ -62,7 +62,7 @@ Current test status:
 
 ```text
 uv run --extra dev pytest
-129 passed
+131 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -128,6 +128,7 @@ uv lock
 - [user-stories.md](user-stories.md): participant and organizer stories.
 - [ui-flow.md](ui-flow.md): screen and workflow definitions.
 - [app-ui-redesign.md](app-ui-redesign.md): planned application-shell and dashboard redesign.
+- [refactor-plan.md](refactor-plan.md): small behavior-preserving route/web-layer refactor plan and implementation record.
 - [data-model.md](data-model.md): database/entity design.
 - [submission-spec.md](submission-spec.md): participant upload format and validation rules.
 - [evaluation-spec.md](evaluation-spec.md): metric definitions and evaluation behavior.

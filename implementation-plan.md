@@ -26,6 +26,13 @@ Current UI direction:
 - Use `app-ui-redesign.md` as the source of truth before implementation.
 - Keep the richer UI operational and dashboard-like, not marketing-style.
 
+Current refactor state:
+
+- The initial route/web-layer refactor from `refactor-plan.md` is implemented.
+- `app/main.py` now focuses on app assembly and router registration.
+- Shared helpers live in `app/web.py`, with auth, team, and admin routes under `app/routes/`.
+- Domain modules, schema, routes, permissions, templates, and deployment behavior were left unchanged.
+
 ## Scrum Roles
 
 Suggested roles:
