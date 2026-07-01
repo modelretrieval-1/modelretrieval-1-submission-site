@@ -59,6 +59,12 @@ def test_organizer_can_view_submission_periods_page():
 
         assert response.status_code == 200
         assert "Submission Periods" in response.text
+        assert (
+            "Configure JST start times, deadlines, and organizer reopen overrides."
+            in response.text
+        )
+        assert "Period Schedule" in response.text
+        assert "Showing 2 submission periods." in response.text
         assert "normal" in response.text
         assert "late" in response.text
         assert "2026-08-01 15:00:00" in response.text

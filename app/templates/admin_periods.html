@@ -7,7 +7,7 @@
     <div class="page-header">
       <div>
         <h1>Submission Periods</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <p>Configure JST start times, deadlines, and organizer reopen overrides.</p>
       </div>
     </div>
 
@@ -18,6 +18,13 @@
     {% if success %}
       <div class="alert alert-success" role="status">{{ success }}</div>
     {% endif %}
+
+    <div class="section-header">
+      <div>
+        <h2>Period Schedule</h2>
+        <p>Showing {{ periods|length }} submission period{% if periods|length != 1 %}s{% endif %}.</p>
+      </div>
+    </div>
 
     <div class="table-wrap">
       <table class="table table-sm align-middle">

@@ -7,7 +7,7 @@
     <div class="page-header">
       <div>
         <h1>Ground Truth</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <p>Upload, validate, activate, and audit protected evaluation ground-truth versions.</p>
       </div>
     </div>
 
@@ -19,7 +19,12 @@
       <div class="alert alert-success" role="status">{{ success }}</div>
     {% endif %}
 
-    <h2>Upload Version</h2>
+    <div class="section-header">
+      <div>
+        <h2>Upload Version</h2>
+        <p>Add a Subtask A or B ground-truth CSV version for organizer-only evaluation.</p>
+      </div>
+    </div>
     <form method="post" action="/admin/ground-truth" enctype="multipart/form-data" class="form-grid">
       <div>
         <label class="form-label" for="ground_truth_subtask">Subtask</label>
@@ -45,7 +50,12 @@
   </section>
 
   <section class="panel">
-    <h2>Version History</h2>
+    <div class="section-header">
+      <div>
+        <h2>Version History</h2>
+        <p>Showing {{ versions|length }} ground-truth version{% if versions|length != 1 %}s{% endif %}.</p>
+      </div>
+    </div>
     <div class="table-wrap">
       <table class="table table-sm table-hover align-middle">
         <thead class="table-light">

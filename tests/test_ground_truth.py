@@ -61,7 +61,13 @@ def test_organizer_can_view_ground_truth_page():
 
         assert response.status_code == 200
         assert "Ground Truth" in response.text
+        assert (
+            "Upload, validate, activate, and audit protected evaluation ground-truth versions."
+            in response.text
+        )
         assert "Upload Version" in response.text
+        assert "Version History" in response.text
+        assert "Showing 0 ground-truth versions." in response.text
 
 
 def test_team_cannot_view_ground_truth_page():
