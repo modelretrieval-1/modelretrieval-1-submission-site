@@ -49,6 +49,18 @@ def render_submission_upload(
     app_settings: Settings = request.app.state.settings
     with connect(app_settings.database_path) as connection:
         periods = list_submission_periods(connection)
+    now_jst = datetime.now(JST)
+    period_states = [
+        {
+            "period": period,
+            "state": "reopened"
+            if period.is_open_override
+            else "open"
+            if is_submission_period_open(period, now_jst=now_jst)
+            else "closed",
+        }
+        for period in periods
+    ]
     return templates.TemplateResponse(
         request,
         "team_submission_upload.html",
@@ -57,6 +69,7 @@ def render_submission_upload(
             "account": account,
             "subtask": subtask,
             "periods": periods,
+            "period_states": period_states,
             "selected_period": selected_period,
             "errors": errors,
             "metrics": metrics,

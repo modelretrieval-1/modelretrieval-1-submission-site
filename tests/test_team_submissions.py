@@ -204,6 +204,29 @@ def test_team_can_open_upload_page_for_eligible_subtask():
         assert "Submission period" in response.text
         assert 'value="normal"' in response.text
         assert 'value="late"' in response.text
+        assert "open" in response.text
+
+
+def test_upload_page_shows_period_closed_and_reopened_states():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        _organizer, team = seed_accounts(settings)
+        set_periods(
+            settings,
+            normal_deadline="2026-01-01 00:00:00",
+            late_deadline="2026-01-02 00:00:00",
+            late_override=True,
+        )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.get("/team/submissions/A/new")
+
+        assert response.status_code == 200
+        assert "closed" in response.text
+        assert "reopened" in response.text
+        assert "2026-01-01 00:00:00 JST" in response.text
+        assert "2026-01-02 00:00:00 JST" in response.text
 
 
 def test_team_cannot_open_upload_page_for_ineligible_subtask():

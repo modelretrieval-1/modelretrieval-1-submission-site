@@ -59,7 +59,8 @@
     <form class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
       <fieldset class="border rounded p-3">
         <legend>Submission period</legend>
-        {% for period in periods %}
+        {% for period_state in period_states %}
+          {% set period = period_state.period %}
           <label class="form-check mb-2">
             <input
               class="form-check-input"
@@ -71,8 +72,12 @@
             >
             <span class="form-check-label">
               {{ period.name|capitalize }}
-              {% if period.is_open_override %}
+              {% if period_state.state == "reopened" %}
                 <span class="badge text-bg-warning">reopened</span>
+              {% elif period_state.state == "open" %}
+                <span class="badge text-bg-success">open</span>
+              {% else %}
+                <span class="badge text-bg-dark">closed</span>
               {% endif %}
             </span>
             <span class="form-text d-block">
