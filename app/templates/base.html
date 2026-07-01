@@ -22,6 +22,7 @@
           <a class="app-nav-link {% if current_path.startswith('/account/password') %}active{% endif %}" href="/account/password">Password</a>
         {% elif account.role == "team" %}
           <a class="app-nav-link {% if current_path == '/team' %}active{% endif %}" href="/team">Dashboard</a>
+          <a class="app-nav-link {% if current_path.startswith('/team/submissions') %}active{% endif %}" href="/team/submissions/new">Upload</a>
           <a class="app-nav-link {% if current_path.startswith('/account/password') %}active{% endif %}" href="/account/password">Password</a>
         {% endif %}
       {% endmacro %}

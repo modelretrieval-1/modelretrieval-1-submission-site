@@ -95,6 +95,21 @@ def team_dashboard(request: Request) -> Response:
     )
 
 
+@router.get("/team/submissions/new")
+def submission_upload_redirect(request: Request) -> Response:
+    account, redirect_response = require_team(request)
+    if redirect_response is not None:
+        return redirect_response
+
+    app_settings: Settings = request.app.state.settings
+    with connect(app_settings.database_path) as connection:
+        subtasks = sorted(get_team_subtasks(connection, account.id))
+
+    if not subtasks:
+        return redirect("/team")
+    return redirect(f"/team/submissions/{subtasks[0]}/new")
+
+
 @router.get("/team/submissions/{subtask}/new", response_class=HTMLResponse)
 def submission_upload_page(request: Request, subtask: str) -> Response:
     app_settings: Settings = request.app.state.settings
