@@ -13,6 +13,7 @@ Secrets may be configured as repository secrets or environment-specific secrets.
 | `STAGING_HOST` | `203.0.113.10` | Sakura VPS hostname or IP. |
 | `STAGING_USER` | `deploy` | SSH user for staging deployment. |
 | `STAGING_SSH_KEY` | private key text | Private SSH key matching the VPS deploy user's authorized key. |
+| `STAGING_SSH_PORT` | `22` | Optional SSH port. Omit when SSH listens on port 22. |
 | `STAGING_PATH` | `/opt/modelretrieval/staging` | Directory containing staging `compose.yml` and `.env`. |
 | `STAGING_URL` | `https://submission-staging.modelretrieval-1.happysocial.net` | Public staging URL used by smoke checks. |
 
@@ -23,6 +24,7 @@ Secrets may be configured as repository secrets or environment-specific secrets.
 | `PRODUCTION_HOST` | `203.0.113.10` | Sakura VPS hostname or IP. |
 | `PRODUCTION_USER` | `deploy` | SSH user for production deployment. |
 | `PRODUCTION_SSH_KEY` | private key text | Private SSH key matching the VPS deploy user's authorized key. |
+| `PRODUCTION_SSH_PORT` | `22` | Optional SSH port. Omit when SSH listens on port 22. |
 | `PRODUCTION_PATH` | `/opt/modelretrieval/production` | Directory containing production `compose.yml`, `.env`, and `backup.sh`. |
 | `PRODUCTION_URL` | `https://submission.modelretrieval-1.happysocial.net` | Public production URL used by smoke checks. |
 
@@ -73,10 +75,12 @@ Store the private key contents in GitHub:
 
 ```text
 STAGING_SSH_KEY
+STAGING_SSH_PORT
 PRODUCTION_SSH_KEY
+PRODUCTION_SSH_PORT
 ```
 
-You may use one key for both environments on the same VPS, or separate keys for stricter separation.
+You may use one key for both environments on the same VPS, or separate keys for stricter separation. The SSH port secrets are only needed when the VPS SSH server does not listen on port 22.
 
 Do not store a VPS user password in GitHub. The workflow is designed for SSH key authentication only.
 
@@ -176,11 +180,13 @@ This preserves automatic staging deployment while keeping production deliberate.
 - [ ] `STAGING_HOST`
 - [ ] `STAGING_USER`
 - [ ] `STAGING_SSH_KEY`
+- [ ] `STAGING_SSH_PORT` if SSH does not listen on port 22
 - [ ] `STAGING_PATH`
 - [ ] `STAGING_URL`
 - [ ] `PRODUCTION_HOST`
 - [ ] `PRODUCTION_USER`
 - [ ] `PRODUCTION_SSH_KEY`
+- [ ] `PRODUCTION_SSH_PORT` if SSH does not listen on port 22
 - [ ] `PRODUCTION_PATH`
 - [ ] `PRODUCTION_URL`
 - [ ] GitHub package permissions allow GHCR writes.

@@ -101,6 +101,7 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
           SSH_HOST: ${{ secrets.STAGING_HOST }}
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT || '22' }}
         run: |
           if [[ -z "${SSH_KEY}" ]]; then
             echo "::error::STAGING_SSH_KEY is not configured."
@@ -113,8 +114,8 @@ jobs:
           install -d -m 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          if ! ssh-keyscan -T 15 -H "$SSH_HOST" > ~/.ssh/known_hosts; then
-            echo "::error::Unable to scan SSH host key for STAGING_HOST. Check that the host is correct, DNS has propagated, and port 22 is reachable from GitHub Actions."
+          if ! ssh-keyscan -T 15 -p "$SSH_PORT" -H "$SSH_HOST" > ~/.ssh/known_hosts; then
+            echo "::error::Unable to scan SSH host key for STAGING_HOST on port ${SSH_PORT}. Check that the host is correct, DNS has propagated, and the SSH port is reachable from GitHub Actions."
             exit 1
           fi
           chmod 644 ~/.ssh/known_hosts
@@ -124,10 +125,11 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.STAGING_HOST }}
           SSH_USER: ${{ secrets.STAGING_USER }}
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT || '22' }}
           DEPLOY_PATH: ${{ secrets.STAGING_PATH }}
           IMAGE: ${{ needs.build.outputs.image }}
         run: |
-          ssh -i ~/.ssh/deploy_key "${SSH_USER}@${SSH_HOST}" \
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" \
             "cd '${DEPLOY_PATH}' && \
              if grep -q '^APP_IMAGE=' .env; then sed -i.bak \"s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE}|\" .env; else printf '\nAPP_IMAGE=${IMAGE}\n' >> .env; fi && \
              docker compose pull && \
@@ -153,6 +155,7 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
           SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+          SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT || '22' }}
         run: |
           if [[ -z "${SSH_KEY}" ]]; then
             echo "::error::PRODUCTION_SSH_KEY is not configured."
@@ -165,8 +168,8 @@ jobs:
           install -d -m 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          if ! ssh-keyscan -T 15 -H "$SSH_HOST" > ~/.ssh/known_hosts; then
-            echo "::error::Unable to scan SSH host key for PRODUCTION_HOST. Check that the host is correct, DNS has propagated, and port 22 is reachable from GitHub Actions."
+          if ! ssh-keyscan -T 15 -p "$SSH_PORT" -H "$SSH_HOST" > ~/.ssh/known_hosts; then
+            echo "::error::Unable to scan SSH host key for PRODUCTION_HOST on port ${SSH_PORT}. Check that the host is correct, DNS has propagated, and the SSH port is reachable from GitHub Actions."
             exit 1
           fi
           chmod 644 ~/.ssh/known_hosts
@@ -176,10 +179,11 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
           SSH_USER: ${{ secrets.PRODUCTION_USER }}
+          SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT || '22' }}
           DEPLOY_PATH: ${{ secrets.PRODUCTION_PATH }}
           IMAGE: ${{ needs.build.outputs.image }}
         run: |
-          ssh -i ~/.ssh/deploy_key "${SSH_USER}@${SSH_HOST}" \
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" \
             "cd '${DEPLOY_PATH}' && \
              ENVIRONMENT=production ./backup.sh && \
              if grep -q '^APP_IMAGE=' .env; then sed -i.bak \"s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE}|\" .env; else printf '\nAPP_IMAGE=${IMAGE}\n' >> .env; fi && \
