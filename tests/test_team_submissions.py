@@ -201,6 +201,11 @@ def test_team_can_open_upload_page_for_eligible_subtask():
 
         assert response.status_code == 200
         assert "Upload Subtask A Submission" in response.text
+        assert (
+            "Select a submission period and upload one TREC_EVAL `.txt` file for evaluation."
+            in response.text
+        )
+        assert "Submission File" in response.text
         assert "Submission period" in response.text
         assert 'value="normal"' in response.text
         assert 'value="late"' in response.text
@@ -356,6 +361,7 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
 
         assert response.status_code == 200
         assert "Submission accepted and evaluated." in response.text
+        assert "Run-level metrics persisted for this accepted submission." in response.text
         assert "ndcg@1" in response.text
         assert "ndcg@3" in response.text
         assert "ndcg@5" in response.text

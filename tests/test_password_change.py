@@ -59,6 +59,8 @@ def test_organizer_can_view_password_change_page():
 
         assert response.status_code == 200
         assert "Change Password" in response.text
+        assert "Rotate the password for Admin User (admin)." in response.text
+        assert "Password Details" in response.text
         assert "Current Password" in response.text
 
 
@@ -73,6 +75,7 @@ def test_team_can_view_password_change_page():
 
         assert response.status_code == 200
         assert "Change Password" in response.text
+        assert "Password Details" in response.text
         assert "Team 001" in response.text
 
 

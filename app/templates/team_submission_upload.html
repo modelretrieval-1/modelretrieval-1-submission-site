@@ -7,7 +7,7 @@
     <div class="page-header">
       <div>
         <h1>Upload Subtask {{ subtask }} Submission</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <p>Select a submission period and upload one TREC_EVAL `.txt` file for evaluation.</p>
       </div>
       <div class="header-actions">
         <a class="btn btn-outline-secondary btn-sm" href="/team">Team dashboard</a>
@@ -33,7 +33,12 @@
     {% endif %}
 
     {% if metrics %}
-      <h2>Scores</h2>
+      <div class="section-header">
+        <div>
+          <h2>Scores</h2>
+          <p>Run-level metrics persisted for this accepted submission.</p>
+        </div>
+      </div>
       <div class="table-wrap">
         <table class="table table-sm table-hover align-middle">
           <thead class="table-light">
@@ -56,6 +61,12 @@
       </div>
     {% endif %}
 
+    <div class="section-header">
+      <div>
+        <h2>Submission File</h2>
+        <p>Choose normal or late submission, then upload the run file for Subtask {{ subtask }}.</p>
+      </div>
+    </div>
     <form class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
       <fieldset class="border rounded p-3">
         <legend>Submission period</legend>
