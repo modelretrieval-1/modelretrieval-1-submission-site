@@ -32,8 +32,10 @@ Implemented through the latest Sprint 6A slice:
 - Participant dashboard submission availability by subtask and period.
 - Organizer dashboard deadline state and recent validation-failure panel.
 - Upload page period open/closed/reopened state.
+- Normalized organizer review, account, and operations pages.
+- Normalized participant submission-upload and password-change form pages.
 
-Next story: continue application-shell page normalization, followed by staging deployment rehearsal and production hardening.
+Next story: run final responsive/accessibility/browser UI verification, followed by staging deployment rehearsal and production hardening.
 
 ## Application UI Redesign
 

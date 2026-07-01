@@ -396,7 +396,7 @@ Current implementation status:
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
 - Sprint 5 UI modernization is complete.
-- Sprint 6A initial application-shell dashboard slices are complete: role-aware sidebar/topbar navigation, participant upload navigation, participant submission availability, organizer period state, organizer validation-failure panel, and upload-page period state.
+- Sprint 6A application-shell and page-normalization slices are complete for the core planned pages: role-aware sidebar/topbar navigation, participant upload navigation, participant submission availability, organizer period state, organizer validation-failure panel, upload-page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
 - Sprint 6 deployment documentation and tooling are implemented; next item is staging deployment rehearsal on Sakura VPS.
 
 ### Sprint 0: Planning and Scaffolding
@@ -589,8 +589,8 @@ Technical decisions:
 Status:
 
 - Documentation exists in `../ui/app-ui-redesign.md`.
-- Initial implementation slices are complete: shared authenticated shell and role-aware navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard period state, organizer dashboard recent validation failures, and upload page period state.
-- Remaining implementation should continue with the documented page-normalization work for list/detail pages and final visual/accessibility polish.
+- Core implementation slices are complete: shared authenticated shell and role-aware navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard period state, organizer dashboard recent validation failures, upload page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
+- Remaining implementation should focus on final responsive/accessibility/browser smoke verification, then staging deployment rehearsal and production hardening.
 
 ## Initial MVP
 

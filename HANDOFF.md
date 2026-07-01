@@ -17,7 +17,7 @@ Scrum implementation is underway.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
 - Sprint 6: current sprint, focused on application-shell UI redesign, deployment rehearsal, and production hardening after the initial route/web-layer refactor.
-- Sprint 6A: initial application-shell/navigation/dashboard slices are implemented; remaining UI work should continue from the documented page-normalization plan.
+- Sprint 6A: core application-shell, dashboard, and page-normalization slices are implemented; remaining UI work is final responsive/accessibility/browser smoke verification.
 
 ## Current Stack
 
@@ -59,6 +59,10 @@ Implemented Sprint 6A UI slices:
 - Organizer dashboard period open/closed/reopened state.
 - Organizer dashboard recent validation-failure panel.
 - Upload page period open/closed/reopened state beside normal/late choices.
+- Normalized organizer review pages for submissions, submission details, and leaderboard.
+- Normalized organizer account pages for teams and users.
+- Normalized organizer operations pages for ground-truth versions and submission periods.
+- Normalized participant form pages for submission upload and password change.
 
 ## Current Refactor State
 
@@ -142,6 +146,15 @@ uv run --extra dev pytest
 
 uv run --extra dev ruff check .
 All checks passed
+
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
+Application startup complete
+
+curl -fsS http://127.0.0.1:8000/health
+{"status":"ok","environment":"development"}
+
+curl -fsS http://127.0.0.1:8000/
+Rendered public landing shell with sign-in and health-check links
 ```
 
 ## Implemented Code
@@ -1003,11 +1016,11 @@ Status:
 - Improved login, password, team dashboard, team upload, organizer dashboard, teams, users, ground truth, periods, submissions, submission detail, and leaderboard templates.
 - Added Bootstrap form controls, tables, alerts, badges, filter panels, and responsive layout polish.
 - Kept generated-password markup compatible with existing tests.
-- Browser plugin backend was unavailable in this session, so visual smoke verification was limited to local server availability plus automated HTML/integration tests.
+- Browser plugin backend was unavailable in the latest session, so visual smoke verification remains pending; local server availability plus automated HTML/integration tests passed.
 
 ## Next Recommended Work
 
-Rehearse deployment on Sakura VPS and verify the CI/CD path end to end.
+Run the manual browser smoke check when a browser backend is available, then rehearse deployment on Sakura VPS and verify the CI/CD path end to end.
 
 Target behavior:
 

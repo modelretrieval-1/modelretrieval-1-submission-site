@@ -40,7 +40,7 @@ Do not introduce React, Vue, a frontend build pipeline, or a separate design sys
 
 ## Implementation Checkpoint
 
-Initial Sprint 6A implementation slices are complete:
+Sprint 6A implementation slices are complete for the core planned pages:
 
 - Shared authenticated app shell with role-aware sidebar and compact top bar.
 - Organizer and participant navigation with active-page state.
@@ -48,9 +48,13 @@ Initial Sprint 6A implementation slices are complete:
 - Participant dashboard submission availability by subtask and period.
 - Organizer dashboard summary metrics, period state, ground-truth status, recent submissions, and recent validation failures.
 - Upload page period open/closed/reopened state beside normal and late choices.
-- Focused regression tests for shell navigation, dashboard period state, upload period state, and participant submission availability.
+- Normalized organizer review pages for submissions, submission details, and leaderboard.
+- Normalized organizer account pages for teams and users.
+- Normalized organizer operations pages for ground-truth versions and submission periods.
+- Normalized participant form pages for submission upload and password change.
+- Focused regression tests for shell navigation, dashboard period state, upload period state, participant submission availability, and normalized page content.
 
-Remaining work should continue with page-header, filter, action, status-badge, table, detail-page, and final responsive/accessibility normalization.
+Remaining work should focus on final responsive/accessibility/browser smoke verification, then staging deployment rehearsal and production hardening.
 
 ## App Shell
 
