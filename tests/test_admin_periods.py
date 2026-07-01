@@ -77,6 +77,59 @@ def test_admin_dashboard_links_to_submission_periods_page():
         assert "/admin/periods" in response.text
 
 
+def test_admin_dashboard_shows_submission_period_open_and_closed_states():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, _team = seed_accounts(settings)
+        with connect(settings.database_path) as connection:
+            connection.execute(
+                """
+                UPDATE submission_periods
+                SET deadline_at_jst = '2026-08-01 15:00:00', is_open_override = 0
+                WHERE name = 'normal'
+                """
+            )
+            connection.execute(
+                """
+                UPDATE submission_periods
+                SET deadline_at_jst = '2026-01-01 00:00:00', is_open_override = 0
+                WHERE name = 'late'
+                """
+            )
+            connection.commit()
+        client = TestClient(create_app(settings))
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin")
+
+        assert response.status_code == 200
+        assert "open" in response.text
+        assert "closed" in response.text
+        assert "scheduled" not in response.text
+
+
+def test_admin_dashboard_shows_reopened_submission_period_state():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, _team = seed_accounts(settings)
+        with connect(settings.database_path) as connection:
+            connection.execute(
+                """
+                UPDATE submission_periods
+                SET deadline_at_jst = '2026-01-01 00:00:00', is_open_override = 1
+                WHERE name = 'normal'
+                """
+            )
+            connection.commit()
+        client = TestClient(create_app(settings))
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin")
+
+        assert response.status_code == 200
+        assert "reopened" in response.text
+
+
 def test_team_cannot_view_submission_periods_page():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)

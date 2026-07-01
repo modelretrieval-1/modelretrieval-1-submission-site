@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import sqlite3
 from collections import Counter
+from datetime import datetime
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Annotated
@@ -24,6 +25,7 @@ from app.config import Settings
 from app.db import connect
 from app.evaluation import list_leaderboard_rows, list_submission_results
 from app.ground_truth import (
+    JST,
     activate_ground_truth_version,
     create_ground_truth_version,
     list_ground_truth_versions,
@@ -33,6 +35,7 @@ from app.ground_truth import (
 )
 from app.submissions import (
     get_admin_submission_detail,
+    is_submission_period_open,
     list_admin_submission_summaries,
     list_submission_bundle_entries,
     list_submission_periods,
@@ -375,6 +378,18 @@ def admin_dashboard(request: Request) -> Response:
         submissions = list_admin_submission_summaries(connection)
 
     active_teams = sum(1 for team in teams if team.is_active)
+    now_jst = datetime.now(JST)
+    period_states = [
+        {
+            "period": period,
+            "state": "reopened"
+            if period.is_open_override
+            else "open"
+            if is_submission_period_open(period, now_jst=now_jst)
+            else "closed",
+        }
+        for period in periods
+    ]
     status_counts = Counter(submission.status for submission in submissions)
     subtask_counts = Counter(
         (submission.subtask, submission.period_name)
@@ -407,6 +422,7 @@ def admin_dashboard(request: Request) -> Response:
             "evaluated_submission_count": status_counts.get("evaluated", 0),
             "rejected_submission_count": status_counts.get("rejected", 0),
             "periods": periods,
+            "period_states": period_states,
             "active_ground_truth": active_ground_truth,
             "recent_submissions": submissions[:6],
             "recent_validation_failures": recent_validation_failures,

@@ -50,16 +50,19 @@
         <a class="btn btn-outline-secondary btn-sm" href="/admin/periods">Manage</a>
       </div>
       <div class="period-stack">
-        {% for period in periods %}
+        {% for period_state in period_states %}
+          {% set period = period_state.period %}
           <div class="period-row">
             <div>
               <strong>{{ period.name|capitalize }}</strong>
               <span class="small-muted d-block">{{ period.deadline_at_jst }} JST</span>
             </div>
-            {% if period.is_open_override %}
+            {% if period_state.state == "reopened" %}
               <span class="badge text-bg-warning">reopened</span>
+            {% elif period_state.state == "open" %}
+              <span class="badge text-bg-success">open</span>
             {% else %}
-              <span class="badge text-bg-secondary">scheduled</span>
+              <span class="badge text-bg-dark">closed</span>
             {% endif %}
           </div>
         {% endfor %}
