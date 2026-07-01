@@ -77,6 +77,24 @@ def team_dashboard(request: Request) -> Response:
     with connect(app_settings.database_path) as connection:
         subtasks = sorted(get_team_subtasks(connection, account.id))
         periods = list_submission_periods(connection)
+        now_jst = datetime.now(JST)
+        submission_slots = [
+            {
+                "subtask": subtask,
+                "period": period,
+                "is_open": is_submission_period_open(period, now_jst=now_jst),
+                "is_submitted": has_successful_submission(
+                    connection,
+                    internal_team_id=account.id,
+                    subtask=subtask,
+                    submission_period_id=period.id,
+                ),
+            }
+            for subtask in subtasks
+            for period in periods
+        ]
+        for slot in submission_slots:
+            slot["can_submit"] = slot["is_open"] and not slot["is_submitted"]
         submission_summaries = list_latest_team_submission_summaries(
             connection,
             internal_team_id=account.id,
@@ -90,6 +108,8 @@ def team_dashboard(request: Request) -> Response:
             "account": account,
             "subtasks": subtasks,
             "periods": periods,
+            "submission_slots": submission_slots,
+            "available_submission_slots": sum(1 for slot in submission_slots if slot["can_submit"]),
             "submission_summaries": submission_summaries,
         },
     )

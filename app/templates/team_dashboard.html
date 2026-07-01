@@ -10,8 +10,8 @@
       <p>{{ account.display_name }} ({{ account.user_id }})</p>
     </div>
     <div class="header-actions">
-      {% if subtasks %}
-        <a class="btn btn-primary" href="/team/submissions/{{ subtasks[0] }}/new">Upload submission</a>
+      {% if available_submission_slots %}
+        <a class="btn btn-primary" href="/team/submissions/new">Upload submission</a>
       {% endif %}
     </div>
   </div>
@@ -25,9 +25,9 @@
       </span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">Latest attempts</span>
-      <strong class="stat-value">{{ submission_summaries|length }}</strong>
-      <span class="stat-note">Most recent retained submissions</span>
+      <span class="stat-label">Available submissions</span>
+      <strong class="stat-value">{{ available_submission_slots }}</strong>
+      <span class="stat-note">Open slots without a successful submission</span>
     </div>
     <div class="stat-card">
       <span class="stat-label">Normal deadline</span>
@@ -50,16 +50,35 @@
   <section class="panel">
     <div class="section-header">
       <div>
-        <h2>Registered Subtasks</h2>
-        <p>Choose a subtask to submit a normal or late run file.</p>
+        <h2>Submission Status</h2>
+        <p>Each registered subtask can have one successful submission per period.</p>
       </div>
     </div>
-    <div class="dashboard-grid subtask-grid">
+    <div class="dashboard-grid">
       {% for subtask in subtasks %}
         <div class="dashboard-tile">
           <h3>Subtask {{ subtask }}</h3>
-          <p class="small-muted">Upload a normal or late submission for this registered subtask.</p>
-          <a class="btn btn-primary btn-sm" href="/team/submissions/{{ subtask }}/new">Upload submission</a>
+          <div class="slot-list">
+            {% for slot in submission_slots if slot.subtask == subtask %}
+              <div class="slot-row">
+                <div>
+                  <strong>{{ slot.period.name|capitalize }}</strong>
+                  <span class="small-muted d-block">{{ slot.period.deadline_at_jst }} JST</span>
+                </div>
+                <div class="slot-action">
+                  {% if slot.is_submitted %}
+                    <span class="badge text-bg-success">submitted</span>
+                  {% elif slot.can_submit %}
+                    <a class="btn btn-primary btn-sm" href="/team/submissions/{{ subtask }}/new">Upload</a>
+                  {% elif slot.is_open %}
+                    <span class="badge text-bg-secondary">unavailable</span>
+                  {% else %}
+                    <span class="badge text-bg-dark">closed</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
         </div>
       {% else %}
         <p class="empty-state">No registered subtasks are available for this team.</p>

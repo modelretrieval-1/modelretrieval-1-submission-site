@@ -145,6 +145,51 @@ def test_team_dashboard_links_to_submission_upload():
         assert "/team/submissions/A/new" in response.text
 
 
+def test_team_dashboard_shows_closed_submission_slots_without_upload_actions():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        _organizer, team = seed_accounts(settings)
+        set_periods(
+            settings,
+            normal_deadline="2026-01-01 00:00:00",
+            late_deadline="2026-01-02 00:00:00",
+        )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.get("/team")
+
+        assert response.status_code == 200
+        assert "Available submissions" in response.text
+        assert '<strong class="stat-value">0</strong>' in response.text
+        assert "closed" in response.text
+        assert 'href="/team/submissions/A/new">Upload</a>' not in response.text
+        assert 'href="/team/submissions/new">Upload submission</a>' not in response.text
+
+
+def test_team_dashboard_marks_successful_period_as_submitted():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        upload_response = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": ("submission.txt", valid_submission_content(), "text/plain")},
+        )
+        assert upload_response.status_code == 200
+
+        response = client.get("/team")
+
+        assert response.status_code == 200
+        assert "submitted" in response.text
+        assert '<strong class="stat-value">1</strong>' in response.text
+        assert 'href="/team/submissions/A/new">Upload</a>' in response.text
+
+
 def test_team_can_open_upload_page_for_eligible_subtask():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)

@@ -568,6 +568,26 @@ a.dashboard-tile:hover {
   font-size: 18px;
 }
 
+.slot-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.slot-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 10px 0;
+  border-top: 1px solid #edf2f7;
+}
+
+.slot-action {
+  flex: 0 0 auto;
+}
+
 .small-muted {
   color: var(--app-muted);
   font-size: 0.875rem;
