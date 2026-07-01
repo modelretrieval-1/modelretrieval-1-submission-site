@@ -7,7 +7,7 @@
     <div class="page-header">
       <div>
         <h1>Organizer Users</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <p>Create organizer accounts and rotate organizer passwords.</p>
       </div>
     </div>
 
@@ -23,7 +23,12 @@
       </div>
     {% endif %}
 
-    <h2>Add Organizer</h2>
+    <div class="section-header">
+      <div>
+        <h2>Add Organizer</h2>
+        <p>Create an organizer account and show its generated password once.</p>
+      </div>
+    </div>
     <form method="post" action="/admin/users" class="form-grid">
       <div>
         <label class="form-label" for="username">Username</label>
@@ -38,7 +43,12 @@
   </section>
 
   <section class="panel">
-    <h2>Organizers</h2>
+    <div class="section-header">
+      <div>
+        <h2>Organizers</h2>
+        <p>Showing {{ organizers|length }} organizer{% if organizers|length != 1 %}s{% endif %}.</p>
+      </div>
+    </div>
     <div class="table-wrap">
       <table class="table table-sm table-hover align-middle">
         <thead class="table-light">
@@ -65,7 +75,7 @@
               <td>{{ organizer.last_login_at or "Never" }}</td>
               <td>
                 <form method="post" action="/admin/users/{{ organizer.username }}/password">
-                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate Password</button>
+                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate password</button>
                 </form>
               </td>
             </tr>

@@ -66,6 +66,8 @@ def test_organizer_can_view_users_page():
 
         assert response.status_code == 200
         assert "Organizer Users" in response.text
+        assert "Create organizer accounts and rotate organizer passwords." in response.text
+        assert "Showing 1 organizer." in response.text
         assert "admin" in response.text
         assert "Admin User" in response.text
 
@@ -146,4 +148,3 @@ def test_regenerated_organizer_password_invalidates_old_password():
         with connect(settings.database_path) as connection:
             assert authenticate(connection, "admin", organizer.password) is None
             assert authenticate(connection, "admin", new_password) is not None
-

@@ -7,7 +7,7 @@
     <div class="page-header">
       <div>
         <h1>Teams</h1>
-        <p>{{ account.display_name }} ({{ account.user_id }})</p>
+        <p>Register participant teams, assign eligible subtasks, and rotate team passwords.</p>
       </div>
     </div>
 
@@ -23,7 +23,12 @@
       </div>
     {% endif %}
 
-    <h2>Add Team</h2>
+    <div class="section-header">
+      <div>
+        <h2>Add Team</h2>
+        <p>Create a registered participant account and show its generated password once.</p>
+      </div>
+    </div>
     <form method="post" action="/admin/teams" class="form-grid">
       <div>
         <label class="form-label" for="team_id">Team ID</label>
@@ -53,7 +58,12 @@
   </section>
 
   <section class="panel">
-    <h2>Registered Teams</h2>
+    <div class="section-header">
+      <div>
+        <h2>Registered Teams</h2>
+        <p>Showing {{ teams|length }} team{% if teams|length != 1 %}s{% endif %}.</p>
+      </div>
+    </div>
     <div class="table-wrap">
       <table class="table table-sm table-hover align-middle">
         <thead class="table-light">
@@ -86,7 +96,7 @@
               <td>{{ team.last_login_at or "Never" }}</td>
               <td>
                 <form method="post" action="/admin/teams/{{ team.team_id }}/password">
-                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate Password</button>
+                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate password</button>
                 </form>
               </td>
             </tr>

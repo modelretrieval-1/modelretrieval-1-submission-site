@@ -65,7 +65,12 @@ def test_organizer_can_view_teams_page():
         response = client.get("/admin/teams")
 
         assert response.status_code == 200
+        assert (
+            "Register participant teams, assign eligible subtasks, and rotate team passwords."
+            in response.text
+        )
         assert "Registered Teams" in response.text
+        assert "Showing 1 team." in response.text
         assert "team-001" in response.text
         assert "Subtask A" in response.text
 
