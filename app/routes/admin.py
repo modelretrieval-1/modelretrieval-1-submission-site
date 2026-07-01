@@ -392,6 +392,9 @@ def admin_dashboard(request: Request) -> Response:
         )
         for subtask in ("A", "B")
     }
+    recent_validation_failures = [
+        submission for submission in submissions if submission.status == "rejected"
+    ][:5]
 
     return templates.TemplateResponse(
         request,
@@ -406,6 +409,7 @@ def admin_dashboard(request: Request) -> Response:
             "periods": periods,
             "active_ground_truth": active_ground_truth,
             "recent_submissions": submissions[:6],
+            "recent_validation_failures": recent_validation_failures,
             "subtask_counts": subtask_counts,
         },
     )

@@ -166,6 +166,47 @@
   <section class="panel">
     <div class="section-header">
       <div>
+        <h2>Recent Validation Failures</h2>
+        <p>Latest rejected attempts that may need participant support.</p>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions?status=rejected">Review failures</a>
+    </div>
+    {% if recent_validation_failures %}
+      <div class="table-wrap">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Team</th>
+              <th>Subtask</th>
+              <th>Period</th>
+              <th>File</th>
+              <th>Summary</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for submission in recent_validation_failures %}
+              <tr>
+                <td>
+                  <a href="/admin/submissions/{{ submission.submission_id }}">{{ submission.team_public_id }}</a>
+                  <span class="small-muted d-block">{{ submission.team_display_name }}</span>
+                </td>
+                <td>Subtask {{ submission.subtask }}</td>
+                <td>{{ submission.period_name|capitalize }}</td>
+                <td>{{ submission.original_filename }}</td>
+                <td>{{ submission.validation_summary or "Rejected during validation." }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No validation failures yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <div class="section-header">
+      <div>
         <h2>Operations</h2>
         <p>Common organizer workflows.</p>
       </div>

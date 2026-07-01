@@ -132,6 +132,24 @@ def test_organizer_can_view_submissions_table_and_filter_by_status():
         assert "bad.txt" not in filtered.text
 
 
+def test_admin_dashboard_highlights_recent_validation_failures():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        seed_submission_attempts(client, team.password)
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin")
+
+        assert response.status_code == 200
+        assert "Recent Validation Failures" in response.text
+        assert 'href="/admin/submissions?status=rejected"' in response.text
+        assert "bad.txt" in response.text
+        assert "1 validation error(s)." in response.text
+
+
 def test_organizer_can_filter_submissions_by_subtask_period_and_team():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
