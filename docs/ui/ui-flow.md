@@ -8,7 +8,7 @@ The UI should be simple, operational, and fast to scan. It is not a marketing si
 
 ## Current Implementation Checkpoint
 
-Implemented through the latest Sprint 5 slice:
+Implemented through the latest Sprint 6A slice:
 
 - Login/logout.
 - Team dashboard with registered subtask upload links.
@@ -27,12 +27,17 @@ Implemented through the latest Sprint 5 slice:
 - Leaderboard CSV export.
 - Submission bundle download.
 - Bootstrap-based UI modernization for global navigation, forms, tables, alerts, badges, filters, dashboards, and responsive layout.
+- Shared authenticated app shell with role-aware sidebar/topbar navigation.
+- Participant upload navigation entry.
+- Participant dashboard submission availability by subtask and period.
+- Organizer dashboard deadline state and recent validation-failure panel.
+- Upload page period open/closed/reopened state.
 
-Next story: application-shell UI redesign, followed by staging deployment rehearsal and production hardening.
+Next story: continue application-shell page normalization, followed by staging deployment rehearsal and production hardening.
 
 ## Application UI Redesign
 
-The next UI slice should make the system feel like an application rather than a set of separate web pages.
+The current UI slice makes the system feel like an application rather than a set of separate web pages.
 
 Source of truth:
 
@@ -41,7 +46,7 @@ Source of truth:
 Key decisions:
 
 - Keep FastAPI, Jinja2, Bootstrap 5, and local CSS.
-- Add an authenticated app shell with persistent role-aware navigation.
+- Continue the authenticated app shell with persistent role-aware navigation.
 - Use a sidebar and compact top bar for organizer and participant workflows.
 - Treat `/admin` as the organizer operations dashboard.
 - Treat `/team` as the participant submission-status dashboard.

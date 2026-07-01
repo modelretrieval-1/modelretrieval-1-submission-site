@@ -11,7 +11,7 @@ The system supports:
 
 ## Current Implementation Checkpoint
 
-The project has completed Sprint 5 UI modernization and is entering Sprint 6 production hardening.
+The project has completed Sprint 5 UI modernization and is in Sprint 6 production hardening with Sprint 6A application-shell UI redesign underway.
 
 Completed implementation:
 
@@ -21,10 +21,11 @@ Completed implementation:
 - Sprint 3 evaluation metrics, participant score display, one-successful-submission enforcement, JST deadline enforcement, and organizer submission-period controls.
 - Sprint 4 participant-selected normal/late upload period, organizer submission review, private leaderboard view, leaderboard CSV export, and submission bundle download.
 - Sprint 5 Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
+- Sprint 6A initial application-shell slices: shared authenticated sidebar/topbar navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard deadline state and recent validation-failure panel, and upload-page period state.
 
 Current sprint target:
 
-- Application-shell UI redesign documentation, then production deployment rehearsal.
+- Continue the documented application-shell UI redesign normalization, then production deployment rehearsal.
 
 ## Users and Roles
 

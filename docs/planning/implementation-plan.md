@@ -396,6 +396,7 @@ Current implementation status:
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
 - Sprint 5 UI modernization is complete.
+- Sprint 6A initial application-shell dashboard slices are complete: role-aware sidebar/topbar navigation, participant upload navigation, participant submission availability, organizer period state, organizer validation-failure panel, and upload-page period state.
 - Sprint 6 deployment documentation and tooling are implemented; next item is staging deployment rehearsal on Sakura VPS.
 
 ### Sprint 0: Planning and Scaffolding
@@ -436,8 +437,7 @@ Demo:
 Status:
 
 - Complete for the planned v1 account scope.
-- Completed: account primitives, password generation/hashing, authentication, signed sessions, login/logout, minimal role dashboards, `/admin/teams`, team creation form, generated password display, subtask assignment UI, team password regeneration, `/admin/users`, organizer creation form, organizer generated password display, organizer password regeneration, `/account/password`, organizer password change flow.
-- Next account polish: allow signed-in participant teams to change their shared team account password from `/account/password`.
+- Completed: account primitives, password generation/hashing, authentication, signed sessions, login/logout, minimal role dashboards, `/admin/teams`, team creation form, generated password display, subtask assignment UI, team password regeneration, `/admin/users`, organizer creation form, organizer generated password display, organizer password regeneration, `/account/password`, organizer password change flow, and participant team password change flow.
 
 ### Sprint 2: Ground Truth and Validation Core
 
@@ -588,8 +588,9 @@ Technical decisions:
 
 Status:
 
-- Documentation started in `../ui/app-ui-redesign.md`.
-- Implementation should follow after document review.
+- Documentation exists in `../ui/app-ui-redesign.md`.
+- Initial implementation slices are complete: shared authenticated shell and role-aware navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard period state, organizer dashboard recent validation failures, and upload page period state.
+- Remaining implementation should continue with the documented page-normalization work for list/detail pages and final visual/accessibility polish.
 
 ## Initial MVP
 

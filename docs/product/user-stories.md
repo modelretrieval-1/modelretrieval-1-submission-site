@@ -2,7 +2,7 @@
 
 ## Current Implementation Checkpoint
 
-Implemented through the latest Sprint 5 slice:
+Implemented through the latest Sprint 6A slice:
 
 - Team and organizer login.
 - Organizer team and organizer-user management.
@@ -17,8 +17,13 @@ Implemented through the latest Sprint 5 slice:
 - Leaderboard CSV export.
 - Submission bundle download.
 - Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
+- Shared authenticated application shell with role-aware sidebar/topbar navigation.
+- Participant upload navigation entry.
+- Participant dashboard submission availability by subtask and period.
+- Organizer dashboard period state and recent validation-failure panel.
+- Upload page period state beside normal/late choices.
 
-Next story: application-shell UI redesign, followed by staging deployment rehearsal and production hardening.
+Next story: continue application-shell page normalization, followed by staging deployment rehearsal and production hardening.
 
 ## Application UI Stories
 

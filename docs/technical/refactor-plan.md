@@ -27,7 +27,7 @@ Verified:
 
 ```text
 uv run --extra dev pytest
-131 passed
+142 passed
 
 uv run --extra dev ruff check .
 All checks passed

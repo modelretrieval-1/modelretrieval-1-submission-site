@@ -17,6 +17,7 @@ Scrum implementation is underway.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
 - Sprint 6: current sprint, focused on application-shell UI redesign, deployment rehearsal, and production hardening after the initial route/web-layer refactor.
+- Sprint 6A: initial application-shell/navigation/dashboard slices are implemented; remaining UI work should continue from the documented page-normalization plan.
 
 ## Current Stack
 
@@ -34,7 +35,7 @@ Scrum implementation is underway.
 
 ## Current UI Direction
 
-The next requested product direction is to make the interface feel more like an application than a collection of web pages.
+The current requested product direction is to make the interface feel more like an application than a collection of web pages.
 
 Documented target:
 
@@ -49,6 +50,15 @@ Key points:
 - Make `/admin` a richer organizer operations dashboard.
 - Make `/team` a clearer participant submission-status dashboard.
 - Preserve current backend behavior, routes, permissions, and server-rendered architecture.
+
+Implemented Sprint 6A UI slices:
+
+- Shared authenticated app shell with role-aware sidebar/topbar navigation.
+- Participant upload navigation entry at `/team/submissions/new`.
+- Participant dashboard submission availability by subtask and period.
+- Organizer dashboard period open/closed/reopened state.
+- Organizer dashboard recent validation-failure panel.
+- Upload page period open/closed/reopened state beside normal/late choices.
 
 ## Current Refactor State
 
@@ -128,7 +138,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-131 passed
+142 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -208,7 +218,7 @@ Key decisions already made:
 - Teams are identified by `team_id`.
 - Each team has one shared account.
 - Organizers add teams and generate visible passwords.
-- Participant team self-service password change is now documented as the next account feature.
+- Participant team self-service password change is implemented at `/account/password`.
 - Only registered teams can submit.
 - Subtask A and Subtask B submissions are uploaded separately.
 - Upload format is one `.txt` file, no zip, maximum 10 MB.

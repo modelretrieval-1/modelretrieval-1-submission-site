@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the next UI direction for the NTCIR-19 ModelRetrieval submission system.
+This document defines the current UI direction for the NTCIR-19 ModelRetrieval submission system.
 
 The goal is to make the product feel like a focused web application rather than a collection of standalone web pages. The redesign should improve navigation, situational awareness, and repeated operational workflows while preserving the existing server-rendered FastAPI/Jinja2 architecture.
 
@@ -37,6 +37,20 @@ Keep the current frontend architecture:
 - Minimal JavaScript, only for Bootstrap behavior or small progressive enhancements.
 
 Do not introduce React, Vue, a frontend build pipeline, or a separate design system package for this redesign.
+
+## Implementation Checkpoint
+
+Initial Sprint 6A implementation slices are complete:
+
+- Shared authenticated app shell with role-aware sidebar and compact top bar.
+- Organizer and participant navigation with active-page state.
+- Participant upload navigation entry at `/team/submissions/new`.
+- Participant dashboard submission availability by subtask and period.
+- Organizer dashboard summary metrics, period state, ground-truth status, recent submissions, and recent validation failures.
+- Upload page period open/closed/reopened state beside normal and late choices.
+- Focused regression tests for shell navigation, dashboard period state, upload period state, and participant submission availability.
+
+Remaining work should continue with page-header, filter, action, status-badge, table, detail-page, and final responsive/accessibility normalization.
 
 ## App Shell
 
