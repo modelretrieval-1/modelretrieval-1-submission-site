@@ -14,7 +14,7 @@ Current implementation checkpoint:
 - Sprint 4 leaderboard CSV export is complete.
 - Sprint 4 submission bundle download is complete.
 - Sprint 5 UI modernization is complete.
-- Current implementation focus: staging deployment rehearsal and production hardening.
+- Current implementation focus: staging end-to-end operations verification and production hardening.
 
 ## Authentication and Team Data
 

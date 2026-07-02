@@ -20,7 +20,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Confirm backup retention period.
 - [ ] Confirm who has SSH access to the VPS.
 - [ ] `vps-setup.md` has been followed for the target VPS.
-- [ ] `github-secrets.md` has been followed for GitHub Actions.
+- [x] `github-secrets.md` has been followed for GitHub Actions staging deployment.
 
 ## One-Time VPS Checklist
 
@@ -52,20 +52,20 @@ This checklist is used before launch and before each production deployment.
 - [ ] Staging and production use separate data directories.
 - [ ] Staging data directory ownership matches the app container UID/GID.
 - [ ] Production data directory ownership matches the app container UID/GID.
-- [ ] GitHub Actions deploy user can SSH to the VPS.
+- [x] GitHub Actions deploy user can SSH to the VPS for staging deployment.
 - [ ] Deploy user has no usable password login.
 - [ ] Deploy user uses SSH keys only.
 - [ ] GitHub Actions deploy user can run Docker Compose in both environment directories.
 
 ## Staging Verification
 
-- [ ] CI tests pass.
-- [ ] CI lint passes.
-- [ ] Docker image was pushed to GitHub Container Registry.
-- [ ] Staging deploy completes.
-- [ ] Staging `APP_IMAGE` was updated in remote `.env`.
-- [ ] `https://submission-staging.modelretrieval-1.happysocial.net/health` returns success.
-- [ ] Login page loads over HTTPS.
+- [x] CI tests pass.
+- [x] CI lint passes.
+- [x] Docker image was pushed to GitHub Container Registry.
+- [x] Staging deploy completes.
+- [x] Staging `APP_IMAGE` was updated in remote `.env`.
+- [x] `https://submission-staging.modelretrieval-1.happysocial.net/health` returns success.
+- [x] Login page loads over HTTPS.
 - [ ] Upload-size behavior is not blocked by Nginx before the app's 10 MB validation rule.
 - [ ] Organizer login works.
 - [ ] Organizer can create a team.

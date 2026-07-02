@@ -81,7 +81,7 @@ All checks passed
 
 Next recommended work:
 
-- Run the remaining visual browser UI smoke check when browser automation is available, then rehearse the staging deployment on Sakura VPS, verify GitHub Actions staging deployment, and promote production with an immutable `v*` tag after staging passes.
+- Run the remaining visual browser UI smoke check when browser automation is available, complete the staging end-to-end operations workflow, then prepare production promotion with an immutable `v*` tag after staging passes.
 
 ## UI Direction
 

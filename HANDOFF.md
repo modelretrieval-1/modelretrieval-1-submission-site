@@ -1046,22 +1046,32 @@ Status:
 
 ## Next Recommended Work
 
-Run the visual browser smoke check when a browser backend is available, then rehearse deployment on Sakura VPS and verify the CI/CD path end to end.
+Run the visual browser smoke check when a browser backend is available, then complete the staging end-to-end operations workflow and prepare production promotion.
 
 Target behavior:
 
-- Complete the first manual staging deploy.
-- Create the first staging organizer account.
-- Verify Nginx HTTPS routing for staging.
-- Confirm GitHub Actions can deploy staging from `main`.
+- Complete organizer/team workflow checks on staging.
+- Upload and activate staging ground truth.
+- Upload invalid and valid team submissions on staging.
+- Confirm participant scores, organizer leaderboard, CSV export, and bundle download on staging.
 - Take a production backup before each production update.
 - Promote production only from an immutable `v*` tag after staging passes.
 
-Suggested checks:
+Completed deployment checks:
 
-- `docker compose ps`
-- `curl -fsS https://submission-staging.modelretrieval-1.happysocial.net/health`
-- `deployment/scripts/smoke-check.sh https://submission-staging.modelretrieval-1.happysocial.net`
+- GitHub Actions staging deployment from `main` has been verified.
+- CI tests and lint passed in GitHub Actions.
+- GHCR image publish completed.
+- Staging `APP_IMAGE` was updated remotely.
+- Staging `/health` and `/login` checks passed over HTTPS.
+
+Suggested remaining checks:
+
+- Staging organizer login and team creation.
+- Staging team login and access-control check.
+- Staging ground-truth upload/activation.
+- Staging valid and invalid submission uploads.
+- Staging leaderboard, CSV export, and submission bundle download.
 - Production backup script before production deploy.
 
 ## Docs To Read First In A New Session

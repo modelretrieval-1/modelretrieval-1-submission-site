@@ -397,7 +397,7 @@ Current implementation status:
 - Submission bundle download is complete.
 - Sprint 5 UI modernization is complete.
 - Sprint 6A application-shell and page-normalization slices are complete for the core planned pages: role-aware sidebar/topbar navigation, participant upload navigation, participant submission availability, organizer period state, organizer validation-failure panel, upload-page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
-- Sprint 6 deployment documentation and tooling are implemented; next item is staging deployment rehearsal on Sakura VPS.
+- Sprint 6 deployment documentation and tooling are implemented; GitHub Actions staging deployment has been verified, and the next item is staging end-to-end operations verification.
 
 ### Sprint 0: Planning and Scaffolding
 
@@ -496,7 +496,7 @@ Status:
 - Organizer private leaderboard view is complete.
 - Leaderboard CSV export is complete.
 - Submission bundle download is complete.
-- Next continue with staging deployment rehearsal and production promotion hardening.
+- Next continue with staging end-to-end operations verification and production promotion hardening.
 
 Demo:
 
@@ -563,7 +563,8 @@ Status:
 - Current deployment direction: local development, staging and production on one Sakura VPS, Muumuu Domain DNS, host Nginx, Docker Compose app stacks, automatic staging deployment from `main`, and production deployment from explicit version tags.
 - Current project domains are `submission-staging.modelretrieval-1.happysocial.net` and `submission.modelretrieval-1.happysocial.net`.
 - Deployment docs capture the GHCR login path, `APP_IMAGE` meaning, `SECRET_KEY` generation, passwordless deploy user, bind-mounted data ownership fix, and Nginx long-hostname hash bucket fix.
-- Remaining Sprint 6 work is staging rehearsal, GitHub Actions deploy verification, production promotion rehearsal, and final E2E regression coverage.
+- GitHub Actions staging deployment from `main` has been verified.
+- Remaining Sprint 6 work is staging end-to-end operations verification, production promotion rehearsal, and final E2E regression coverage.
 
 ### Sprint 6A: Application UI Redesign
 
@@ -591,7 +592,7 @@ Status:
 - Documentation exists in `../ui/app-ui-redesign.md`.
 - Core implementation slices are complete: shared authenticated shell and role-aware navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard period state, organizer dashboard recent validation failures, upload page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
 - Automated local UI regression coverage is complete for mobile navigation controls, public/authenticated shell separation, responsive table wrappers, visible form labels, and compact-row overflow guards.
-- Remaining implementation should focus on visual browser smoke verification when browser automation is available, then staging deployment rehearsal and production hardening.
+- Remaining implementation should focus on visual browser smoke verification when browser automation is available, then staging end-to-end operations verification and production hardening.
 
 ## Initial MVP
 

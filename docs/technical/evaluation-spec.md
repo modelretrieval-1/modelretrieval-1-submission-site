@@ -30,7 +30,7 @@ Implemented behavior:
 - Organizer leaderboard rows can be exported as CSV with the current filters.
 - Evaluation and leaderboard pages have been modernized with Bootstrap tables, filters, badges, and responsive layout.
 
-Current implementation focus: staging deployment rehearsal and production hardening.
+Current implementation focus: staging end-to-end operations verification and production hardening.
 
 ## Subtask A: Language Model Retrieval
 
