@@ -15,11 +15,9 @@ Core entities:
 - Evaluation results.
 - Audit events.
 
-## Current Implementation Checkpoint
+## Implementation Status
 
-As of the current handoff, persistence is implemented through participant upload, validation, evaluation, score display, period controls, participant-selected submission turns, organizer operations, and UI modernization.
-
-Implemented tables include `organizers`, `teams`, `team_subtasks`, `submission_periods`, `ground_truth_versions`, `submissions`, `runs`, `validation_errors`, `evaluation_results`, and `audit_events`.
+The implemented SQLite schema includes the core entities below. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 Participant upload attempts use:
 

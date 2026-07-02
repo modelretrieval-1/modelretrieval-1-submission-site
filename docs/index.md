@@ -2,11 +2,14 @@
 
 This directory contains project documentation grouped by topic. Keep `../README.md` and `../HANDOFF.md` at the repository root for quick orientation.
 
+Document role: this file is only the documentation map. Keep current implementation status in `../HANDOFF.md`.
+
 ## Product
 
 - [Requirements](product/requirements.md): product requirements and policy decisions.
+- [Decisions](product/decisions.md): resolved product and implementation decisions.
 - [User Stories](product/user-stories.md): participant and organizer stories.
-- [Open Questions](product/open-questions.md): resolved product and implementation decisions.
+- [Open Questions](product/open-questions.md): compatibility pointer to resolved decisions.
 
 ## UI
 
@@ -20,11 +23,16 @@ This directory contains project documentation grouped by topic. Keep `../README.
 - [Submission Specification](technical/submission-spec.md): participant upload format and validation rules.
 - [Evaluation Specification](technical/evaluation-spec.md): metric definitions and evaluation behavior.
 - [Diagrams](technical/diagrams.md): diagram inventory and Mermaid conventions.
-- [Refactor Plan](technical/refactor-plan.md): route/web-layer refactor plan and implementation record.
+- [Refactor Plan](technical/refactor-plan.md): pointer to the archived route/web-layer refactor record.
 
 ## Planning
 
 - [Implementation Plan](planning/implementation-plan.md): Scrum plan, epics, testing strategy, and sprint plan.
+- [Documentation Cleanup Plan](planning/documentation-cleanup-plan.md): cleanup plan for reducing documentation redundancy.
+
+## Archive
+
+- [Archived Refactor Plan](archive/refactor-plan.md): completed route/web-layer refactor plan and implementation record.
 
 ## Deployment
 

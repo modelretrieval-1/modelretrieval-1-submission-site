@@ -1,5 +1,7 @@
 # Deployment Runbook
 
+Document role: this is the start-here operational guide for deployment, backup, rollback, logs, smoke checks, and restore flow. Use the neighboring deployment docs for focused reference details.
+
 ## Purpose
 
 This runbook describes the operational flow for deploying and maintaining staging and production.

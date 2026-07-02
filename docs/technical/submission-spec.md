@@ -13,26 +13,9 @@ Each upload must be a single `.txt` file. Zip files and other compressed formats
 
 Maximum upload size: 10 MB.
 
-## Current Implementation Checkpoint
+## Implementation Status
 
-Current upload behavior is implemented:
-
-- Team upload pages exist for registered subtasks.
-- Participants explicitly choose normal or late submission during upload.
-- Uploads are limited to one `.txt` file.
-- Non-`.txt` files and oversized files are rejected immediately.
-- TREC_EVAL parser and validation rules are implemented.
-- Active ground truth supplies required query and candidate model IDs.
-- Failed validation attempts are persisted as `rejected` submissions with `validation_errors`.
-- Valid submissions are persisted with run metadata, evaluated immediately, and shown to the participant with scores.
-- One successful submission is enforced per team, subtask, and selected submission turn.
-- Organizers can review submitted attempts and inspect validation errors or run metrics.
-- Organizers can view a private leaderboard of evaluated run metrics.
-- Organizers can export leaderboard rows as CSV.
-- Organizers can download submission bundles with metadata and stored files.
-- Submission, validation-error, and organizer review pages have been modernized with Bootstrap forms, tables, alerts, badges, filters, and responsive layout.
-
-Current implementation focus: staging end-to-end operations verification and production hardening.
+The participant upload workflow and validation behavior are implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 ## Submission Workflow Diagram
 

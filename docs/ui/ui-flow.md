@@ -6,37 +6,9 @@ This document defines the NTCIR-19 ModelRetrieval submission system interface.
 
 The UI should be simple, operational, and fast to scan. It is not a marketing site. The first screen should help users sign in and submit or administer runs.
 
-## Current Implementation Checkpoint
+## Implementation Status
 
-Implemented through the latest Sprint 6A slice:
-
-- Login/logout.
-- Team dashboard with registered subtask upload links.
-- Organizer dashboard.
-- Organizer team management.
-- Organizer user management.
-- Organizer password change.
-- Organizer ground-truth upload, validation, activation, and history.
-- Organizer submission-period controls.
-- Participant upload form for registered subtasks.
-- Participant-selected normal/late upload period.
-- Immediate validation error display.
-- Participant score display after accepted uploads and latest team-dashboard score summaries.
-- Organizer submissions table and detail view.
-- Organizer private leaderboard view.
-- Leaderboard CSV export.
-- Submission bundle download.
-- Bootstrap-based UI modernization for global navigation, forms, tables, alerts, badges, filters, dashboards, and responsive layout.
-- Shared authenticated app shell with role-aware sidebar/topbar navigation.
-- Participant upload navigation entry.
-- Participant dashboard submission availability by subtask and period.
-- Organizer dashboard deadline state and recent validation-failure panel.
-- Upload page period open/closed/reopened state.
-- Normalized organizer review, account, and operations pages.
-- Normalized participant submission-upload and password-change form pages.
-- Automated local UI regression checks for mobile navigation controls, role-aware shell separation, responsive table wrappers, visible form labels, and compact-row overflow guards.
-
-Next story: run the remaining visual browser UI smoke verification, followed by staging end-to-end operations verification and production hardening.
+The main UI flow is implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint and remaining production-hardening work.
 
 ## Application UI Redesign
 

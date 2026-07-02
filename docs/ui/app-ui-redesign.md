@@ -38,24 +38,9 @@ Keep the current frontend architecture:
 
 Do not introduce React, Vue, a frontend build pipeline, or a separate design system package for this redesign.
 
-## Implementation Checkpoint
+## Implementation Status
 
-Sprint 6A implementation slices are complete for the core planned pages:
-
-- Shared authenticated app shell with role-aware sidebar and compact top bar.
-- Organizer and participant navigation with active-page state.
-- Participant upload navigation entry at `/team/submissions/new`.
-- Participant dashboard submission availability by subtask and period.
-- Organizer dashboard summary metrics, period state, ground-truth status, recent submissions, and recent validation failures.
-- Upload page period open/closed/reopened state beside normal and late choices.
-- Normalized organizer review pages for submissions, submission details, and leaderboard.
-- Normalized organizer account pages for teams and users.
-- Normalized organizer operations pages for ground-truth versions and submission periods.
-- Normalized participant form pages for submission upload and password change.
-- Focused regression tests for shell navigation, mobile offcanvas controls, dashboard period state, upload period state, participant submission availability, visible form labels, responsive table wrappers, and normalized page content.
-- Local responsive CSS guards for top-bar actions, public brand text, header actions, period rows, and submission slot rows.
-
-The automated local UI regression gate has passed. Remaining work should focus on visual browser smoke verification when browser automation is available, then staging end-to-end operations verification and production hardening.
+The Sprint 6A application-shell redesign is implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint and remaining production-hardening work.
 
 ## App Shell
 

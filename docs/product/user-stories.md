@@ -1,32 +1,8 @@
 # NTCIR-19 ModelRetrieval Submission System User Stories
 
-## Current Implementation Checkpoint
+## Implementation Status
 
-Implemented through the latest Sprint 6A slice:
-
-- Team and organizer login.
-- Organizer team and organizer-user management.
-- Organizer ground-truth upload, validation, activation, and history.
-- Participant upload UI for registered subtasks.
-- Participant-selected normal/late upload period.
-- Immediate validation errors and persisted rejected attempts.
-- Accepted submission/run persistence.
-- Accepted submission evaluation and participant score display.
-- Organizer submissions table and detail view.
-- Organizer private leaderboard view.
-- Leaderboard CSV export.
-- Submission bundle download.
-- Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
-- Shared authenticated application shell with role-aware sidebar/topbar navigation.
-- Participant upload navigation entry.
-- Participant dashboard submission availability by subtask and period.
-- Organizer dashboard period state and recent validation-failure panel.
-- Upload page period state beside normal/late choices.
-- Normalized organizer review, account, and operations pages.
-- Normalized participant submission-upload and password-change form pages.
-- Automated local UI regression checks for mobile navigation controls, responsive table wrappers, visible labels, and compact row overflow guards.
-
-Next story: run the remaining visual browser UI smoke verification, followed by staging end-to-end operations verification and production hardening.
+The main user-story scope is implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint and remaining production-hardening work.
 
 ## Application UI Stories
 

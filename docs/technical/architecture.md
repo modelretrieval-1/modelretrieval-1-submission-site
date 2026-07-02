@@ -4,17 +4,9 @@
 
 Use a lightweight Python web application with SQLite and local file storage, deployed on a VPS.
 
-## Current Implementation Checkpoint
+## Implementation Status
 
-The implemented stack matches this recommendation:
-
-- FastAPI and Jinja2 are in use.
-- SQLite schema/bootstrap is in place.
-- Local filesystem storage is used for ground truth and submissions.
-- `uv`, Pytest, and Ruff are configured.
-- Participant validation, evaluation, score display, deadline controls, selected-period uploads, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, and Bootstrap-based UI modernization are implemented.
-
-The current implementation focus is staging and production deployment rehearsal and hardening.
+The implemented stack matches this recommendation. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 Recommended stack:
 

@@ -1,5 +1,7 @@
 # NTCIR-19 ModelRetrieval Submission System Requirements
 
+Document role: this file is the source of truth for stable product requirements and policy rules. Use `../../HANDOFF.md` for detailed current implementation status.
+
 ## Purpose
 
 The submission system accepts official NTCIR-19 ModelRetrieval run files from registered teams, validates them immediately, evaluates successful submissions internally, and gives organizers a private view of scores and leaderboards.
@@ -9,23 +11,9 @@ The system supports:
 - Subtask A: Language Model Retrieval, evaluated with nDCG@1, nDCG@3, and nDCG@5.
 - Subtask B: Image Style Transfer Model Retrieval, evaluated with MRR.
 
-## Current Implementation Checkpoint
+## Implementation Status
 
-The project has completed Sprint 5 UI modernization and is in Sprint 6 production hardening with the core Sprint 6A application-shell UI redesign and automated local UI regression gate implemented.
-
-Completed implementation:
-
-- Sprint 0 foundation.
-- Sprint 1 accounts and team setup.
-- Sprint 2 ground-truth management, TREC_EVAL validation, participant upload UI, validation-failure persistence, and accepted submission/run persistence.
-- Sprint 3 evaluation metrics, participant score display, one-successful-submission enforcement, JST deadline enforcement, and organizer submission-period controls.
-- Sprint 4 participant-selected normal/late upload period, organizer submission review, private leaderboard view, leaderboard CSV export, and submission bundle download.
-- Sprint 5 Bootstrap-based UI modernization for navigation, forms, tables, status badges, filters, dashboards, and responsive layout.
-- Sprint 6A application-shell and page-normalization slices: shared authenticated sidebar/topbar navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard deadline state and recent validation-failure panel, upload-page period state, normalized organizer review/account/operations pages, normalized participant form pages, and automated checks for mobile navigation controls, visible labels, responsive table wrappers, and compact row overflow guards.
-
-Current sprint target:
-
-- Run the remaining visual browser UI smoke verification, then production deployment rehearsal.
+The main product scope is implemented and the current work is production hardening. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 ## Users and Roles
 

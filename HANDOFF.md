@@ -1,5 +1,7 @@
 # Project Handoff
 
+Document role: this is the primary current-state handoff for future Codex or developer sessions. Keep detailed implementation status here instead of duplicating it across stable product and technical docs.
+
 ## Project
 
 NTCIR-19 ModelRetrieval submission and evaluation system.
@@ -67,7 +69,7 @@ Implemented Sprint 6A UI slices:
 
 ## Current Refactor State
 
-The initial small, document-driven route/web-layer refactor is implemented. Use `docs/technical/refactor-plan.md` as the source of truth and implementation record.
+The initial small, document-driven route/web-layer refactor is implemented. `docs/technical/refactor-plan.md` now points to the archived implementation record in `docs/archive/refactor-plan.md`.
 
 Key points:
 
@@ -1091,6 +1093,7 @@ Suggested remaining checks:
 13. `docs/technical/submission-spec.md`
 14. `docs/technical/evaluation-spec.md`
 15. `docs/product/requirements.md`
-16. `docs/product/user-stories.md`
-17. `docs/technical/architecture.md`
-18. `docs/product/open-questions.md`
+16. `docs/product/decisions.md`
+17. `docs/product/user-stories.md`
+18. `docs/technical/architecture.md`
+19. `docs/product/open-questions.md`

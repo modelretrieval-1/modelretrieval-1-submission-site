@@ -1,5 +1,7 @@
 # Implementation Plan
 
+Document role: this file records the Scrum plan, milestone history, and quality gates. Use `../../HANDOFF.md` for detailed current implementation status.
+
 ## Approach
 
 Build the NTCIR-19 ModelRetrieval submission system using Scrum-style increments.
@@ -28,7 +30,7 @@ Current UI direction:
 
 Current refactor state:
 
-- The initial route/web-layer refactor from `../technical/refactor-plan.md` is implemented.
+- The initial route/web-layer refactor is implemented, and the detailed plan is archived at `../archive/refactor-plan.md`.
 - `app/main.py` now focuses on app assembly and router registration.
 - Shared helpers live in `app/web.py`, with auth, team, and admin routes under `app/routes/`.
 - Domain modules, schema, routes, permissions, templates, and deployment behavior were left unchanged.

@@ -10,27 +10,9 @@ Ground truth is uploaded or configured by organizers and must not be accessible 
 
 Ground-truth files are stored on the server local filesystem.
 
-## Current Implementation Checkpoint
+## Implementation Status
 
-Evaluation is implemented for accepted participant uploads.
-
-Implemented behavior:
-
-- Valid submissions can be accepted and stored.
-- Ground-truth versions can be uploaded, validated, and activated.
-- Accepted submissions store `RunID` metadata in `runs`.
-- `evaluation_results` exists in the database schema.
-- Pure metric helpers for nDCG and MRR are implemented and unit tested.
-- Accepted submissions are evaluated immediately and metric rows are persisted.
-- Participant upload responses and the team dashboard show the team's own metric results.
-- One successful submission is enforced per team, subtask, and selected submission period.
-- Organizer submission-period controls and participant-selected normal/late uploads are implemented.
-- Organizer submission detail views show run-level metric rows for evaluated submissions.
-- Organizer private leaderboard view shows evaluated run rows with metrics and period filters.
-- Organizer leaderboard rows can be exported as CSV with the current filters.
-- Evaluation and leaderboard pages have been modernized with Bootstrap tables, filters, badges, and responsive layout.
-
-Current implementation focus: staging end-to-end operations verification and production hardening.
+Evaluation is implemented for accepted participant uploads. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 ## Subtask A: Language Model Retrieval
 
