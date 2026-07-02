@@ -169,6 +169,10 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.app-topbar .btn {
+  flex: 0 0 auto;
+}
+
 .app-topbar-title {
   display: grid;
   min-width: 0;
@@ -238,7 +242,11 @@ h2 {
 }
 
 .navbar-brand {
+  min-width: 0;
+  overflow: hidden;
   font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-navbar .nav-link {
@@ -344,6 +352,10 @@ label {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.header-actions .btn {
+  white-space: normal;
 }
 
 .form-grid {
@@ -546,6 +558,10 @@ legend {
   background: #fbfdff;
 }
 
+.period-row > div {
+  min-width: 0;
+}
+
 .mini-card {
   display: grid;
   gap: 6px;
@@ -595,6 +611,10 @@ a.dashboard-tile:hover {
   min-width: 0;
   padding: 10px 0;
   border-top: 1px solid #edf2f7;
+}
+
+.slot-row > div:first-child {
+  min-width: 0;
 }
 
 .slot-action {

@@ -24,8 +24,9 @@ Implemented through the latest Sprint 6A slice:
 - Upload page period state beside normal/late choices.
 - Normalized organizer review, account, and operations pages.
 - Normalized participant submission-upload and password-change form pages.
+- Automated local UI regression checks for mobile navigation controls, responsive table wrappers, visible labels, and compact row overflow guards.
 
-Next story: run final responsive/accessibility/browser UI verification, followed by staging deployment rehearsal and production hardening.
+Next story: run the remaining visual browser UI smoke verification, followed by staging deployment rehearsal and production hardening.
 
 ## Application UI Stories
 

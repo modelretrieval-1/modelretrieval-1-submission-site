@@ -6,7 +6,7 @@ This repository contains the submission and evaluation system for the NTCIR-19 M
 
 The project is in **Sprint 6: Production Hardening**.
 
-Participant upload, validation, evaluation, score display, period controls, selected normal/late upload period, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, Bootstrap-based UI modernization, and the Sprint 6A application-shell/page-normalization redesign are complete for the planned scope so far.
+Participant upload, validation, evaluation, score display, period controls, selected normal/late upload period, organizer submission review, private leaderboard, leaderboard CSV export, submission bundle download, Bootstrap-based UI modernization, the Sprint 6A application-shell/page-normalization redesign, and the automated local UI regression gate are complete for the planned scope so far.
 
 Completed foundation:
 
@@ -62,6 +62,7 @@ Completed foundation:
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.
+- Responsive app-shell guards for mobile navigation, visible labels, table wrappers, and compact row overflow.
 - Docker image and Docker Compose deployment foundation.
 - Host Nginx reverse-proxy templates for staging and production.
 - VPS setup, GitHub Actions deployment, backup, restore, and smoke-check documentation.
@@ -72,7 +73,7 @@ Current test status:
 
 ```text
 uv run --extra dev pytest
-142 passed
+146 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -80,13 +81,13 @@ All checks passed
 
 Next recommended work:
 
-- Run the final local/browser UI quality gate, then rehearse the staging deployment on Sakura VPS, verify GitHub Actions staging deployment, and promote production with an immutable `v*` tag after staging passes.
+- Run the remaining visual browser UI smoke check when browser automation is available, then rehearse the staging deployment on Sakura VPS, verify GitHub Actions staging deployment, and promote production with an immutable `v*` tag after staging passes.
 
 ## UI Direction
 
 The app remains a FastAPI/Jinja2 server-rendered system. The UI now uses Bootstrap 5 for navigation, forms, tables, alerts, badges, and responsive layout, with `app/static/app.css` reserved for project-specific polish. React, Vue, and a separate frontend build pipeline are intentionally not part of this phase.
 
-The current UI slice is the Sprint 6A application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, a clearer participant submission dashboard, and normalized organizer/participant workflow pages. Remaining work should continue from `docs/ui/app-ui-redesign.md` with final responsive, accessibility, and browser smoke verification.
+The current UI slice is the Sprint 6A application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, a clearer participant submission dashboard, and normalized organizer/participant workflow pages. Automated responsive/accessibility-oriented regression checks are in place; remaining work should continue from `docs/ui/app-ui-redesign.md` with the visual browser smoke verification.
 
 ## Development Setup
 

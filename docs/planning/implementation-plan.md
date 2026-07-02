@@ -590,7 +590,8 @@ Status:
 
 - Documentation exists in `../ui/app-ui-redesign.md`.
 - Core implementation slices are complete: shared authenticated shell and role-aware navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard period state, organizer dashboard recent validation failures, upload page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
-- Remaining implementation should focus on final responsive/accessibility/browser smoke verification, then staging deployment rehearsal and production hardening.
+- Automated local UI regression coverage is complete for mobile navigation controls, public/authenticated shell separation, responsive table wrappers, visible form labels, and compact-row overflow guards.
+- Remaining implementation should focus on visual browser smoke verification when browser automation is available, then staging deployment rehearsal and production hardening.
 
 ## Initial MVP
 

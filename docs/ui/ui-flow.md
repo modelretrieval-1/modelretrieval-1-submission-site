@@ -34,8 +34,9 @@ Implemented through the latest Sprint 6A slice:
 - Upload page period open/closed/reopened state.
 - Normalized organizer review, account, and operations pages.
 - Normalized participant submission-upload and password-change form pages.
+- Automated local UI regression checks for mobile navigation controls, role-aware shell separation, responsive table wrappers, visible form labels, and compact-row overflow guards.
 
-Next story: run final responsive/accessibility/browser UI verification, followed by staging deployment rehearsal and production hardening.
+Next story: run the remaining visual browser UI smoke verification, followed by staging deployment rehearsal and production hardening.
 
 ## Application UI Redesign
 

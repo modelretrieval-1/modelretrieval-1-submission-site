@@ -17,7 +17,7 @@ Scrum implementation is underway.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
 - Sprint 6: current sprint, focused on application-shell UI redesign, deployment rehearsal, and production hardening after the initial route/web-layer refactor.
-- Sprint 6A: core application-shell, dashboard, and page-normalization slices are implemented; remaining UI work is final responsive/accessibility/browser smoke verification.
+- Sprint 6A: core application-shell, dashboard, page-normalization, and automated local UI regression slices are implemented; remaining UI work is visual browser smoke verification when browser automation is available.
 
 ## Current Stack
 
@@ -63,6 +63,7 @@ Implemented Sprint 6A UI slices:
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.
+- Responsive app-shell guards for mobile navigation, visible labels, table wrappers, and compact row overflow.
 
 ## Current Refactor State
 
@@ -142,7 +143,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-142 passed
+146 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -153,8 +154,10 @@ Application startup complete
 curl -fsS http://127.0.0.1:8000/health
 {"status":"ok","environment":"development"}
 
-curl -fsS http://127.0.0.1:8000/
-Rendered public landing shell with sign-in and health-check links
+curl -fsS http://127.0.0.1:8000/login
+Rendered public login shell with sign-in form
+
+In-app browser backend was unavailable during the latest verification, so visual browser smoke verification remains pending.
 ```
 
 ## Implemented Code
@@ -1018,9 +1021,32 @@ Status:
 - Kept generated-password markup compatible with existing tests.
 - Browser plugin backend was unavailable in the latest session, so visual smoke verification remains pending; local server availability plus automated HTML/integration tests passed.
 
+## Completed Story
+
+Strengthen the local UI quality gate for Sprint 6A.
+
+Target behavior:
+
+- Keep the authenticated app shell responsive and role-aware.
+- Preserve mobile offcanvas navigation controls.
+- Keep public pages outside the authenticated app shell.
+- Ensure key tables remain inside horizontal-scroll wrappers.
+- Ensure key forms keep visible labels.
+- Add small CSS guards for compact rows and action areas so text does not force awkward overflow.
+
+Status:
+
+- Complete.
+- Added CSS guards for top-bar buttons, public brand text, header action buttons, period rows, and participant slot rows in `app/static/app.css`.
+- Expanded `tests/test_app_shell.py` to cover mobile navigation controls, public/authenticated shell separation, responsive table wrappers, and visible labels on organizer and participant form pages.
+- Verified `uv run --extra dev pytest` with 146 passing tests.
+- Verified `uv run --extra dev ruff check .`.
+- Verified local server startup plus `/health` and `/login` responses.
+- In-app browser backend was unavailable, so true visual browser smoke verification remains pending.
+
 ## Next Recommended Work
 
-Run the manual browser smoke check when a browser backend is available, then rehearse deployment on Sakura VPS and verify the CI/CD path end to end.
+Run the visual browser smoke check when a browser backend is available, then rehearse deployment on Sakura VPS and verify the CI/CD path end to end.
 
 Target behavior:
 

@@ -68,6 +68,24 @@ def test_organizer_shell_shows_admin_navigation_and_active_page():
         assert 'app-nav-link active" href="/admin/periods"' in response.text
 
 
+def test_authenticated_shell_includes_mobile_navigation_controls():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, _team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin")
+
+        assert response.status_code == 200
+        assert 'class="app-sidebar"' in response.text
+        assert 'data-bs-toggle="offcanvas"' in response.text
+        assert 'data-bs-target="#mobileNavigation"' in response.text
+        assert 'class="offcanvas offcanvas-start app-mobile-nav"' in response.text
+        assert 'aria-labelledby="mobileNavigationLabel"' in response.text
+        assert 'class="app-topbar"' in response.text
+
+
 def test_team_shell_hides_organizer_navigation():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
@@ -86,6 +104,20 @@ def test_team_shell_hides_organizer_navigation():
         assert 'href="/admin/ground-truth">Ground Truth</a>' not in response.text
         assert 'href="/admin/leaderboard">Leaderboard</a>' not in response.text
         assert 'app-nav-link active" href="/team"' in response.text
+
+
+def test_public_pages_remain_outside_authenticated_shell():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        seed_accounts(settings)
+        client = TestClient(create_app(settings))
+
+        response = client.get("/login")
+
+        assert response.status_code == 200
+        assert 'class="navbar app-navbar"' in response.text
+        assert 'class="app-shell"' not in response.text
+        assert 'id="mobileNavigation"' not in response.text
 
 
 def test_team_upload_navigation_redirects_to_first_registered_subtask():
@@ -112,6 +144,61 @@ def test_team_upload_page_marks_upload_navigation_active():
 
         assert response.status_code == 200
         assert 'app-nav-link active" href="/team/submissions/new"' in response.text
+
+
+def test_key_workspace_tables_use_responsive_wrappers():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, _team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "admin", organizer.password)
+
+        paths = (
+            "/admin",
+            "/admin/teams",
+            "/admin/users",
+            "/admin/ground-truth",
+            "/admin/periods",
+            "/admin/submissions",
+            "/admin/leaderboard",
+        )
+
+        for path in paths:
+            response = client.get(path)
+            assert response.status_code == 200
+            if "<table" in response.text:
+                assert 'class="table-wrap"' in response.text
+
+
+def test_key_forms_keep_visible_labels():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+
+        login(client, "admin", organizer.password)
+        admin_form_pages = (
+            "/admin/teams",
+            "/admin/users",
+            "/admin/ground-truth",
+            "/admin/periods",
+            "/admin/submissions",
+            "/admin/leaderboard",
+            "/account/password",
+        )
+        for path in admin_form_pages:
+            response = client.get(path)
+            assert response.status_code == 200
+            if "<form" in response.text:
+                assert 'class="form-label"' in response.text
+
+        client.get("/logout")
+        login(client, "team-001", team.password)
+        team_form_pages = ("/team/submissions/A/new", "/account/password")
+        for path in team_form_pages:
+            response = client.get(path)
+            assert response.status_code == 200
+            assert 'class="form-label"' in response.text
 
 
 def test_admin_dashboard_links_to_submission_bundle_route():

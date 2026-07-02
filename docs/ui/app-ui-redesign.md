@@ -52,9 +52,10 @@ Sprint 6A implementation slices are complete for the core planned pages:
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.
-- Focused regression tests for shell navigation, dashboard period state, upload period state, participant submission availability, and normalized page content.
+- Focused regression tests for shell navigation, mobile offcanvas controls, dashboard period state, upload period state, participant submission availability, visible form labels, responsive table wrappers, and normalized page content.
+- Local responsive CSS guards for top-bar actions, public brand text, header actions, period rows, and submission slot rows.
 
-Remaining work should focus on final responsive/accessibility/browser smoke verification, then staging deployment rehearsal and production hardening.
+The automated local UI regression gate has passed. Remaining work should focus on visual browser smoke verification when browser automation is available, then staging deployment rehearsal and production hardening.
 
 ## App Shell
 
