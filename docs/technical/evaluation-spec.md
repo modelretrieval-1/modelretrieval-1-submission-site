@@ -12,7 +12,7 @@ Ground-truth files are stored on the server local filesystem.
 
 ## Implementation Status
 
-Aggregate run-level evaluation is implemented for accepted participant uploads. Organizer-only per-query metric persistence and display are planned by this specification but not yet implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
+Aggregate run-level evaluation is implemented for accepted participant uploads. Organizer-only per-query metric persistence and organizer submission-detail display are also implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 ## Subtask A: Language Model Retrieval
 

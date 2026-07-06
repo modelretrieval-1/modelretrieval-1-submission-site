@@ -26,6 +26,7 @@ class DatabaseTests(unittest.TestCase):
                 self.assertIn("teams", table_names)
                 self.assertIn("submissions", table_names)
                 self.assertIn("evaluation_results", table_names)
+                self.assertIn("evaluation_query_results", table_names)
 
                 periods = connection.execute(
                     "SELECT name, deadline_at_jst FROM submission_periods ORDER BY name"
@@ -54,4 +55,3 @@ class DatabaseTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

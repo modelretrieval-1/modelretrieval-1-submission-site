@@ -18,7 +18,7 @@ Core entities:
 
 ## Implementation Status
 
-The implemented SQLite schema includes the current core entities below. This document also records the planned `evaluation_query_results` table for organizer-only per-query diagnostics. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
+The implemented SQLite schema includes the core entities below, including `evaluation_query_results` for organizer-only per-query diagnostics. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 Participant upload attempts use:
 
@@ -29,7 +29,7 @@ Participant upload attempts use:
 
 Submissions store the selected `submission_period_id`, and the partial unique index enforces one successful submission per team, subtask, and selected period.
 
-Per-query evaluation result persistence is planned but not yet implemented in the current schema.
+Per-query evaluation result persistence is implemented separately from aggregate `evaluation_results` so participant pages, leaderboard sorting, and leaderboard exports can remain aggregate-only.
 
 ## ER Diagram
 

@@ -11,6 +11,7 @@ from app.config import Settings
 from app.db import connect
 from app.evaluation import (
     evaluate_submission,
+    evaluate_submission_query_metrics,
     list_latest_team_submission_summaries,
     list_submission_results,
     mark_evaluation_failed,
@@ -333,11 +334,17 @@ async def upload_submission(
                     subtask=subtask,  # type: ignore[arg-type]
                     ground_truth_version=ground_truth_version,
                 )
+                query_metrics = evaluate_submission_query_metrics(
+                    validation_result.parsed,
+                    subtask=subtask,  # type: ignore[arg-type]
+                    ground_truth_version=ground_truth_version,
+                )
                 persist_evaluation_results(
                     connection,
                     submission_id=submission_id,
                     ground_truth_version_id=ground_truth_version.id,
                     metrics=metrics,
+                    query_metrics=query_metrics,
                 )
             metrics = list_submission_results(connection, submission_id=submission_id)
         else:

@@ -20,8 +20,24 @@ class RunMetric:
 
 
 @dataclass(frozen=True)
+class QueryMetric:
+    run_id: str
+    topic_id: str
+    metric_name: str
+    metric_value: float
+
+
+@dataclass(frozen=True)
 class EvaluationResult:
     run_id: str
+    metric_name: str
+    metric_value: float
+
+
+@dataclass(frozen=True)
+class QueryEvaluationResult:
+    run_id: str
+    topic_id: str
     metric_name: str
     metric_value: float
 
@@ -119,6 +135,42 @@ def evaluate_subtask_a(
     return tuple(metrics)
 
 
+def evaluate_subtask_a_query_metrics(
+    parsed: ParsedSubmission,
+    relevance_by_topic_doc: dict[tuple[str, str], float],
+    *,
+    cutoffs: tuple[int, ...] = (1, 3, 5),
+) -> tuple[QueryMetric, ...]:
+    metrics: list[QueryMetric] = []
+    lines_by_run_topic = _lines_by_run_topic(parsed.lines)
+    topics = sorted({topic_id for topic_id, _doc_id in relevance_by_topic_doc})
+
+    for run_id in parsed.run_ids:
+        for topic_id in topics:
+            run_lines = lines_by_run_topic[(run_id, topic_id)]
+            ranked_doc_ids = _ranked_doc_ids(run_lines)
+            relevance_by_doc_id = {
+                doc_id: relevance
+                for (relevance_topic_id, doc_id), relevance in relevance_by_topic_doc.items()
+                if relevance_topic_id == topic_id
+            }
+            for cutoff in cutoffs:
+                metrics.append(
+                    QueryMetric(
+                        run_id=run_id,
+                        topic_id=topic_id,
+                        metric_name=f"ndcg@{cutoff}",
+                        metric_value=ndcg_at(
+                            ranked_doc_ids,
+                            relevance_by_doc_id,
+                            cutoff=cutoff,
+                        ),
+                    )
+                )
+
+    return tuple(metrics)
+
+
 def evaluate_subtask_b(
     parsed: ParsedSubmission,
     relevant_doc_by_topic: dict[str, str],
@@ -144,6 +196,31 @@ def evaluate_subtask_b(
                 metric_value=metric_value,
             )
         )
+
+    return tuple(metrics)
+
+
+def evaluate_subtask_b_query_metrics(
+    parsed: ParsedSubmission,
+    relevant_doc_by_topic: dict[str, str],
+) -> tuple[QueryMetric, ...]:
+    metrics: list[QueryMetric] = []
+    lines_by_run_topic = _lines_by_run_topic(parsed.lines)
+
+    for run_id in parsed.run_ids:
+        for topic_id, relevant_doc_id in sorted(relevant_doc_by_topic.items()):
+            run_lines = lines_by_run_topic[(run_id, topic_id)]
+            metrics.append(
+                QueryMetric(
+                    run_id=run_id,
+                    topic_id=topic_id,
+                    metric_name="reciprocal_rank",
+                    metric_value=mean_reciprocal_rank(
+                        _ranked_doc_ids(run_lines),
+                        relevant_doc_id,
+                    ),
+                )
+            )
 
     return tuple(metrics)
 
@@ -196,12 +273,30 @@ def evaluate_submission(
     )
 
 
+def evaluate_submission_query_metrics(
+    parsed: ParsedSubmission,
+    *,
+    subtask: Subtask,
+    ground_truth_version: GroundTruthVersion,
+) -> tuple[QueryMetric, ...]:
+    if subtask == "A":
+        return evaluate_subtask_a_query_metrics(
+            parsed,
+            load_subtask_a_relevance(ground_truth_version),
+        )
+    return evaluate_subtask_b_query_metrics(
+        parsed,
+        load_subtask_b_relevant_docs(ground_truth_version),
+    )
+
+
 def persist_evaluation_results(
     connection: sqlite3.Connection,
     *,
     submission_id: int,
     ground_truth_version_id: int,
     metrics: tuple[RunMetric, ...],
+    query_metrics: tuple[QueryMetric, ...] = (),
 ) -> None:
     run_rows = connection.execute(
         """
@@ -213,7 +308,10 @@ def persist_evaluation_results(
     ).fetchall()
     run_database_ids = {row["run_id"]: row["id"] for row in run_rows}
     missing_run_ids = sorted(
-        {metric.run_id for metric in metrics}
+        (
+            {metric.run_id for metric in metrics}
+            | {metric.run_id for metric in query_metrics}
+        )
         - set(run_database_ids)
     )
     if missing_run_ids:
@@ -241,6 +339,32 @@ def persist_evaluation_results(
                 jst_now_text(),
             )
             for metric in metrics
+        ],
+    )
+    connection.executemany(
+        """
+        INSERT INTO evaluation_query_results (
+          submission_id,
+          run_id,
+          ground_truth_version_id,
+          topic_id,
+          metric_name,
+          metric_value,
+          created_at_jst
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                submission_id,
+                run_database_ids[metric.run_id],
+                ground_truth_version_id,
+                metric.topic_id,
+                metric.metric_name,
+                metric.metric_value,
+                jst_now_text(),
+            )
+            for metric in query_metrics
         ],
     )
     connection.execute(
@@ -287,6 +411,39 @@ def list_submission_results(
     return tuple(
         EvaluationResult(
             run_id=row["run_id"],
+            metric_name=row["metric_name"],
+            metric_value=row["metric_value"],
+        )
+        for row in rows
+    )
+
+
+def list_submission_query_results(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+) -> tuple[QueryEvaluationResult, ...]:
+    rows = connection.execute(
+        """
+        SELECT
+          runs.run_id,
+          evaluation_query_results.topic_id,
+          evaluation_query_results.metric_name,
+          evaluation_query_results.metric_value
+        FROM evaluation_query_results
+        JOIN runs ON runs.id = evaluation_query_results.run_id
+        WHERE evaluation_query_results.submission_id = ?
+        ORDER BY
+          runs.run_id,
+          evaluation_query_results.topic_id,
+          evaluation_query_results.metric_name
+        """,
+        (submission_id,),
+    ).fetchall()
+    return tuple(
+        QueryEvaluationResult(
+            run_id=row["run_id"],
+            topic_id=row["topic_id"],
             metric_name=row["metric_name"],
             metric_value=row["metric_value"],
         )

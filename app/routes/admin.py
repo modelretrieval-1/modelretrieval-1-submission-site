@@ -23,7 +23,11 @@ from app.accounts import (
 )
 from app.config import Settings
 from app.db import connect
-from app.evaluation import list_leaderboard_rows, list_submission_results
+from app.evaluation import (
+    list_leaderboard_rows,
+    list_submission_query_results,
+    list_submission_results,
+)
 from app.ground_truth import (
     JST,
     activate_ground_truth_version,
@@ -276,6 +280,7 @@ def render_admin_submission_detail(
         )
         runs = list_submission_runs(connection, submission_id=submission_id)
         metrics = list_submission_results(connection, submission_id=submission_id)
+        query_metrics = list_submission_query_results(connection, submission_id=submission_id)
     return templates.TemplateResponse(
         request,
         "admin_submission_detail.html",
@@ -286,6 +291,7 @@ def render_admin_submission_detail(
             "validation_errors": validation_errors,
             "runs": runs,
             "metrics": metrics,
+            "query_metrics": query_metrics,
         },
     )
 

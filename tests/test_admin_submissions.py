@@ -199,6 +199,8 @@ def test_organizer_can_view_rejected_submission_detail_with_validation_errors():
         assert "invalid_q0" in response.text
         assert "Field 2 must be Q0." in response.text
         assert "No metrics recorded." in response.text
+        assert "Per-Query Metrics" in response.text
+        assert "No per-query metrics recorded." in response.text
 
 
 def test_organizer_can_view_evaluated_submission_detail_with_runs_and_metrics():
@@ -225,6 +227,10 @@ def test_organizer_can_view_evaluated_submission_detail_with_runs_and_metrics():
         assert "ndcg@3" in response.text
         assert "ndcg@5" in response.text
         assert "1.000000" in response.text
+        assert "Per-Query Metrics" in response.text
+        assert "Organizer-only diagnostic metric details by run and query." in response.text
+        assert "q1" in response.text
+        assert "q2" in response.text
         assert "No validation errors recorded." in response.text
 
 

@@ -386,6 +386,21 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
                 ORDER BY evaluation_results.metric_name
                 """
             ).fetchall()
+            query_metrics = connection.execute(
+                """
+                SELECT
+                  runs.run_id,
+                  evaluation_query_results.topic_id,
+                  evaluation_query_results.metric_name,
+                  evaluation_query_results.metric_value
+                FROM evaluation_query_results
+                JOIN runs ON runs.id = evaluation_query_results.run_id
+                ORDER BY
+                  runs.run_id,
+                  evaluation_query_results.topic_id,
+                  evaluation_query_results.metric_name
+                """
+            ).fetchall()
 
         assert submission["status"] == "evaluated"
         assert submission["ground_truth_version_id"] is not None
@@ -394,6 +409,18 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
         assert run["query_count"] == 2
         assert [metric["metric_name"] for metric in metrics] == ["ndcg@1", "ndcg@3", "ndcg@5"]
         assert [metric["metric_value"] for metric in metrics] == [1.0, 1.0, 1.0]
+        assert len(query_metrics) == 6
+        assert {
+            (metric["topic_id"], metric["metric_name"], metric["metric_value"])
+            for metric in query_metrics
+        } == {
+            ("q1", "ndcg@1", 1.0),
+            ("q1", "ndcg@3", 1.0),
+            ("q1", "ndcg@5", 1.0),
+            ("q2", "ndcg@1", 1.0),
+            ("q2", "ndcg@3", 1.0),
+            ("q2", "ndcg@5", 1.0),
+        }
 
         dashboard = client.get("/team")
 
@@ -402,6 +429,8 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
         assert "Subtask A" in dashboard.text
         assert "evaluated" in dashboard.text
         assert "run1 ndcg@5" in dashboard.text
+        assert "Per-Query Metrics" not in dashboard.text
+        assert "reciprocal_rank" not in dashboard.text
 
 
 def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
@@ -442,16 +471,32 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
                 FROM evaluation_results
                 """
             ).fetchone()
+            query_metrics = connection.execute(
+                """
+                SELECT topic_id, metric_name, metric_value
+                FROM evaluation_query_results
+                ORDER BY topic_id
+                """
+            ).fetchall()
 
         assert submission["status"] == "evaluated"
         assert metric["metric_name"] == "mrr"
         assert metric["metric_value"] == 1.0
+        assert [
+            (row["topic_id"], row["metric_name"], row["metric_value"])
+            for row in query_metrics
+        ] == [
+            ("image1", "reciprocal_rank", 1.0),
+            ("image2", "reciprocal_rank", 1.0),
+        ]
 
         dashboard = client.get("/team")
 
         assert dashboard.status_code == 200
         assert "Subtask B" in dashboard.text
         assert "run1 mrr" in dashboard.text
+        assert "Per-Query Metrics" not in dashboard.text
+        assert "reciprocal_rank" not in dashboard.text
 
 
 def test_rejected_upload_can_be_followed_by_valid_upload():

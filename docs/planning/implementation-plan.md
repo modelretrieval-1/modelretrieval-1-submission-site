@@ -482,7 +482,7 @@ Status:
 
 - Complete for the planned evaluation and participant-result scope.
 - Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, unit tests with known expected values, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, `evaluated` status updates, upload-page score display, team-dashboard latest score summaries, one-successful-submission enforcement with friendly errors, JST deadline/open-period enforcement, and organizer submission-period controls.
-- Planned follow-up: persist and show organizer-only per-query metric details while keeping participant pages and leaderboard exports aggregate-only.
+- Organizer-only per-query metric persistence and organizer submission-detail display are implemented while participant pages and leaderboard exports remain aggregate-only.
 
 ### Sprint 4: Organizer Operations
 

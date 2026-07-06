@@ -111,6 +111,39 @@
 
     <div class="section-header detail-section-header">
       <div>
+        <h2>Per-Query Metrics</h2>
+        <p>Organizer-only diagnostic metric details by run and query.</p>
+      </div>
+    </div>
+    {% if query_metrics %}
+      <div class="table-wrap">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>RunID</th>
+              <th>Query</th>
+              <th>Metric</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for metric in query_metrics %}
+              <tr>
+                <td>{{ metric.run_id }}</td>
+                <td>{{ metric.topic_id }}</td>
+                <td>{{ metric.metric_name }}</td>
+                <td class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No per-query metrics recorded.</p>
+    {% endif %}
+
+    <div class="section-header detail-section-header">
+      <div>
         <h2>Validation Errors</h2>
         <p>Line-level validation errors for rejected attempts.</p>
       </div>

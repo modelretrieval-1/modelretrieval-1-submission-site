@@ -121,6 +121,20 @@ CREATE TABLE IF NOT EXISTS evaluation_results (
   FOREIGN KEY (ground_truth_version_id) REFERENCES ground_truth_versions(id)
 );
 
+CREATE TABLE IF NOT EXISTS evaluation_query_results (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  submission_id INTEGER NOT NULL,
+  run_id INTEGER NOT NULL,
+  ground_truth_version_id INTEGER NOT NULL,
+  topic_id TEXT NOT NULL,
+  metric_name TEXT NOT NULL,
+  metric_value REAL NOT NULL,
+  created_at_jst TEXT NOT NULL,
+  FOREIGN KEY (submission_id) REFERENCES submissions(id),
+  FOREIGN KEY (run_id) REFERENCES runs(id),
+  FOREIGN KEY (ground_truth_version_id) REFERENCES ground_truth_versions(id)
+);
+
 CREATE TABLE IF NOT EXISTS audit_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   actor_type TEXT NOT NULL,
@@ -159,4 +173,3 @@ def initialize_database(database_path: Path) -> None:
             DEFAULT_PERIODS,
         )
         connection.commit()
-

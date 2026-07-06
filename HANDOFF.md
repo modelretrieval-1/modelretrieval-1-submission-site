@@ -251,7 +251,7 @@ Key decisions already made:
 - Ground truth is uploaded/configured by organizers and stored on the server local filesystem.
 - Evaluation is internal.
 - Participant-visible scores are aggregate run-level metrics only.
-- Per-query metric details are planned as organizer-only diagnostics.
+- Per-query metric details are implemented as organizer-only diagnostics.
 - Records are retained forever.
 - No email notifications.
 - VPS deployment.
@@ -707,7 +707,7 @@ Target behavior:
 - Load active ground truth into Subtask A relevance maps and Subtask B relevant-model maps.
 - Evaluate each accepted submission after validation.
 - Store metric rows in `evaluation_results`.
-- Planned follow-up: store organizer-only per-query metric rows separately from aggregate `evaluation_results`.
+- Store organizer-only per-query metric rows separately from aggregate `evaluation_results`.
 - Update submission status from `accepted` to `evaluated` or `evaluation_failed`.
 - Keep participant score display ready for the following UI slice.
 
@@ -725,7 +725,7 @@ Status:
 - Active Subtask B ground truth is loaded into relevant-model maps.
 - Valid uploads are evaluated immediately after run metadata is persisted.
 - Metric rows are written to `evaluation_results`.
-- Per-query metric persistence is not yet implemented; planned behavior is organizer-only visibility.
+- Per-query metric rows are written to `evaluation_query_results` for organizer-only visibility.
 - Successful evaluation updates submissions to `evaluated`.
 - Missing evaluation setup can mark submissions as `evaluation_failed`.
 - Implemented integration tests in `tests/test_team_submissions.py`.
@@ -889,7 +889,7 @@ Target behavior:
 - Organizer can filter by team, subtask, period, and status.
 - Organizer can inspect validation errors for rejected submissions.
 - Organizer can inspect run-level metrics for evaluated submissions.
-- Planned follow-up: Organizer can inspect per-query metric diagnostics for evaluated submissions.
+- Organizer can inspect per-query metric diagnostics for evaluated submissions.
 - Team users cannot access organizer submission views.
 
 Suggested tests:
