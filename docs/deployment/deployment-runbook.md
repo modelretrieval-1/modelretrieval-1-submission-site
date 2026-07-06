@@ -276,12 +276,12 @@ Deployment command shape:
 ```bash
 cd /opt/modelretrieval/staging
 docker compose pull
-docker compose run --rm app alembic upgrade head
+docker compose run --rm app python -m app.cli migrate
 docker compose up -d
 docker compose exec app python -m app.cli create-admin --username admin --display-name "Admin User"
 ```
 
-You may use `docker compose run --rm app python -m app.cli migrate` instead of invoking Alembic directly.
+The app-native migration command safely stamps an existing pre-Alembic baseline database before applying newer migrations. Use raw `alembic upgrade head` only for databases that already have an `alembic_version` row.
 
 Only run `create-admin` when the environment does not yet have an organizer account.
 
@@ -302,11 +302,11 @@ Deploy:
 
 ```bash
 docker compose pull
-docker compose run --rm app alembic upgrade head
+docker compose run --rm app python -m app.cli migrate
 docker compose up -d
 ```
 
-You may use `docker compose run --rm app python -m app.cli migrate` instead of invoking Alembic directly.
+The app-native migration command safely stamps an existing pre-Alembic baseline database before applying newer migrations. Use raw `alembic upgrade head` only for databases that already have an `alembic_version` row.
 
 After deployment, run smoke checks:
 
@@ -372,9 +372,9 @@ PRODUCTION_PATH=/opt/modelretrieval/production
 PRODUCTION_URL=https://submission.modelretrieval-1.happysocial.net
 ```
 
-The staging deploy job updates `APP_IMAGE` in the remote staging `.env`, pulls the image, runs `alembic upgrade head`, starts the Compose stack, and runs `deployment/scripts/smoke-check.sh`.
+The staging deploy job updates `APP_IMAGE` in the remote staging `.env`, pulls the image, runs `python -m app.cli migrate`, starts the Compose stack, and runs `deployment/scripts/smoke-check.sh`.
 
-The production deploy job runs `./backup.sh` in the remote production directory before updating `APP_IMAGE`, pulling the image, running `alembic upgrade head`, starting the Compose stack, and running the smoke check.
+The production deploy job runs `./backup.sh` in the remote production directory before updating `APP_IMAGE`, pulling the image, running `python -m app.cli migrate`, starting the Compose stack, and running the smoke check.
 
 The workflow publishes images to GitHub Container Registry using the repository's `GITHUB_TOKEN`.
 
