@@ -141,6 +141,7 @@ Acceptance criteria:
 - Subtask B submissions show MRR.
 - The system shows the submission timestamp and run IDs.
 - Participants can only see their own scores.
+- Participants see aggregate run-level scores only, not organizer-only per-query diagnostics.
 
 ## Organizer/Admin Stories
 
@@ -214,6 +215,7 @@ Acceptance criteria:
 - It clearly indicates whether each row is from the normal or late period.
 - It shows team, run ID, metrics, and submission timestamp.
 - It can be exported as CSV.
+- It uses aggregate run-level metrics rather than per-query diagnostic rows.
 
 ### Verify Evaluation Results
 
@@ -222,6 +224,7 @@ As an organizer, I want to inspect evaluation results from the system so that I 
 Acceptance criteria:
 
 - Organizers can view metric values per run.
+- Organizers can view per-query metric diagnostics for each evaluated run.
 - Organizers can see which ground-truth version was used.
 - Organizers can rerun evaluation if ground truth is replaced or corrected.
 
@@ -244,4 +247,5 @@ Acceptance criteria:
 - Successful submissions are retained forever.
 - Failed validation attempts are retained forever.
 - Evaluation records are retained forever.
+- Organizer-only per-query evaluation records are retained forever.
 - Ground-truth version records are retained forever.

@@ -67,7 +67,7 @@ Then verify:
 - Team login.
 - Ground-truth history.
 - Recent submissions.
-- Evaluation results.
+- Evaluation results, including organizer-only per-query evaluation results when present.
 - Private leaderboard.
 
 ## Staging Restore Test

@@ -56,6 +56,7 @@ sequenceDiagram
 
       alt Evaluation succeeds
         Eval->>DB: Persist evaluation_results
+        Eval->>DB: Persist organizer-only evaluation_query_results
         Eval->>DB: Mark submission evaluated
         App-->>Team: Show run-level scores
       else Evaluation fails

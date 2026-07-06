@@ -13,11 +13,12 @@ Core entities:
 - Validation errors.
 - Ground-truth versions.
 - Evaluation results.
+- Per-query evaluation results.
 - Audit events.
 
 ## Implementation Status
 
-The implemented SQLite schema includes the core entities below. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
+The implemented SQLite schema includes the current core entities below. This document also records the planned `evaluation_query_results` table for organizer-only per-query diagnostics. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 Participant upload attempts use:
 
@@ -27,6 +28,8 @@ Participant upload attempts use:
 - `evaluation_failed` when a valid stored submission cannot be evaluated.
 
 Submissions store the selected `submission_period_id`, and the partial unique index enforces one successful submission per team, subtask, and selected period.
+
+Per-query evaluation result persistence is planned but not yet implemented in the current schema.
 
 ## ER Diagram
 
@@ -41,8 +44,11 @@ erDiagram
   SUBMISSIONS ||--o{ RUNS : contains
   SUBMISSIONS ||--o{ VALIDATION_ERRORS : records
   SUBMISSIONS ||--o{ EVALUATION_RESULTS : produces
+  SUBMISSIONS ||--o{ EVALUATION_QUERY_RESULTS : produces
   RUNS ||--o{ EVALUATION_RESULTS : scored_as
+  RUNS ||--o{ EVALUATION_QUERY_RESULTS : scored_by_query_as
   GROUND_TRUTH_VERSIONS ||--o{ EVALUATION_RESULTS : used_for
+  GROUND_TRUTH_VERSIONS ||--o{ EVALUATION_QUERY_RESULTS : used_for
 
   ORGANIZERS {
     integer id PK
@@ -137,6 +143,17 @@ erDiagram
     integer submission_id FK
     integer run_id FK
     integer ground_truth_version_id FK
+    string metric_name
+    float metric_value
+    string created_at_jst
+  }
+
+  EVALUATION_QUERY_RESULTS {
+    integer id PK
+    integer submission_id FK
+    integer run_id FK
+    integer ground_truth_version_id FK
+    string topic_id
     string metric_name
     float metric_value
     string created_at_jst
@@ -355,6 +372,35 @@ Notes:
 - Subtask A uses macro-averaged nDCG.
 - Subtask B uses MRR.
 - Re-evaluation creates new result rows tied to the new ground-truth version.
+
+## evaluation_query_results
+
+Stores organizer-only per-query evaluation scores.
+
+Suggested fields:
+
+- `id`
+- `submission_id`
+- `run_id`
+- `ground_truth_version_id`
+- `topic_id`
+- `metric_name`
+- `metric_value`
+- `created_at_jst`
+
+Metric names:
+
+- `ndcg@1`
+- `ndcg@3`
+- `ndcg@5`
+- `reciprocal_rank`
+
+Notes:
+
+- Per-query rows are diagnostic records for organizers.
+- Participant pages must not query or render this table.
+- Leaderboard sorting and CSV export should continue to use `evaluation_results`.
+- Re-evaluation creates new per-query result rows tied to the new ground-truth version.
 
 ## audit_events
 

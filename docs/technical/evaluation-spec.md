@@ -4,7 +4,7 @@
 
 The system evaluates successful submissions internally after validation.
 
-Participants see their own scores immediately. Organizers see all scores and a private leaderboard.
+Participants see their own aggregate run-level scores immediately. Organizers see all aggregate scores, organizer-only per-query diagnostics, and a private leaderboard.
 
 Ground truth is uploaded or configured by organizers and must not be accessible to participants.
 
@@ -12,7 +12,7 @@ Ground-truth files are stored on the server local filesystem.
 
 ## Implementation Status
 
-Evaluation is implemented for accepted participant uploads. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
+Aggregate run-level evaluation is implemented for accepted participant uploads. Organizer-only per-query metric persistence and display are planned by this specification but not yet implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
 ## Subtask A: Language Model Retrieval
 
@@ -65,6 +65,8 @@ nDCG@k = DCG@k / IDCG@k
 
 The final score is the macro-average nDCG across evaluated queries, with each query weighted equally.
 
+The system should retain the underlying per-query nDCG@k values for organizer diagnostics. These per-query values are not participant-visible scores.
+
 ## Subtask B: Image Style Transfer Model Retrieval
 
 ### Metric
@@ -93,6 +95,8 @@ MRR = mean(1 / rank_q)
 
 Every submitted run must include all candidate models for every query. If the correct model is omitted, the submission is rejected during validation rather than scored as `0`.
 
+The system should retain the underlying per-query reciprocal-rank values for organizer diagnostics. These per-query values are not participant-visible scores.
+
 ## Multi-Run Evaluation
 
 Each distinct `RunID` is evaluated independently.
@@ -103,6 +107,9 @@ For a successful submission containing multiple run IDs:
 - Store all run-level scores.
 - Show participants their own run-level results.
 - Include all 5 submitted runs as official runs in the private leaderboard.
+- Store per-query metric details for each run and query.
+- Show per-query metric details only to organizers, such as on the organizer submission detail page.
+- Keep participant pages, private leaderboard sorting, and leaderboard CSV export based on aggregate run-level scores unless a later policy changes that behavior.
 
 ## Ground Truth Versioning
 
@@ -118,6 +125,7 @@ Store:
 - Active/inactive status.
 
 Each evaluation result must reference the ground-truth version used.
+Each per-query evaluation result must also reference the same ground-truth version used for the aggregate score.
 
 ## Re-Evaluation
 
@@ -127,6 +135,7 @@ Re-evaluation should:
 
 - Preserve the original submitted file.
 - Create new evaluation results tied to the new ground-truth version.
+- Create new per-query evaluation results tied to the new ground-truth version.
 - Keep prior evaluation results for audit unless explicitly superseded.
 - Keep participant-visible scores available; the system does not hide scores after correction.
 - Not allow participant re-upload after a successful submission.

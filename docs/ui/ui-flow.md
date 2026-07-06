@@ -319,12 +319,15 @@ Behavior:
 
 - Participants can only view their own submissions.
 - Scores remain visible after evaluation.
+- Participants see aggregate run-level metrics only.
+- Participants do not see per-query metric details.
 - No re-upload action appears after successful submission.
 
 UI modernization notes:
 
 - Use a concise metadata summary and a score table.
 - Highlight official metric columns without hiding secondary metrics.
+- Keep organizer-only per-query diagnostics out of participant views.
 
 ## Organizer Flow
 
@@ -554,8 +557,18 @@ Content:
 - Submitted timestamp in JST.
 - Validation summary.
 - Run IDs.
-- Scores, if evaluated.
+- Aggregate run-level scores, if evaluated.
+- Organizer-only per-query metric diagnostics, if evaluated.
 - Ground-truth version used.
+
+Per-query diagnostics:
+
+- Group or filter by RunID.
+- Show query/topic ID.
+- Show metric name.
+- Show metric value.
+- Keep this section organizer-only.
+- Use compact tables or grouped sections so large query sets remain scannable.
 
 Actions:
 

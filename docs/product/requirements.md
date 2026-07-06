@@ -158,6 +158,14 @@ Subtask B:
 - Each query has one relevant model.
 
 Participants should see their scores immediately after a successful submission.
+Participant-visible scores must remain run-level aggregate scores only.
+
+The system should also retain per-query metric details for organizer diagnostics:
+
+- Subtask A: per-query nDCG@1, nDCG@3, and nDCG@5 for each RunID and query.
+- Subtask B: per-query reciprocal rank for each RunID and query.
+- Per-query metric details are organizer-only and must not be visible to participant teams.
+- The private leaderboard and leaderboard CSV export should continue to use aggregate run-level metrics unless a later requirement explicitly changes them.
 
 ## Ground Truth Management
 
@@ -189,6 +197,7 @@ The leaderboard should support:
 - CSV export.
 
 Participants must not see the global leaderboard.
+Participants must not see organizer-only per-query metric details.
 
 All 5 runs in a successful submission are official runs; organizers do not need to select a single official run.
 
@@ -199,6 +208,7 @@ The system should retain:
 - All successful submissions.
 - Failed validation attempts and validation errors.
 - Evaluation results.
+- Organizer-only per-query evaluation results.
 - Ground-truth versions.
 - Submission timestamps in JST.
 - User/team identity for each action.

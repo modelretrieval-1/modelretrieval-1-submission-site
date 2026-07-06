@@ -327,13 +327,16 @@ Stories:
 - Implement MRR.
 - Evaluate each RunID independently.
 - Store run-level scores.
+- Store organizer-only per-query metric details.
 - Show participant results.
 - Reference active ground-truth version.
 
 Required tests:
 
 - Unit tests for nDCG and MRR with known expected values.
+- Unit tests for per-query nDCG and reciprocal-rank outputs.
 - Integration tests for accepted submission evaluation.
+- Integration tests that per-query rows are persisted and not exposed to team pages.
 - E2E test for valid upload and score display.
 
 ### Epic 7: Organizer Review and Leaderboard
@@ -479,6 +482,7 @@ Status:
 
 - Complete for the planned evaluation and participant-result scope.
 - Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, unit tests with known expected values, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, `evaluated` status updates, upload-page score display, team-dashboard latest score summaries, one-successful-submission enforcement with friendly errors, JST deadline/open-period enforcement, and organizer submission-period controls.
+- Planned follow-up: persist and show organizer-only per-query metric details while keeping participant pages and leaderboard exports aggregate-only.
 
 ### Sprint 4: Organizer Operations
 

@@ -45,6 +45,9 @@ For the latest implementation status, use `../../HANDOFF.md`. This document shou
 - Subtask A nDCG is macro-averaged equally across queries.
 - Subtask B submissions must include all models; missing correct models are validation errors.
 - Tied scores are allowed and resolved by line order.
+- Participant-visible scores remain run-level aggregate metrics only.
+- Per-query metrics are stored and shown only to organizers for diagnostics.
+- Private leaderboard sorting and CSV export continue to use aggregate run-level metrics, not per-query rows.
 
 ## Organizer Workflow
 

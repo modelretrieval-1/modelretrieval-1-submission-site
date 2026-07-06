@@ -237,6 +237,7 @@ Should include:
 - `runs`
 - `validation_errors`
 - `evaluation_results`
+- `evaluation_query_results`
 - `audit_events`
 
 Important relationships:
@@ -247,7 +248,9 @@ Important relationships:
 - Successful submissions have runs.
 - Rejected submissions have validation errors.
 - Evaluated submissions have evaluation results.
+- Evaluated submissions have organizer-only per-query evaluation results.
 - Evaluation results reference the ground-truth version used.
+- Per-query evaluation results reference the ground-truth version used.
 
 Best home:
 
