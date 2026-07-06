@@ -11,7 +11,6 @@ from app.ground_truth import JST, GroundTruthRequirements, jst_now_text, safe_fi
 
 MAX_RUNS_PER_SUBTASK = 5
 EXPECTED_FIELD_COUNT = 6
-ALLOWED_SUBMISSION_SUFFIX = ".txt"
 
 
 @dataclass(frozen=True)
@@ -393,18 +392,6 @@ def validate_submission_against_requirements(
         errors=tuple(errors),
         ground_truth_version_id=requirements.ground_truth_version_id,
     )
-
-
-def validate_submission_filename(filename: str) -> tuple[SubmissionValidationError, ...]:
-    if Path(filename).suffix.lower() != ALLOWED_SUBMISSION_SUFFIX:
-        return (
-            SubmissionValidationError(
-                field_name="file",
-                error_code="invalid_file_extension",
-                message="Submission file must be a .txt file.",
-            ),
-        )
-    return ()
 
 
 def validate_submission_size(

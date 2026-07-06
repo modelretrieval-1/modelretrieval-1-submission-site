@@ -202,7 +202,7 @@ def test_team_can_open_upload_page_for_eligible_subtask():
         assert response.status_code == 200
         assert "Upload Subtask A Submission" in response.text
         assert (
-            "Select a submission period and upload one TREC_EVAL `.txt` file for evaluation."
+            "Select a submission period and upload one TREC_EVAL-format file for evaluation."
             in response.text
         )
         assert "Submission File" in response.text
@@ -247,7 +247,7 @@ def test_team_cannot_open_upload_page_for_ineligible_subtask():
         assert response.headers["location"] == "/team"
 
 
-def test_non_txt_submission_is_rejected_and_persisted():
+def test_submission_with_non_txt_extension_is_accepted_when_content_is_valid():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
         organizer, team = seed_accounts(settings)
@@ -258,18 +258,21 @@ def test_non_txt_submission_is_rejected_and_persisted():
         response = client.post(
             "/team/submissions/A/new",
             data={"submission_period": "normal"},
-            files={"file": ("submission.csv", b"not trec", "text/csv")},
+            files={"file": ("submission.csv", valid_submission_content(), "text/csv")},
         )
 
         assert response.status_code == 200
-        assert "Submission file must be a .txt file." in response.text
+        assert "Submission accepted and evaluated." in response.text
 
         with connect(settings.database_path) as connection:
-            submission = connection.execute("SELECT status FROM submissions").fetchone()
-            error = connection.execute("SELECT error_code FROM validation_errors").fetchone()
+            submission = connection.execute(
+                "SELECT status, original_filename FROM submissions"
+            ).fetchone()
+            error_count = connection.execute("SELECT COUNT(*) FROM validation_errors").fetchone()[0]
 
-        assert submission["status"] == "rejected"
-        assert error["error_code"] == "invalid_file_extension"
+        assert submission["status"] == "evaluated"
+        assert submission["original_filename"] == "submission.csv"
+        assert error_count == 0
 
 
 def test_oversized_submission_is_rejected_and_persisted():

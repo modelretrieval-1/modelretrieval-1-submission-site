@@ -28,7 +28,6 @@ from app.submissions import (
     persist_validation_errors,
     store_submission_file,
     validate_submission_against_requirements,
-    validate_submission_filename,
     validate_submission_size,
 )
 from app.web import get_session_account, redirect, require_team, templates
@@ -181,12 +180,9 @@ async def upload_submission(
 
     filename = file.filename or ""
     content = await file.read()
-    guard_errors = (
-        validate_submission_filename(filename)
-        + validate_submission_size(
-            len(content),
-            max_upload_bytes=app_settings.max_upload_bytes,
-        )
+    guard_errors = validate_submission_size(
+        len(content),
+        max_upload_bytes=app_settings.max_upload_bytes,
     )
 
     with connect(app_settings.database_path) as connection:

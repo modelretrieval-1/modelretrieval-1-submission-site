@@ -7,7 +7,7 @@
     <div class="page-header">
       <div>
         <h1>Upload Subtask {{ subtask }} Submission</h1>
-        <p>Select a submission period and upload one TREC_EVAL `.txt` file for evaluation.</p>
+        <p>Select a submission period and upload one TREC_EVAL-format file for evaluation.</p>
       </div>
       <div class="header-actions">
         <a class="btn btn-outline-secondary btn-sm" href="/team">Team dashboard</a>
@@ -99,8 +99,8 @@
       </fieldset>
       <div>
         <label class="form-label" for="submission_file">Submission file</label>
-        <input class="form-control" id="submission_file" name="file" type="file" accept=".txt" required>
-        <div class="form-text">Upload one TREC_EVAL `.txt` file, maximum 10 MB and up to 5 RunID values.</div>
+        <input class="form-control" id="submission_file" name="file" type="file" required>
+        <div class="form-text">Upload one TREC_EVAL-format file, maximum 10 MB and up to 5 RunID values. The filename extension is not checked.</div>
       </div>
       <div class="action-row">
         <button class="btn btn-primary" type="submit">Upload</button>
