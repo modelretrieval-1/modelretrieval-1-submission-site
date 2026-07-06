@@ -9,12 +9,12 @@ Document role: this file is only the documentation map. Keep current implementat
 - [Requirements](product/requirements.md): product requirements and policy decisions.
 - [Decisions](product/decisions.md): resolved product and implementation decisions.
 - [User Stories](product/user-stories.md): participant and organizer stories.
-- [Open Questions](product/open-questions.md): compatibility pointer to resolved decisions.
+- [Open Questions](product/open-questions.md): legacy pointer to resolved decisions.
 
 ## UI
 
 - [UI Flow](ui/ui-flow.md): screen and workflow definitions.
-- [Application UI Redesign](ui/app-ui-redesign.md): planned application-shell and dashboard redesign.
+- [Application UI Redesign](ui/app-ui-redesign.md): pointer to the archived completed app-shell redesign plan.
 
 ## Technical
 
@@ -29,11 +29,14 @@ Document role: this file is only the documentation map. Keep current implementat
 ## Planning
 
 - [Implementation Plan](planning/implementation-plan.md): Scrum plan, epics, testing strategy, and sprint plan.
-- [Documentation Cleanup Plan](planning/documentation-cleanup-plan.md): cleanup plan for reducing documentation redundancy.
+- [Documentation Cleanup Plan](planning/documentation-cleanup-plan.md): pointer to the archived completed cleanup plan.
 
 ## Archive
 
 - [Archived Refactor Plan](archive/refactor-plan.md): completed route/web-layer refactor plan and implementation record.
+- [Archived Application UI Redesign](archive/app-ui-redesign.md): completed app-shell redesign plan and acceptance criteria.
+- [Archived Documentation Cleanup Plan](archive/documentation-cleanup-plan.md): completed documentation cleanup plan and implementation record.
+- [Archived Open Questions](archive/open-questions.md): historical pointer for resolved product questions.
 
 ## Deployment
 

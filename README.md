@@ -28,7 +28,7 @@ All checks passed
 
 The app remains a FastAPI/Jinja2 server-rendered system. The UI now uses Bootstrap 5 for navigation, forms, tables, alerts, badges, and responsive layout, with `app/static/app.css` reserved for project-specific polish. React, Vue, and a separate frontend build pipeline are intentionally not part of this phase.
 
-The current UI slice is the Sprint 6A application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, a clearer participant submission dashboard, and normalized organizer/participant workflow pages. Automated responsive/accessibility-oriented regression checks are in place; remaining work should continue from `docs/ui/app-ui-redesign.md` with the visual browser smoke verification.
+The current UI slice is the implemented Sprint 6A application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, a clearer participant submission dashboard, and normalized organizer/participant workflow pages. Automated responsive/accessibility-oriented regression checks are in place; remaining UI work is visual browser smoke verification tracked in `HANDOFF.md`.
 
 ## Development Setup
 
@@ -79,11 +79,11 @@ uv lock
 - [docs/index.md](docs/index.md): organized documentation index.
 - [docs/product/requirements.md](docs/product/requirements.md): product requirements.
 - [docs/product/decisions.md](docs/product/decisions.md): resolved product and implementation decisions.
-- [docs/ui/app-ui-redesign.md](docs/ui/app-ui-redesign.md): application-shell and dashboard redesign plan and acceptance criteria.
+- [docs/ui/ui-flow.md](docs/ui/ui-flow.md): active screen and workflow specification.
 - [docs/technical/data-model.md](docs/technical/data-model.md): database/entity design.
 - [docs/technical/database-migrations.md](docs/technical/database-migrations.md): Alembic migration adoption plan.
 - [docs/technical/submission-spec.md](docs/technical/submission-spec.md): participant upload format and validation rules.
 - [docs/deployment/deployment-runbook.md](docs/deployment/deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
 - [docs/planning/implementation-plan.md](docs/planning/implementation-plan.md): Scrum plan, epics, testing strategy, sprint plan.
-- [docs/planning/documentation-cleanup-plan.md](docs/planning/documentation-cleanup-plan.md): documentation cleanup plan and implementation record.
+- [docs/planning/documentation-cleanup-plan.md](docs/planning/documentation-cleanup-plan.md): pointer to the archived documentation cleanup plan.
 - [HANDOFF.md](HANDOFF.md): concise continuation guide for a new Codex session.

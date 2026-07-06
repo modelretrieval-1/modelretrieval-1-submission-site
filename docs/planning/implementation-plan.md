@@ -25,7 +25,7 @@ Current UI direction:
 
 - Continue using FastAPI, Jinja2, Bootstrap 5, and local CSS.
 - Redesign authenticated pages around an application shell with role-aware navigation.
-- Use `../ui/app-ui-redesign.md` as the source of truth before implementation.
+- Use `../ui/ui-flow.md` as the active screen and workflow source of truth.
 - Keep the richer UI operational and dashboard-like, not marketing-style.
 
 Current refactor state:
@@ -410,7 +410,7 @@ Required tests:
 
 ## Suggested Sprint Plan
 
-Current implementation status:
+Milestone summary:
 
 - Sprint 0 is complete.
 - Sprint 1 is complete for the planned v1 account scope.
@@ -486,7 +486,6 @@ Status:
 
 - Complete for the planned validation-core scope.
 - Completed: `/admin/ground-truth`, upload form, local file storage under `storage/ground-truth`, checksum calculation, `ground_truth_versions` row creation, upload history table, organizer-only access, Subtask A ground-truth column validation, Subtask B ground-truth column validation, activation of one ground-truth version per subtask, TREC_EVAL parser with field-level validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, active ground-truth requirement extraction, combined validation against active ground truth, participant upload UI, validation failure persistence, accepted submission persistence, run metadata persistence.
-- Remaining validation-core polish can be handled later if period-reopen UI or deadline enforcement is prioritized before evaluation.
 
 ### Sprint 3: Evaluation and Participant Results
 
@@ -620,7 +619,7 @@ Technical decisions:
 
 Status:
 
-- Documentation exists in `../ui/app-ui-redesign.md`.
+- The completed redesign plan is archived at `../archive/app-ui-redesign.md`.
 - Core implementation slices are complete: shared authenticated shell and role-aware navigation, participant upload navigation, participant dashboard submission availability by subtask and period, organizer dashboard period state, organizer dashboard recent validation failures, upload page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
 - Automated local UI regression coverage is complete for mobile navigation controls, public/authenticated shell separation, responsive table wrappers, visible form labels, and compact-row overflow guards.
 - Remaining implementation should focus on visual browser smoke verification when browser automation is available, then staging end-to-end operations verification and production hardening.

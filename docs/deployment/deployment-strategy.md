@@ -25,18 +25,18 @@ The existing repository documents remain useful and should not be replaced.
 - `../technical/evaluation-spec.md`: evaluation and leaderboard behavior.
 - `../ui/ui-flow.md`: user-facing workflow expectations.
 
-This deployment document set adds operational detail for Sprint 6.
+This deployment document set records the deployment model implemented for Sprint 6. Use `deployment-runbook.md` for commands and operational procedures.
 
-## Required Deployment Documents
+## Deployment Document Set
 
-Recommended document set:
+Current document set:
 
 - `deployment-strategy.md`: environment model, release flow, Docker Compose recommendation, and rollback strategy.
 - `deployment-environments.md`: per-environment domains, data paths, environment variables, and secrets.
 - `deployment-runbook.md`: setup, deploy, promote, rollback, backup, and restore commands.
 - `deployment-checklist.md`: pre-launch and per-release verification checklist.
 
-These four documents are enough before writing deployment code, service files, or CI/CD workflows.
+Use this file for architecture and release-model context. Use `deployment-runbook.md` as the operational entry point, with the other files as focused references.
 
 ## Recommended Architecture
 
@@ -311,7 +311,7 @@ Data rollback:
 - Stop the production container before restore.
 - Start production and run smoke checks after restore.
 
-The first deployment iteration should avoid schema migrations. If migrations are added later, migration and rollback rules should be documented before production use.
+Schema migrations are managed with Alembic. Staging and production deployments run migrations before starting the app, and production rollback should use the pre-deploy backup if a migration damages data or schema state.
 
 ## Security Baseline
 

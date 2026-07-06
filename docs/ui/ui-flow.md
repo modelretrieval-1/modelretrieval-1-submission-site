@@ -12,13 +12,13 @@ The main UI flow is implemented. Use `../../HANDOFF.md` for the detailed current
 
 ## Application UI Redesign
 
-The current UI slice makes the system feel like an application rather than a set of separate web pages.
+The implemented UI slice makes the system feel like an application rather than a set of separate web pages.
 
-Source of truth:
+Historical implementation record:
 
-- `app-ui-redesign.md`
+- `../archive/app-ui-redesign.md`
 
-Key decisions:
+Current decisions:
 
 - Keep FastAPI, Jinja2, Bootstrap 5, and local CSS.
 - Continue the authenticated app shell with persistent role-aware navigation.
@@ -710,9 +710,9 @@ Organizer navigation:
 - Change password.
 - Logout.
 
-## MVP Screen Set
+## Implemented MVP Screen Set
 
-The first coding milestone should include:
+The implemented MVP screen set includes:
 
 - Login.
 - Team dashboard.
@@ -725,7 +725,7 @@ The first coding milestone should include:
 - Submissions table.
 - Private leaderboard.
 
-The second milestone can add:
+Later or extended workflow screens include:
 
 - Organizer user management.
 - Submission period editing.

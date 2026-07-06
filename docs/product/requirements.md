@@ -229,7 +229,7 @@ The system should retain:
 
 The application remains a server-rendered FastAPI/Jinja2 app. The completed UI modernization improves clarity and usability without introducing a single-page application framework or frontend build pipeline.
 
-The next UI direction is documented in `../ui/app-ui-redesign.md`. The product should feel more like an application console than a collection of standalone web pages.
+The active UI flow is documented in `../ui/ui-flow.md`. The product should feel more like an application console than a collection of standalone web pages.
 
 Implemented UI direction:
 
