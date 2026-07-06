@@ -2,7 +2,16 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.db import connect, initialize_database, verify_database_current
+from alembic import command
+
+from app.db import (
+    SCHEMA,
+    alembic_config,
+    connect,
+    initialize_database,
+    run_migrations,
+    verify_database_current,
+)
 
 
 class DatabaseTests(unittest.TestCase):
@@ -81,6 +90,45 @@ class DatabaseTests(unittest.TestCase):
                 index_sql,
             )
             self.assertIn("is_current = 1", index_sql)
+
+    def test_migrations_stamp_legacy_baseline_database_with_empty_version_table(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            database_path = Path(tmp) / "app.sqlite3"
+            config = alembic_config(database_path)
+
+            command.upgrade(config, "20260706_0001")
+            with connect(database_path) as connection:
+                connection.execute("DELETE FROM alembic_version")
+                connection.commit()
+
+            run_migrations(database_path)
+
+            with connect(database_path) as connection:
+                revision = connection.execute("SELECT version_num FROM alembic_version").fetchone()
+                permissions_table = connection.execute(
+                    """
+                    SELECT name FROM sqlite_master
+                    WHERE type = 'table' AND name = 'resubmission_permissions'
+                    """
+                ).fetchone()
+
+            self.assertEqual(revision["version_num"], "20260706_0002")
+            self.assertIsNotNone(permissions_table)
+
+    def test_migrations_stamp_unversioned_current_schema_database(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            database_path = Path(tmp) / "app.sqlite3"
+
+            with connect(database_path) as connection:
+                connection.executescript(SCHEMA)
+                connection.commit()
+
+            run_migrations(database_path)
+
+            with connect(database_path) as connection:
+                revision = connection.execute("SELECT version_num FROM alembic_version").fetchone()
+
+            self.assertEqual(revision["version_num"], "20260706_0002")
 
 
 if __name__ == "__main__":

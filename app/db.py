@@ -235,18 +235,31 @@ def _current_revision(connection: sqlite3.Connection) -> str | None:
     return row[0]
 
 
+def _column_names(connection: sqlite3.Connection, table_name: str) -> set[str]:
+    rows = connection.execute(f"PRAGMA table_info({table_name})").fetchall()
+    return {row["name"] for row in rows}
+
+
+def _schema_revision_for_unversioned_database(
+    connection: sqlite3.Connection,
+    config: Config,
+) -> str:
+    table_names = _table_names(connection)
+    submission_columns = _column_names(connection, "submissions")
+    if "resubmission_permissions" in table_names and "is_current" in submission_columns:
+        return _head_revision(config)
+    return "20260706_0001"
+
+
 def _head_revision(config: Config) -> str:
     script = ScriptDirectory.from_config(config)
     return script.get_current_head()
 
 
 def _stamp_existing_baseline_if_needed(database_path: Path, config: Config) -> None:
-    if not database_path.exists():
-        return
-
     with connect(database_path) as connection:
         table_names = _table_names(connection)
-        if "alembic_version" in table_names or not table_names:
+        if not table_names:
             return
 
         missing_tables = EXPECTED_BASELINE_TABLES - table_names
@@ -257,7 +270,12 @@ def _stamp_existing_baseline_if_needed(database_path: Path, config: Config) -> N
                 f"baseline schema. Missing tables: {missing}."
             )
 
-    command.stamp(config, "20260706_0001")
+        current_revision = _current_revision(connection)
+        if current_revision is not None:
+            return
+        stamp_revision = _schema_revision_for_unversioned_database(connection, config)
+
+    command.stamp(config, stamp_revision, purge=True)
 
 
 def run_migrations(database_path: Path) -> None:
