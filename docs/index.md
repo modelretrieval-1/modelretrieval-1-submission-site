@@ -29,6 +29,7 @@ Document role: this file is only the documentation map. Keep current implementat
 ## Planning
 
 - [Implementation Plan](planning/implementation-plan.md): Scrum plan, epics, testing strategy, and sprint plan.
+- [Organizer-Approved Resubmission Plan](planning/resubmission-plan.md): proposed plan for allowing organizer-approved replacement submissions while preserving organizer-only metric history.
 - [Documentation Cleanup Plan](planning/documentation-cleanup-plan.md): pointer to the archived completed cleanup plan.
 
 ## Archive
