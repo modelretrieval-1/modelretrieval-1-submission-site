@@ -43,6 +43,26 @@ class QueryEvaluationResult:
 
 
 @dataclass(frozen=True)
+class MetricColumn:
+    key: str
+    label: str
+    is_primary: bool = False
+
+
+@dataclass(frozen=True)
+class PivotedMetricRow:
+    run_id: str
+    metric_values: dict[str, float]
+    topic_id: str | None = None
+
+
+@dataclass(frozen=True)
+class PivotedMetricTable:
+    columns: tuple[MetricColumn, ...]
+    rows: tuple[PivotedMetricRow, ...]
+
+
+@dataclass(frozen=True)
 class TeamSubmissionSummary:
     submission_id: int
     subtask: str
@@ -50,6 +70,7 @@ class TeamSubmissionSummary:
     original_filename: str
     submitted_at_jst: str
     metrics: tuple[EvaluationResult, ...]
+    metric_table: PivotedMetricTable
 
 
 @dataclass(frozen=True)
@@ -62,6 +83,92 @@ class LeaderboardRow:
     run_id: str
     submitted_at_jst: str
     metric_values: dict[str, float]
+
+
+METRIC_LABELS = {
+    "ndcg@1": "nDCG@1",
+    "ndcg@3": "nDCG@3",
+    "ndcg@5": "nDCG@5",
+    "mrr": "MRR",
+    "reciprocal_rank": "Reciprocal Rank",
+}
+METRIC_DISPLAY_ORDER = {
+    "ndcg@1": 1,
+    "ndcg@3": 2,
+    "ndcg@5": 3,
+    "mrr": 4,
+    "reciprocal_rank": 5,
+}
+PRIMARY_METRICS = {"ndcg@3", "ndcg@5", "mrr"}
+
+
+def metric_label(metric_name: str) -> str:
+    return METRIC_LABELS.get(metric_name, metric_name)
+
+
+def metric_sort_key(metric_name: str) -> tuple[int, str]:
+    return (METRIC_DISPLAY_ORDER.get(metric_name, 100), metric_name)
+
+
+def pivot_evaluation_results(
+    metrics: tuple[EvaluationResult, ...],
+) -> PivotedMetricTable:
+    metric_names = tuple(sorted({metric.metric_name for metric in metrics}, key=metric_sort_key))
+    columns = tuple(
+        MetricColumn(
+            key=metric_name,
+            label=metric_label(metric_name),
+            is_primary=metric_name in PRIMARY_METRICS,
+        )
+        for metric_name in metric_names
+    )
+
+    run_order: list[str] = []
+    values_by_run: dict[str, dict[str, float]] = {}
+    for metric in metrics:
+        if metric.run_id not in values_by_run:
+            run_order.append(metric.run_id)
+            values_by_run[metric.run_id] = {}
+        values_by_run[metric.run_id][metric.metric_name] = metric.metric_value
+
+    rows = tuple(
+        PivotedMetricRow(run_id=run_id, metric_values=values_by_run[run_id])
+        for run_id in run_order
+    )
+    return PivotedMetricTable(columns=columns, rows=rows)
+
+
+def pivot_query_evaluation_results(
+    metrics: tuple[QueryEvaluationResult, ...],
+) -> PivotedMetricTable:
+    metric_names = tuple(sorted({metric.metric_name for metric in metrics}, key=metric_sort_key))
+    columns = tuple(
+        MetricColumn(
+            key=metric_name,
+            label=metric_label(metric_name),
+            is_primary=metric_name in PRIMARY_METRICS,
+        )
+        for metric_name in metric_names
+    )
+
+    row_order: list[tuple[str, str]] = []
+    values_by_row: dict[tuple[str, str], dict[str, float]] = {}
+    for metric in metrics:
+        key = (metric.run_id, metric.topic_id)
+        if key not in values_by_row:
+            row_order.append(key)
+            values_by_row[key] = {}
+        values_by_row[key][metric.metric_name] = metric.metric_value
+
+    rows = tuple(
+        PivotedMetricRow(
+            run_id=run_id,
+            topic_id=topic_id,
+            metric_values=values_by_row[(run_id, topic_id)],
+        )
+        for run_id, topic_id in row_order
+    )
+    return PivotedMetricTable(columns=columns, rows=rows)
 
 
 def dcg(relevance_scores: list[float]) -> float:
@@ -483,17 +590,21 @@ def list_latest_team_submission_summaries(
     for row in rows:
         latest_by_subtask.setdefault(row["subtask"], row)
 
-    return tuple(
-        TeamSubmissionSummary(
-            submission_id=row["id"],
-            subtask=row["subtask"],
-            status=row["status"],
-            original_filename=row["original_filename"],
-            submitted_at_jst=row["submitted_at_jst"],
-            metrics=list_submission_results(connection, submission_id=row["id"]),
+    summaries: list[TeamSubmissionSummary] = []
+    for row in sorted(latest_by_subtask.values(), key=lambda item: item["subtask"]):
+        metrics = list_submission_results(connection, submission_id=row["id"])
+        summaries.append(
+            TeamSubmissionSummary(
+                submission_id=row["id"],
+                subtask=row["subtask"],
+                status=row["status"],
+                original_filename=row["original_filename"],
+                submitted_at_jst=row["submitted_at_jst"],
+                metrics=metrics,
+                metric_table=pivot_evaluation_results(metrics),
+            )
         )
-        for row in sorted(latest_by_subtask.values(), key=lambda item: item["subtask"])
-    )
+    return tuple(summaries)
 
 
 def list_leaderboard_rows(

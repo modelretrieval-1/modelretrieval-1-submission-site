@@ -374,10 +374,10 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
         assert response.status_code == 200
         assert "Submission accepted and evaluated." in response.text
         assert "Run-level metrics persisted for this accepted submission." in response.text
-        assert "ndcg@1" in response.text
-        assert "ndcg@3" in response.text
-        assert "ndcg@5" in response.text
-        assert "1.000000" in response.text
+        assert "nDCG@1" in response.text
+        assert "nDCG@3" in response.text
+        assert "nDCG@5" in response.text
+        assert "1.0000" in response.text
 
         with connect(settings.database_path) as connection:
             submission = connection.execute(
@@ -437,7 +437,8 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
         assert "Latest Submissions" in dashboard.text
         assert "Subtask A" in dashboard.text
         assert "evaluated" in dashboard.text
-        assert "run1 ndcg@5" in dashboard.text
+        assert "run1" in dashboard.text
+        assert "nDCG@5" in dashboard.text
         assert "Per-Query Metrics" not in dashboard.text
         assert "reciprocal_rank" not in dashboard.text
 
@@ -469,8 +470,8 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
 
         assert response.status_code == 200
         assert "Submission accepted and evaluated." in response.text
-        assert "mrr" in response.text
-        assert "1.000000" in response.text
+        assert "MRR" in response.text
+        assert "1.0000" in response.text
 
         with connect(settings.database_path) as connection:
             submission = connection.execute("SELECT status FROM submissions").fetchone()
@@ -503,7 +504,8 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
 
         assert dashboard.status_code == 200
         assert "Subtask B" in dashboard.text
-        assert "run1 mrr" in dashboard.text
+        assert "run1" in dashboard.text
+        assert "MRR" in dashboard.text
         assert "Per-Query Metrics" not in dashboard.text
         assert "reciprocal_rank" not in dashboard.text
 
@@ -661,8 +663,9 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
 
         dashboard_after_replacement = client.get("/team")
 
-        assert "run2 ndcg@5" in dashboard_after_replacement.text
-        assert "run1 ndcg@5" not in dashboard_after_replacement.text
+        assert "run2" in dashboard_after_replacement.text
+        assert "nDCG@5" in dashboard_after_replacement.text
+        assert "run1" not in dashboard_after_replacement.text
         assert "Upload replacement" not in dashboard_after_replacement.text
 
         with connect(settings.database_path) as connection:

@@ -32,7 +32,7 @@
       </div>
     {% endif %}
 
-    {% if metrics %}
+    {% if metric_table.rows %}
       <div class="section-header">
         <div>
           <h2>Scores</h2>
@@ -40,20 +40,25 @@
         </div>
       </div>
       <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
+        <table class="table table-sm table-hover align-middle metric-table">
           <thead class="table-light">
             <tr>
               <th>RunID</th>
-              <th>Metric</th>
-              <th>Value</th>
+              {% for column in metric_table.columns %}
+                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+              {% endfor %}
             </tr>
           </thead>
           <tbody>
-            {% for metric in metrics %}
+            {% for row in metric_table.rows %}
               <tr>
-                <td>{{ metric.run_id }}</td>
-                <td>{{ metric.metric_name }}</td>
-                <td class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</td>
+                <td>{{ row.run_id }}</td>
+                {% for column in metric_table.columns %}
+                  {% set value = row.metric_values.get(column.key) %}
+                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
+                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
+                  </td>
+                {% endfor %}
               </tr>
             {% endfor %}
           </tbody>

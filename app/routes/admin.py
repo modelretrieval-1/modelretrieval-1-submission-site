@@ -27,6 +27,8 @@ from app.evaluation import (
     list_leaderboard_rows,
     list_submission_query_results,
     list_submission_results,
+    pivot_evaluation_results,
+    pivot_query_evaluation_results,
 )
 from app.ground_truth import (
     JST,
@@ -307,7 +309,9 @@ def render_admin_submission_detail(
             "validation_errors": validation_errors,
             "runs": runs,
             "metrics": metrics,
+            "metric_table": pivot_evaluation_results(metrics),
             "query_metrics": query_metrics,
+            "query_metric_table": pivot_query_evaluation_results(query_metrics),
             "history": history,
             "resubmission_permissions": resubmission_permissions,
             "success": success,

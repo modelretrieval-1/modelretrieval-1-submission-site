@@ -16,6 +16,7 @@ from app.evaluation import (
     list_submission_results,
     mark_evaluation_failed,
     persist_evaluation_results,
+    pivot_evaluation_results,
 )
 from app.ground_truth import JST, get_active_ground_truth_requirements, get_ground_truth_version
 from app.submissions import (
@@ -78,6 +79,7 @@ def render_submission_upload(
             "selected_period": selected_period,
             "errors": errors,
             "metrics": metrics,
+            "metric_table": pivot_evaluation_results(tuple(metrics)),
             "success": success,
         },
     )

@@ -119,15 +119,32 @@
                 <td>{{ submission.original_filename }}</td>
                 <td>{{ submission.submitted_at_jst }} JST</td>
                 <td>
-                  {% if submission.metrics %}
-                    <ul class="metric-list">
-                      {% for metric in submission.metrics %}
-                        <li>
-                          {{ metric.run_id }} {{ metric.metric_name }}:
-                          <span class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</span>
-                        </li>
-                      {% endfor %}
-                    </ul>
+                  {% if submission.metric_table.rows %}
+                    <div class="table-wrap">
+                      <table class="table table-sm align-middle metric-table compact-metric-table">
+                        <thead class="table-light">
+                          <tr>
+                            <th>RunID</th>
+                            {% for column in submission.metric_table.columns %}
+                              <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+                            {% endfor %}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for row in submission.metric_table.rows %}
+                            <tr>
+                              <td>{{ row.run_id }}</td>
+                              {% for column in submission.metric_table.columns %}
+                                {% set value = row.metric_values.get(column.key) %}
+                                <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
+                                  {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
+                                </td>
+                              {% endfor %}
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
                   {% else %}
                     <span class="text-muted">No scores yet</span>
                   {% endif %}

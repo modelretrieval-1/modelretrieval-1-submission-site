@@ -420,6 +420,33 @@ legend {
   padding-left: 18px;
 }
 
+.metric-table {
+  min-width: max-content;
+}
+
+.metric-table .metric-value {
+  text-align: right;
+}
+
+.metric-table .metric-primary {
+  background: var(--app-accent-soft);
+}
+
+.compact-metric-table {
+  font-size: 0.875rem;
+}
+
+.metric-table-scroll {
+  max-height: 520px;
+  overflow: auto;
+}
+
+.metric-table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 .detail-list {
   display: grid;
   grid-template-columns: minmax(140px, max-content) 1fr;

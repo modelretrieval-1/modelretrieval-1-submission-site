@@ -223,10 +223,10 @@ def test_organizer_can_view_evaluated_submission_detail_with_runs_and_metrics():
         assert "good.txt" in response.text
         assert "Submission Metadata" in response.text
         assert "run1" in response.text
-        assert "ndcg@1" in response.text
-        assert "ndcg@3" in response.text
-        assert "ndcg@5" in response.text
-        assert "1.000000" in response.text
+        assert "nDCG@1" in response.text
+        assert "nDCG@3" in response.text
+        assert "nDCG@5" in response.text
+        assert "1.0000" in response.text
         assert "Per-Query Metrics" in response.text
         assert "Organizer-only diagnostic metric details by run and query." in response.text
         assert "q1" in response.text

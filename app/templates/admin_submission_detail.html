@@ -219,22 +219,27 @@
         <p>Persisted run-level evaluation results.</p>
       </div>
     </div>
-    {% if metrics %}
+    {% if metric_table.rows %}
       <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
+        <table class="table table-sm table-hover align-middle metric-table">
           <thead class="table-light">
             <tr>
               <th>RunID</th>
-              <th>Metric</th>
-              <th>Value</th>
+              {% for column in metric_table.columns %}
+                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+              {% endfor %}
             </tr>
           </thead>
           <tbody>
-            {% for metric in metrics %}
+            {% for row in metric_table.rows %}
               <tr>
-                <td>{{ metric.run_id }}</td>
-                <td>{{ metric.metric_name }}</td>
-                <td class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</td>
+                <td>{{ row.run_id }}</td>
+                {% for column in metric_table.columns %}
+                  {% set value = row.metric_values.get(column.key) %}
+                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
+                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
+                  </td>
+                {% endfor %}
               </tr>
             {% endfor %}
           </tbody>
@@ -250,24 +255,29 @@
         <p>Organizer-only diagnostic metric details by run and query.</p>
       </div>
     </div>
-    {% if query_metrics %}
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
+    {% if query_metric_table.rows %}
+      <div class="table-wrap metric-table-scroll">
+        <table class="table table-sm table-hover align-middle metric-table">
           <thead class="table-light">
             <tr>
               <th>RunID</th>
               <th>Query</th>
-              <th>Metric</th>
-              <th>Value</th>
+              {% for column in query_metric_table.columns %}
+                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+              {% endfor %}
             </tr>
           </thead>
           <tbody>
-            {% for metric in query_metrics %}
+            {% for row in query_metric_table.rows %}
               <tr>
-                <td>{{ metric.run_id }}</td>
-                <td>{{ metric.topic_id }}</td>
-                <td>{{ metric.metric_name }}</td>
-                <td class="metric-value">{{ "%.6f"|format(metric.metric_value) }}</td>
+                <td>{{ row.run_id }}</td>
+                <td>{{ row.topic_id }}</td>
+                {% for column in query_metric_table.columns %}
+                  {% set value = row.metric_values.get(column.key) %}
+                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
+                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
+                  </td>
+                {% endfor %}
               </tr>
             {% endfor %}
           </tbody>
