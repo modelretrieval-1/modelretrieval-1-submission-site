@@ -37,7 +37,7 @@ SQLite is appropriate because:
 Local filesystem storage is appropriate because:
 
 - Ground truth is required to live on the server.
-- Uploaded `.txt` files are small, with a 10 MB maximum.
+- Uploaded submission files are small, with a 10 MB maximum, and are validated by content rather than filename extension.
 - Organizers need downloadable bundles.
 - Evaluation should be reproducible from preserved files.
 

@@ -196,18 +196,19 @@ URL:
 
 Purpose:
 
-- Let a team upload one `.txt` submission file for one registered subtask and one selected submission period.
+- Let a team upload one submission file for one registered subtask and one selected submission period.
 
 Inputs:
 
 - Subtask selector: A or B, limited to registered subtasks.
 - Submission period selector: normal or late.
-- File input accepting `.txt`.
+- File input accepting any filename extension.
 
 Rules shown near the form:
 
-- One `.txt` file only.
+- One file only.
 - Maximum file size: 10 MB.
+- Filename extension is not checked; the content must be valid TREC_EVAL text.
 - Up to 5 `RunID` values.
 - TREC_EVAL format: `topicID Q0 docID Rank Score RunID`.
 - Every run must include all test queries.

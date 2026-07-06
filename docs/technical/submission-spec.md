@@ -9,7 +9,8 @@ The system supports two independent subtasks:
 
 Each subtask has its own submission limit of up to 5 runs per team per submission turn.
 
-Each upload must be a single `.txt` file. Zip files and other compressed formats are not accepted.
+Each upload must be a single file. Filename extensions are not used to accept or reject submissions.
+Files with any extension, or no extension, are accepted when their content is valid TREC_EVAL text.
 
 Maximum upload size: 10 MB.
 
@@ -27,12 +28,12 @@ sequenceDiagram
   participant Storage as Local storage
   participant Eval as Evaluation logic
 
-  Team->>App: Upload .txt for subtask and period
+  Team->>App: Upload one file for subtask and period
   App->>DB: Load session account
   App->>DB: Check team subtask eligibility
   App->>DB: Load selected submission period
   App->>App: Validate deadline or organizer override
-  App->>App: Validate filename and size
+  App->>App: Validate file size
   App->>DB: Check existing successful submission
 
   alt Existing successful submission

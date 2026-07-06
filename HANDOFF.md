@@ -6,7 +6,7 @@ Document role: this is the primary current-state handoff for future Codex or dev
 
 NTCIR-19 ModelRetrieval submission and evaluation system.
 
-The app accepts registered team submissions, validates TREC_EVAL `.txt` files, evaluates internally, shows participant scores immediately, and gives organizers private administration and leaderboard views.
+The app accepts registered team submissions, validates uploaded files by TREC_EVAL content, evaluates internally, shows participant scores immediately, and gives organizers private administration and leaderboard views.
 
 ## Current Phase
 
@@ -239,7 +239,7 @@ Key decisions already made:
 - Participant team self-service password change is implemented at `/account/password`.
 - Only registered teams can submit.
 - Subtask A and Subtask B submissions are uploaded separately.
-- Upload format is one `.txt` file, no zip, maximum 10 MB.
+- Upload format is one TREC_EVAL-format file, any filename extension, maximum 10 MB.
 - Each subtask allows up to 5 runs.
 - One successful submission per team/subtask/period.
 - Failed validation attempts do not count.
@@ -640,8 +640,8 @@ Build participant submission upload UI and persist validation failures.
 Target behavior:
 
 - Team dashboard links to a submission form for each eligible subtask.
-- Team uploads one `.txt` file for one subtask at a time.
-- Reject non-`.txt` files and files larger than 10 MB.
+- Team uploads one TREC_EVAL-format file for one subtask at a time.
+- Accept any filename extension and reject files larger than 10 MB.
 - Use active ground-truth requirements for validation.
 - Show validation errors immediately.
 - Persist failed validation attempts for audit/debugging.
@@ -651,7 +651,7 @@ Suggested tests:
 
 - Team can open the upload page for an eligible subtask.
 - Team cannot open the upload page for an ineligible subtask.
-- Non-`.txt` upload is rejected.
+- Files with non-TREC_EVAL content are rejected regardless of filename extension.
 - Upload larger than 10 MB is rejected.
 - Missing active ground truth shows a clear error.
 - Invalid TREC_EVAL content shows validation errors and persists a failed attempt.
@@ -664,7 +664,7 @@ Status:
 - Implemented route: `GET /team/submissions/{subtask}/new`.
 - Implemented route: `POST /team/submissions/{subtask}/new`.
 - Team users cannot access upload pages for unregistered subtasks.
-- Non-`.txt` files are rejected and persisted as rejected attempts.
+- Files with non-TREC_EVAL content are rejected and persisted as rejected attempts.
 - Files larger than the configured maximum are rejected and persisted as rejected attempts.
 - Missing active ground truth is rejected and persisted as a validation error.
 - Invalid TREC_EVAL content is rejected, stored, and persisted with validation errors.

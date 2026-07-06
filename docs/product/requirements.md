@@ -94,8 +94,10 @@ Each subtask has its own run limit.
 - A team may submit up to 5 runs for Subtask B in a successful submission.
 - If a submitted file or submission package contains more than 5 distinct runs for the selected subtask, the system must reject it immediately.
 - Each subtask must be uploaded separately.
-- Each upload is a single `.txt` file.
-- Compressed files are not accepted.
+- Each upload is a single file.
+- Filename extensions are not used to accept or reject submissions.
+- The system must validate the uploaded file by reading its content as TREC_EVAL text.
+- Files with any extension, or no extension, are accepted when their content satisfies the submission format.
 - Maximum upload size is 10 MB.
 
 ## Submission File Format

@@ -300,9 +300,9 @@ Goal:
 
 Stories:
 
-- Parse TREC_EVAL `.txt` files.
+- Parse uploaded files as TREC_EVAL text.
 - Enforce 10 MB limit.
-- Enforce `.txt` upload only.
+- Accept any filename extension and reject invalid content through submission-format validation.
 - Enforce up to 5 RunIDs.
 - Enforce all queries and all candidate models.
 - Allow ties by line order.
@@ -603,7 +603,7 @@ The MVP should include:
 - Password login for teams and organizers.
 - Organizer team creation.
 - Ground-truth upload.
-- Team upload of one `.txt` file per subtask/period.
+- Team upload of one TREC_EVAL-format file per subtask/period, regardless of filename extension.
 - Immediate validation.
 - Internal evaluation.
 - Participant score display.
