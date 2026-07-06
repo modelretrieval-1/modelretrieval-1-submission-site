@@ -67,6 +67,7 @@ Implemented Sprint 6A UI slices:
 - Organizer dashboard recent validation-failure panel.
 - Upload page period open/closed/reopened state beside normal/late choices.
 - Normalized organizer review pages for submissions, submission details, and leaderboard.
+- Planned metric-table display improvement: show aggregate and per-query metrics as pivoted tables with metric names as columns.
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.

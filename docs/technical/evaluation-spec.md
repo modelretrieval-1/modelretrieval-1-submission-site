@@ -111,6 +111,23 @@ For a successful submission containing multiple run IDs:
 - Show per-query metric details only to organizers, such as on the organizer submission detail page.
 - Keep participant pages, private leaderboard sorting, and leaderboard CSV export based on aggregate run-level scores unless a later policy changes that behavior.
 
+## Metric Display Shape
+
+Metric persistence remains normalized:
+
+- `evaluation_results` stores one aggregate metric row per submission, run, and metric.
+- `evaluation_query_results` stores one per-query metric row per submission, run, query, and metric.
+
+Organizer and participant UI tables should pivot these rows for readability:
+
+- Aggregate score tables should use one row per `RunID`, with metric names as columns.
+- Per-query diagnostic tables should use one row per `RunID` and query/topic ID, with metric names as columns.
+- Subtask A columns should be `nDCG@1`, `nDCG@3`, and `nDCG@5`.
+- Subtask B columns should be `MRR` for aggregate scores and `Reciprocal Rank` for per-query diagnostics.
+- Dense UI tables may display values with 4 decimal places; CSV exports may retain 6 decimal places.
+
+This is a presentation concern only. It does not require changing the normalized metric storage tables.
+
 ## Ground Truth Versioning
 
 Each ground-truth upload or configuration should create a version.

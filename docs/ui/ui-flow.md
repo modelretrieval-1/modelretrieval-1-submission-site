@@ -561,14 +561,64 @@ Content:
 - Organizer-only per-query metric diagnostics, if evaluated.
 - Ground-truth version used.
 
+Metric display:
+
+- Display aggregate run-level scores as a pivoted table, not one row per metric.
+- Use one row per `RunID`.
+- Use metric names as columns.
+- For Subtask A, aggregate metric columns should be `nDCG@1`, `nDCG@3`, and `nDCG@5`.
+- For Subtask B, the aggregate metric column should be `MRR`.
+- Right-align numeric metric values.
+- Prefer compact precision such as 4 decimal places in dense UI tables, while CSV export can retain 6 decimal places.
+- Highlight official primary metrics without hiding secondary metrics.
+
+Example Subtask A aggregate layout:
+
+```text
+RunID | nDCG@1 | nDCG@3 | nDCG@5
+Run01 | 0.4286 | 0.5627 | 0.5681
+Run02 | 0.5714 | 0.6042 | 0.6219
+```
+
+Example Subtask B aggregate layout:
+
+```text
+RunID | MRR
+Run01 | 0.8750
+Run02 | 0.8125
+```
+
 Per-query diagnostics:
 
 - Group or filter by RunID.
 - Show query/topic ID.
-- Show metric name.
-- Show metric value.
+- Display per-query metrics as a pivoted table, not one row per metric.
+- Use one row per `RunID` and query/topic ID.
+- Use metric names as columns.
+- For Subtask A, per-query columns should be `nDCG@1`, `nDCG@3`, and `nDCG@5`.
+- For Subtask B, the per-query column should be `Reciprocal Rank`.
 - Keep this section organizer-only.
 - Use compact tables or grouped sections so large query sets remain scannable.
+- Put large per-query tables in a constrained scroll region with a sticky table header.
+- Repeat or visually group `RunID` values so organizers can scan multi-run submissions.
+- Add later filters when needed: RunID selector, metric selector, query search, and sort by lowest selected metric.
+
+Example Subtask A per-query layout:
+
+```text
+RunID | Query | nDCG@1 | nDCG@3 | nDCG@5
+Run01 | 1     | 0.0000 | 0.0532 | 0.0490
+Run01 | 10    | 0.1429 | 0.4227 | 0.5329
+Run01 | 11    | 1.0000 | 0.6967 | 0.6974
+```
+
+Example Subtask B per-query layout:
+
+```text
+RunID | Query  | Reciprocal Rank
+Run01 | image1 | 1.0000
+Run01 | image2 | 0.5000
+```
 
 Actions:
 

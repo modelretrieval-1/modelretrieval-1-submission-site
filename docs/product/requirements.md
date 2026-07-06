@@ -170,6 +170,7 @@ The system should also retain per-query metric details for organizer diagnostics
 - Subtask B: per-query reciprocal rank for each RunID and query.
 - Per-query metric details are organizer-only and must not be visible to participant teams.
 - The private leaderboard and leaderboard CSV export should continue to use aggregate run-level metrics unless a later requirement explicitly changes them.
+- UI score tables should present metric names as columns where practical, rather than repeating one row per metric.
 
 ## Ground Truth Management
 
