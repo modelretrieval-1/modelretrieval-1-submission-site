@@ -34,6 +34,7 @@ Document role: this file is only the documentation map. Keep current implementat
 ## Archive
 
 - [Archived Refactor Plan](archive/refactor-plan.md): completed route/web-layer refactor plan and implementation record.
+- [Archived Implementation History](archive/implementation-history.md): completed story details moved out of the current handoff.
 - [Archived Application UI Redesign](archive/app-ui-redesign.md): completed app-shell redesign plan and acceptance criteria.
 - [Archived Documentation Cleanup Plan](archive/documentation-cleanup-plan.md): completed documentation cleanup plan and implementation record.
 - [Archived Open Questions](archive/open-questions.md): historical pointer for resolved product questions.
