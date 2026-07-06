@@ -459,13 +459,22 @@ def list_latest_team_submission_summaries(
     rows = connection.execute(
         """
         SELECT
-          id,
-          subtask,
-          status,
-          original_filename,
-          submitted_at_jst
+          submissions.id,
+          submissions.subtask,
+          submissions.status,
+          submissions.original_filename,
+          submissions.submitted_at_jst
         FROM submissions
-        WHERE team_id = ?
+        WHERE submissions.team_id = ?
+          AND submissions.is_current = 1
+          AND NOT EXISTS (
+            SELECT 1
+            FROM resubmission_permissions
+            WHERE resubmission_permissions.team_id = submissions.team_id
+              AND resubmission_permissions.subtask = submissions.subtask
+              AND resubmission_permissions.submission_period_id = submissions.submission_period_id
+              AND resubmission_permissions.is_used = 0
+          )
         ORDER BY subtask, id DESC
         """,
         (internal_team_id,),
@@ -493,7 +502,7 @@ def list_leaderboard_rows(
     subtask: str | None = None,
     period_name: str | None = None,
 ) -> tuple[LeaderboardRow, ...]:
-    where_clauses = ["submissions.status = 'evaluated'"]
+    where_clauses = ["submissions.status = 'evaluated'", "submissions.is_current = 1"]
     parameters: list[str] = []
     if subtask:
         where_clauses.append("submissions.subtask = ?")

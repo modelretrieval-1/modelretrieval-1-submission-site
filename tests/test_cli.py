@@ -57,4 +57,4 @@ def test_migrate_database_cli_helper_applies_migrations():
         with connect(test_settings.database_path) as connection:
             revision = connection.execute("SELECT version_num FROM alembic_version").fetchone()
 
-        assert revision["version_num"] == "20260706_0001"
+        assert revision["version_num"] == "20260706_0002"

@@ -80,14 +80,42 @@ CREATE TABLE IF NOT EXISTS submissions (
   submitted_at_jst TEXT NOT NULL,
   validation_summary TEXT,
   ground_truth_version_id INTEGER,
+  is_current INTEGER NOT NULL DEFAULT 0,
+  superseded_at_jst TEXT,
+  superseded_by_submission_id INTEGER,
+  superseded_reason TEXT,
+  superseded_by_organizer_id INTEGER,
   FOREIGN KEY (team_id) REFERENCES teams(id),
   FOREIGN KEY (submission_period_id) REFERENCES submission_periods(id),
-  FOREIGN KEY (ground_truth_version_id) REFERENCES ground_truth_versions(id)
+  FOREIGN KEY (ground_truth_version_id) REFERENCES ground_truth_versions(id),
+  FOREIGN KEY (superseded_by_submission_id) REFERENCES submissions(id),
+  FOREIGN KEY (superseded_by_organizer_id) REFERENCES organizers(id)
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_one_successful_submission
+CREATE UNIQUE INDEX IF NOT EXISTS idx_one_current_successful_submission
 ON submissions(team_id, subtask, submission_period_id)
-WHERE status IN ('accepted', 'evaluated', 'evaluation_failed');
+WHERE status IN ('accepted', 'evaluated', 'evaluation_failed') AND is_current = 1;
+
+CREATE TABLE IF NOT EXISTS resubmission_permissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  team_id INTEGER NOT NULL,
+  subtask TEXT NOT NULL CHECK (subtask IN ('A', 'B')),
+  submission_period_id INTEGER NOT NULL,
+  granted_by_organizer_id INTEGER NOT NULL,
+  granted_at_jst TEXT NOT NULL,
+  reason TEXT,
+  used_by_submission_id INTEGER,
+  used_at_jst TEXT,
+  is_used INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (team_id) REFERENCES teams(id),
+  FOREIGN KEY (submission_period_id) REFERENCES submission_periods(id),
+  FOREIGN KEY (granted_by_organizer_id) REFERENCES organizers(id),
+  FOREIGN KEY (used_by_submission_id) REFERENCES submissions(id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unused_resubmission_permission
+ON resubmission_permissions(team_id, subtask, submission_period_id)
+WHERE is_used = 0;
 
 CREATE TABLE IF NOT EXISTS runs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -229,7 +257,7 @@ def _stamp_existing_baseline_if_needed(database_path: Path, config: Config) -> N
                 f"baseline schema. Missing tables: {missing}."
             )
 
-    command.stamp(config, "head")
+    command.stamp(config, "20260706_0001")
 
 
 def run_migrations(database_path: Path) -> None:

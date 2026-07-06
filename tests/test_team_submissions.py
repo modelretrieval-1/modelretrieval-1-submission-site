@@ -104,6 +104,15 @@ def valid_submission_content() -> bytes:
     )
 
 
+def replacement_submission_content() -> bytes:
+    return (
+        b"q1 Q0 m2 1 2.0 run2\n"
+        b"q1 Q0 m1 2 1.0 run2\n"
+        b"q2 Q0 m1 1 2.0 run2\n"
+        b"q2 Q0 m2 2 1.0 run2\n"
+    )
+
+
 def set_periods(
     settings: Settings,
     *,
@@ -573,6 +582,123 @@ def test_second_successful_upload_for_same_subtask_period_shows_friendly_error()
 
         assert statuses == ["evaluated", "rejected"]
         assert metric_count == 3
+
+
+def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_metrics():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        first_response = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": ("first.txt", valid_submission_content(), "text/plain")},
+        )
+        assert first_response.status_code == 200
+        assert "Submission accepted and evaluated." in first_response.text
+
+        with connect(settings.database_path) as connection:
+            first_submission_id = connection.execute(
+                "SELECT id FROM submissions WHERE status = 'evaluated'"
+            ).fetchone()["id"]
+
+        client.get("/logout")
+        login(client, "admin", organizer.password)
+        grant_response = client.post(
+            f"/admin/submissions/{first_submission_id}/resubmission",
+            data={"reason": "Organizer-approved correction"},
+        )
+        assert grant_response.status_code == 200
+        assert "Replacement upload permission granted." in grant_response.text
+        assert "pending" in grant_response.text
+
+        client.get("/logout")
+        login(client, "team-001", team.password)
+
+        dashboard_after_grant = client.get("/team")
+
+        assert dashboard_after_grant.status_code == 200
+        assert "Upload replacement" in dashboard_after_grant.text
+        assert "run1 ndcg@5" not in dashboard_after_grant.text
+
+        invalid_replacement = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": ("bad-replacement.txt", b"q1 BAD m1 1 2.0 run2\n", "text/plain")},
+        )
+
+        assert invalid_replacement.status_code == 200
+        assert "Field 2 must be Q0." in invalid_replacement.text
+
+        with connect(settings.database_path) as connection:
+            permission = connection.execute(
+                "SELECT is_used FROM resubmission_permissions"
+            ).fetchone()
+            current_count = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM submissions
+                WHERE status IN ('accepted', 'evaluated', 'evaluation_failed')
+                  AND is_current = 1
+                """
+            ).fetchone()[0]
+
+        assert permission["is_used"] == 0
+        assert current_count == 1
+
+        replacement_response = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": ("replacement.txt", replacement_submission_content(), "text/plain")},
+        )
+
+        assert replacement_response.status_code == 200
+        assert "Submission accepted and evaluated." in replacement_response.text
+        assert "run2" in replacement_response.text
+
+        dashboard_after_replacement = client.get("/team")
+
+        assert "run2 ndcg@5" in dashboard_after_replacement.text
+        assert "run1 ndcg@5" not in dashboard_after_replacement.text
+        assert "Upload replacement" not in dashboard_after_replacement.text
+
+        with connect(settings.database_path) as connection:
+            rows = connection.execute(
+                """
+                SELECT id, original_filename, is_current, superseded_by_submission_id
+                FROM submissions
+                WHERE status = 'evaluated'
+                ORDER BY id
+                """
+            ).fetchall()
+            permission = connection.execute(
+                """
+                SELECT is_used, used_by_submission_id
+                FROM resubmission_permissions
+                """
+            ).fetchone()
+
+        assert [row["original_filename"] for row in rows] == ["first.txt", "replacement.txt"]
+        assert rows[0]["is_current"] == 0
+        assert rows[0]["superseded_by_submission_id"] == rows[1]["id"]
+        assert rows[1]["is_current"] == 1
+        assert permission["is_used"] == 1
+        assert permission["used_by_submission_id"] == rows[1]["id"]
+
+        client.get("/logout")
+        login(client, "admin", organizer.password)
+
+        leaderboard = client.get("/admin/leaderboard")
+        history = client.get(f"/admin/submissions/{first_submission_id}")
+
+        assert "run2" in leaderboard.text
+        assert "run1" not in leaderboard.text
+        assert "superseded" in history.text
+        assert "Replacement Permissions" in history.text
+        assert "Organizer-approved correction" in history.text
 
 
 def test_team_can_submit_to_selected_late_period_when_late_is_open():

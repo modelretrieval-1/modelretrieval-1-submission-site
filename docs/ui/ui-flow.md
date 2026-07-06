@@ -164,8 +164,8 @@ Content:
 - Current late submission deadline from the configured submission-period row.
 - Reopen status for each configured submission period.
 - Submission status for each registered subtask and period.
-- Link to upload page for open periods without a successful submission.
-- Links to score pages for successful submissions.
+- Link to upload page for open periods without a current successful submission, or when organizer-approved replacement permission is pending.
+- Links to current score summaries for successful submissions.
 
 Status labels:
 
@@ -186,7 +186,7 @@ UI modernization notes:
 
 - Present registered subtasks and normal/late periods as compact status sections.
 - Use badges for period and submission status.
-- Make upload actions visually available only when the selected subtask/period can accept a successful submission.
+- Make upload actions visually available only when the selected subtask/period can accept a successful submission or an organizer-approved replacement upload.
 
 ### Upload Submission
 
@@ -213,7 +213,7 @@ Rules shown near the form:
 - TREC_EVAL format: `topicID Q0 docID Rank Score RunID`.
 - Every run must include all test queries.
 - Every query must include all candidate models.
-- After a successful submission, no re-upload is allowed for that subtask and period.
+- After a successful submission, no re-upload is allowed for that subtask and period unless an organizer grants one-time replacement-upload permission.
 - The selected period is used as submitted; the system does not auto-switch normal and late.
 - Closed periods are rejected unless organizer reopen override is active.
 
@@ -291,7 +291,7 @@ URL:
 
 Purpose:
 
-- Show the team's successful submission and scores.
+- Show the team's current successful submission and scores.
 
 Content:
 
@@ -321,7 +321,7 @@ Behavior:
 - Scores remain visible after evaluation.
 - Participants see aggregate run-level metrics only.
 - Participants do not see per-query metric details.
-- No re-upload action appears after successful submission.
+- No re-upload action appears after successful submission unless organizer-approved replacement permission is pending.
 
 UI modernization notes:
 

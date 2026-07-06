@@ -20,9 +20,14 @@ from app.evaluation import (
 from app.ground_truth import JST, get_active_ground_truth_requirements, get_ground_truth_version
 from app.submissions import (
     SubmissionValidationError,
+    activate_current_submission,
     create_submission_attempt,
+    get_current_successful_submission_id,
+    get_resubmission_permission,
     get_submission_period_by_name,
+    get_unused_resubmission_permission_id,
     has_successful_submission,
+    has_unused_resubmission_permission,
     is_submission_period_open,
     list_submission_periods,
     persist_submission_runs,
@@ -102,12 +107,20 @@ def team_dashboard(request: Request) -> Response:
                     subtask=subtask,
                     submission_period_id=period.id,
                 ),
+                "resubmission_allowed": has_unused_resubmission_permission(
+                    connection,
+                    internal_team_id=account.id,
+                    subtask=subtask,
+                    submission_period_id=period.id,
+                ),
             }
             for subtask in subtasks
             for period in periods
         ]
         for slot in submission_slots:
-            slot["can_submit"] = slot["is_open"] and not slot["is_submitted"]
+            slot["can_submit"] = slot["is_open"] and (
+                not slot["is_submitted"] or slot["resubmission_allowed"]
+            )
         submission_summaries = list_latest_team_submission_summaries(
             connection,
             internal_team_id=account.id,
@@ -247,7 +260,14 @@ async def upload_submission(
             if not guard_errors
             else None
         )
-        already_submitted = has_successful_submission(
+        current_submission_id = get_current_successful_submission_id(
+            connection,
+            internal_team_id=account.id,
+            subtask=subtask,
+            submission_period_id=period.id,
+        )
+        already_submitted = current_submission_id is not None
+        resubmission_permission_id = get_unused_resubmission_permission_id(
             connection,
             internal_team_id=account.id,
             subtask=subtask,
@@ -276,7 +296,7 @@ async def upload_submission(
                 )
                 validation_errors = validation_result.errors
 
-        if not validation_errors and already_submitted:
+        if not validation_errors and already_submitted and resubmission_permission_id is None:
             validation_errors = (
                 SubmissionValidationError(
                     field_name="file",
@@ -328,6 +348,8 @@ async def upload_submission(
             )
             if ground_truth_version is None:
                 mark_evaluation_failed(connection, submission_id=submission_id)
+                if current_submission_id is None:
+                    activate_current_submission(connection, submission_id=submission_id)
             else:
                 metrics = evaluate_submission(
                     validation_result.parsed,
@@ -345,6 +367,22 @@ async def upload_submission(
                     ground_truth_version_id=ground_truth_version.id,
                     metrics=metrics,
                     query_metrics=query_metrics,
+                )
+                permission = (
+                    get_resubmission_permission(
+                        connection,
+                        permission_id=resubmission_permission_id,
+                    )
+                    if resubmission_permission_id is not None
+                    else None
+                )
+                activate_current_submission(
+                    connection,
+                    submission_id=submission_id,
+                    superseded_submission_id=current_submission_id,
+                    resubmission_permission_id=resubmission_permission_id,
+                    organizer_id=permission.granted_by_organizer_id if permission else None,
+                    reason=permission.reason if permission else None,
                 )
             metrics = list_submission_results(connection, submission_id=submission_id)
         else:

@@ -95,7 +95,7 @@ Acceptance criteria:
 - The default normal submission deadline is August 1, 2026 at 15:00 JST.
 - Invalid files are rejected immediately.
 - Failed validation attempts do not count as successful submissions.
-- Once a file succeeds, the team cannot submit another successful file for the same subtask and normal period.
+- Once a file succeeds, the team cannot submit another successful file for the same subtask and normal period unless an organizer grants one-time replacement-upload permission.
 
 ### Submit Runs During Late Period
 

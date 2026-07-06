@@ -72,6 +72,7 @@
             <th>Subtask</th>
             <th>Period</th>
             <th>Status</th>
+            <th>State</th>
             <th>File</th>
             <th>Submitted</th>
             <th>Summary</th>
@@ -94,6 +95,15 @@
                   {{ submission.status }}
                 </span>
               </td>
+              <td>
+                {% if submission.is_current %}
+                  <span class="badge text-bg-primary">current</span>
+                {% elif submission.superseded_at_jst %}
+                  <span class="badge text-bg-secondary">superseded</span>
+                {% else %}
+                  <span class="badge text-bg-light text-dark">attempt</span>
+                {% endif %}
+              </td>
               <td>{{ submission.original_filename }}</td>
               <td>{{ submission.submitted_at_jst }} JST</td>
               <td>{{ submission.validation_summary or "" }}</td>
@@ -101,7 +111,7 @@
             </tr>
           {% else %}
             <tr>
-              <td colspan="9"><p class="empty-state">No submissions match these filters.</p></td>
+              <td colspan="10"><p class="empty-state">No submissions match these filters.</p></td>
             </tr>
           {% endfor %}
         </tbody>

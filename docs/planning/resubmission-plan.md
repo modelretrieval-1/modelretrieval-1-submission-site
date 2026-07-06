@@ -1,6 +1,8 @@
 # Organizer-Approved Resubmission Plan
 
-Document role: this is a proposed feature plan. It is not implemented yet and should not be treated as a resolved product decision until the open questions are answered.
+Document role: this is the implementation plan and record for organizer-approved replacement submissions.
+
+Implementation status: implemented. The first slice adds one-time organizer permission, current/superseded submission state, participant-visible current metrics only, organizer history visibility, and current-only leaderboard rows.
 
 ## Feature Goal
 
@@ -13,11 +15,11 @@ The requested policy is:
 - The team cannot see previous metrics after a replacement upload is allowed.
 - Organizers can see the full metric history.
 
-## Current Behavior
+## Previous Behavior
 
-The current system intentionally enforces one successful submission per team, subtask, and submission period.
+The previous system intentionally enforced one successful submission per team, subtask, and submission period.
 
-Current enforcement points:
+Previous enforcement points:
 
 - Participant upload checks for an existing successful submission before accepting a new valid file.
 - The database has a partial unique index that prevents multiple successful submissions for the same team, subtask, and period.
@@ -43,7 +45,7 @@ For each team, subtask, and period:
 - Older successful submissions should remain stored as history.
 - Participant pages should show only the current participant-visible state.
 - Organizer pages should expose both current and historical submissions.
-- Leaderboard and CSV export should default to current submissions only unless the organizer explicitly asks for history.
+- Leaderboard and CSV export default to current submissions only.
 
 This avoids deleting data and keeps auditability intact.
 
@@ -59,8 +61,8 @@ Add current/history fields to `submissions`:
 
 Change the successful-submission uniqueness rule:
 
-- Current rule: one successful submission ever per team, subtask, and period.
-- Proposed rule: one current successful submission per team, subtask, and period.
+- Previous rule: one successful submission ever per team, subtask, and period.
+- Implemented rule: one current successful submission per team, subtask, and period.
 
 Replace the current partial unique index with a new partial unique index over:
 
@@ -279,20 +281,20 @@ Update:
 
 The stable product docs should be updated only after the policy questions below are resolved.
 
-## Open Questions
+## Resolved Policy
 
-1. Does the participant lose access to previous metrics immediately when permission is granted, or only after the replacement upload succeeds?
-2. Is organizer permission one-time, or can an organizer allow unlimited replacement uploads until revoked?
-3. Should a replacement upload be allowed after the selected submission period is closed, or must the period also be open/reopened?
-4. If replacement validation succeeds but evaluation fails, should the old submission remain current?
-5. Should leaderboard and CSV always use current submissions only, or should organizers be able to include superseded history?
-6. Should submission bundles include all history by default, or current submissions only?
-7. Should participants see that a previous submission was superseded, without seeing the old metrics?
-8. Should organizer grant actions require a reason before saving?
+1. Participant access to previous metrics is hidden immediately after replacement permission is granted.
+2. Organizer permission is one-time. A successful replacement consumes it.
+3. Replacement uploads still require the selected submission period to be open or reopened.
+4. Failed replacement validation does not consume permission. If evaluation fails, the old current submission remains current.
+5. Leaderboard and CSV use current submissions only.
+6. Submission bundles continue to include retained submission history.
+7. Participants see only the current participant-visible state, not superseded metrics.
+8. Organizer grant reasons are optional.
 
 ## Recommended First Slice
 
-Implement the smallest safe version after policy approval:
+Implemented first slice:
 
 1. Add current/superseded schema fields and resubmission permission table.
 2. Add organizer grant action on submission detail.

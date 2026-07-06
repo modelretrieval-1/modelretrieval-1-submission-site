@@ -34,9 +34,9 @@ sequenceDiagram
   App->>DB: Load selected submission period
   App->>App: Validate deadline or organizer override
   App->>App: Validate file size
-  App->>DB: Check existing successful submission
+  App->>DB: Check current successful submission and replacement permission
 
-  alt Existing successful submission
+  alt Current successful submission without replacement permission
     App->>DB: Persist rejected attempt
     App-->>Team: Show already-submitted error
   else New attempt allowed
@@ -76,7 +76,9 @@ The system supports:
 
 All submission windows and deadlines are enforced in JST.
 
-For each team, subtask, and submission turn, only one successful submission is allowed. Participants may retry until validation succeeds.
+For each team, subtask, and submission turn, only one current successful submission is allowed. Participants may retry until validation succeeds.
+
+If an organizer grants one-time replacement-upload permission, a team may upload another file for the same team, subtask, and submission turn while the selected period is open or reopened. A successful replacement becomes current and supersedes the previous successful submission. Failed replacement validation attempts do not consume permission.
 
 Participants choose the submission turn explicitly during upload. The system validates the selected turn against its JST deadline and organizer reopen override. The system must not automatically assign normal or late based only on server time.
 
@@ -166,3 +168,5 @@ For each successful submission, store:
 - Validation status.
 - Evaluation status.
 - Evaluation score summary.
+- Whether the submission is current or superseded.
+- Replacement permission and supersession metadata when applicable.

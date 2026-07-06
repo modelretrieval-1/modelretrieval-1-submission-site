@@ -62,7 +62,11 @@ For the latest implementation status, use `../../HANDOFF.md`. This document shou
 - Submission files are not encrypted at rest.
 - Submissions and validation failures are retained forever.
 - Participant-visible scores are not hidden after correction or re-evaluation.
-- Participants cannot re-upload after a successful submission for the same team, subtask, and submission period.
+- Participants cannot re-upload after a successful submission for the same team, subtask, and submission period unless an organizer grants one-time replacement-upload permission.
+- When replacement-upload permission is granted, previous metrics for that team, subtask, and period are hidden from the participant.
+- A successful replacement submission becomes current and supersedes the previous successful submission.
+- Organizers can inspect current and superseded metric history.
+- Private leaderboard and leaderboard CSV use current evaluated submissions only.
 
 ## Implementation Direction
 

@@ -54,7 +54,7 @@ Initial adoption includes:
 - Add `alembic.ini`.
 - Add a `migrations/` directory with Alembic environment configuration.
 - Add an initial revision that creates the current schema.
-- Add the partial unique index for one successful submission per team, subtask, and period.
+- Add the partial unique index for one current successful submission per team, subtask, and period.
 - Add idempotent insertion of default submission periods.
 - Add `python -m app.cli migrate` as the app-native migration command.
 - Update tests to create databases through migrations or through a migration-aware helper.
@@ -216,7 +216,8 @@ Completed implementation:
 7. Updated Dockerfile to copy migration files and Alembic config.
 8. Updated CI/CD deployment commands to run migrations before `docker compose up -d`.
 9. Updated deployment runbook and handoff.
-10. Ran full tests and lint.
+10. Added revision `20260706_0002` for organizer-approved replacement submissions, current/superseded submission state, and one-time resubmission permissions.
+11. Ran full tests and lint.
 
 ## Acceptance Criteria
 

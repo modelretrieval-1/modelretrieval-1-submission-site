@@ -29,9 +29,9 @@ Participant upload attempts use:
 - `evaluated` for valid submissions with persisted metric rows.
 - `evaluation_failed` when a valid stored submission cannot be evaluated.
 
-Submissions store the selected `submission_period_id`, and the partial unique index enforces one successful submission per team, subtask, and selected period.
+Submissions store the selected `submission_period_id`, and the partial unique index enforces one current successful submission per team, subtask, and selected period. Older successful submissions can be retained as superseded history after an organizer-approved replacement upload.
 
-Per-query evaluation result persistence is implemented separately from aggregate `evaluation_results` so participant pages, leaderboard sorting, and leaderboard exports can remain aggregate-only.
+Per-query evaluation result persistence is implemented separately from aggregate `evaluation_results` so participant pages, leaderboard sorting, and leaderboard exports can remain aggregate-only. Participant pages and leaderboards use current submissions only; organizer detail pages can inspect superseded metric history.
 
 ## ER Diagram
 
@@ -285,7 +285,8 @@ Allowed `status` values:
 
 Rules:
 
-- Only one successful submission is allowed per team, subtask, and period.
+- Only one current successful submission is allowed per team, subtask, and period.
+- Organizer-approved replacement uploads can supersede a previous successful submission while retaining metric history.
 - Validation failures are retained forever.
 - Successful submissions are retained forever.
 

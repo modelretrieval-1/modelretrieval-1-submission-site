@@ -405,7 +405,7 @@ Required tests:
 
 - Integration test that a fresh database migrates to head.
 - Integration test that default periods exist after migration.
-- Integration test that the one-successful-submission partial unique index exists and behaves correctly.
+- Integration test that the one-current-successful-submission partial unique index exists and behaves correctly.
 - Full regression test suite after migration adoption.
 
 ## Suggested Sprint Plan
@@ -418,7 +418,8 @@ Milestone summary:
 - Sprint 2 validation-core scope is complete.
 - Implemented Sprint 2 items: organizer ground-truth upload page, local filesystem storage, SHA-256 metadata, upload history, organizer-only access, ground-truth CSV format validation, ground-truth version activation, TREC_EVAL parser with field-level validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation, active ground-truth requirement extraction, combined validation against active ground truth, participant submission upload UI, validation failure persistence, accepted submission/run persistence, and tests.
 - Sprint 3 is complete for the planned evaluation and participant-result scope.
-- Implemented Sprint 3 items: pure metric calculation helpers, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, participant score display, one-successful-submission enforcement, JST deadline/open-period enforcement, organizer submission-period controls, and tests.
+- Implemented Sprint 3 items: pure metric calculation helpers, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, participant score display, original one-successful-submission enforcement, JST deadline/open-period enforcement, organizer submission-period controls, and tests.
+- Implemented later: organizer-approved one-time replacement uploads retain superseded metric history for organizers while participant and leaderboard views use current submissions only.
 - Participant-selected normal/late submission period is complete.
 - Organizer submissions table and detail view is complete.
 - Organizer private leaderboard view is complete.
@@ -504,7 +505,7 @@ Demo:
 Status:
 
 - Complete for the planned evaluation and participant-result scope.
-- Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, unit tests with known expected values, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, `evaluated` status updates, upload-page score display, team-dashboard latest score summaries, one-successful-submission enforcement with friendly errors, JST deadline/open-period enforcement, and organizer submission-period controls.
+- Completed: pure metric calculation helpers for nDCG, macro nDCG by run, MRR, Subtask A evaluation, Subtask B evaluation, unit tests with known expected values, active ground-truth metric loading, accepted submission evaluation, `evaluation_results` persistence, `evaluated` status updates, upload-page score display, team-dashboard latest score summaries, one-current-successful-submission enforcement with friendly errors, JST deadline/open-period enforcement, organizer-approved replacement uploads, and organizer submission-period controls.
 - Organizer-only per-query metric persistence and organizer submission-detail display are implemented while participant pages and leaderboard exports remain aggregate-only.
 
 ### Sprint 4: Organizer Operations

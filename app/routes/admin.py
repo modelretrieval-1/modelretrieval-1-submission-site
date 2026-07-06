@@ -39,8 +39,10 @@ from app.ground_truth import (
 )
 from app.submissions import (
     get_admin_submission_detail,
+    grant_resubmission_permission_for_submission,
     is_submission_period_open,
     list_admin_submission_summaries,
+    list_resubmission_permissions_for_slot,
     list_submission_bundle_entries,
     list_submission_periods,
     list_submission_runs,
@@ -268,6 +270,8 @@ def render_admin_submission_detail(
     *,
     account,
     submission_id: int,
+    success: str | None = None,
+    error: str | None = None,
 ) -> HTMLResponse | None:
     app_settings: Settings = request.app.state.settings
     with connect(app_settings.database_path) as connection:
@@ -281,6 +285,18 @@ def render_admin_submission_detail(
         runs = list_submission_runs(connection, submission_id=submission_id)
         metrics = list_submission_results(connection, submission_id=submission_id)
         query_metrics = list_submission_query_results(connection, submission_id=submission_id)
+        history = list_admin_submission_summaries(
+            connection,
+            team_public_id=submission.team_public_id,
+            subtask=submission.subtask,
+            period_name=submission.period_name,
+        )
+        resubmission_permissions = list_resubmission_permissions_for_slot(
+            connection,
+            internal_team_id=submission.internal_team_id,
+            subtask=submission.subtask,
+            submission_period_id=submission.submission_period_id,
+        )
     return templates.TemplateResponse(
         request,
         "admin_submission_detail.html",
@@ -292,6 +308,10 @@ def render_admin_submission_detail(
             "runs": runs,
             "metrics": metrics,
             "query_metrics": query_metrics,
+            "history": history,
+            "resubmission_permissions": resubmission_permissions,
+            "success": success,
+            "error": error,
         },
     )
 
@@ -783,6 +803,44 @@ def admin_submission_detail(request: Request, submission_id: int) -> Response:
         request,
         account=account,
         submission_id=submission_id,
+    )
+    if response is None:
+        return redirect("/admin/submissions")
+    return response
+
+
+@router.post("/admin/submissions/{submission_id}/resubmission", response_class=HTMLResponse)
+async def allow_resubmission(request: Request, submission_id: int) -> Response:
+    app_settings: Settings = request.app.state.settings
+    account, redirect_response = require_organizer(request)
+    if redirect_response is not None:
+        return redirect_response
+
+    form = await request.form()
+    reason = str(form.get("reason", "")).strip() or None
+
+    with connect(app_settings.database_path) as connection:
+        granted = grant_resubmission_permission_for_submission(
+            connection,
+            submission_id=submission_id,
+            organizer_id=account.id,
+            reason=reason,
+        )
+
+    message = (
+        "Replacement upload permission granted."
+        if granted
+        else (
+            "Replacement upload permission can only be granted for a current "
+            "successful submission."
+        )
+    )
+    response = render_admin_submission_detail(
+        request,
+        account=account,
+        submission_id=submission_id,
+        success=message if granted else None,
+        error=None if granted else message,
     )
     if response is None:
         return redirect("/admin/submissions")

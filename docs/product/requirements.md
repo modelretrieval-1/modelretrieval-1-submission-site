@@ -73,7 +73,7 @@ Default deadlines:
 - Normal submission: August 1, 2026 at 15:00 JST.
 - Late submission: October 15, 2026 at 23:59 JST.
 
-Participants can submit until they have one successful submission per subtask per submission turn. Failed validation attempts do not count as successful submissions.
+Participants can submit until they have one current successful submission per subtask per submission turn. Failed validation attempts do not count as successful submissions.
 
 For each team, subtask, and submission turn:
 
@@ -81,8 +81,12 @@ For each team, subtask, and submission turn:
 - The system must not automatically choose normal or late based only on the current time.
 - The selected submission turn must be open at upload time, or reopened by organizer override.
 - A team may continue retrying while submissions fail validation.
-- Once a submission succeeds, the system must prevent another successful submission for that same team, subtask, and turn.
-- If a team attempts to submit again after a successful submission, the system must show an error.
+- Once a submission succeeds, the system must prevent another successful submission for that same team, subtask, and turn unless an organizer grants one-time replacement-upload permission.
+- If a team attempts to submit again after a successful submission without organizer permission, the system must show an error.
+- If an organizer grants replacement-upload permission, the participant can upload again while the selected period is open or reopened.
+- Previous metrics for that team, subtask, and period must not be participant-visible while replacement-upload permission is pending or after a replacement succeeds.
+- A successful replacement submission becomes the current participant-visible submission and supersedes the previous successful submission.
+- Failed replacement validation attempts do not consume replacement-upload permission.
 - Organizers can reopen a submission period after it closes.
 - Participant-facing dashboard and upload pages must display the currently configured period deadlines and reopen state, not hardcoded default deadline text.
 
@@ -223,7 +227,7 @@ The system should retain:
 - The system does not send automatic email notifications for successful or failed submissions; organizers contact participants manually when needed.
 - Submission files and validation failures are retained forever unless organizers delete them manually in a future maintenance workflow.
 - Submission files do not need encryption at rest.
-- Participant-visible scores stay visible after evaluation. The system does not support participant re-upload after a successful submission.
+- Participant-visible scores stay visible after evaluation unless an organizer grants replacement-upload permission for that team, subtask, and period. Superseded scores are organizer-only.
 
 ## UI and Frontend Requirements
 

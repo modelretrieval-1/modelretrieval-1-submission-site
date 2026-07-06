@@ -62,6 +62,7 @@ Implemented Sprint 6A UI slices:
 - Shared authenticated app shell with role-aware sidebar/topbar navigation.
 - Participant upload navigation entry at `/team/submissions/new`.
 - Participant dashboard submission availability by subtask and period.
+- Organizer-approved one-time replacement uploads with participant-hidden superseded metrics and organizer-visible metric history.
 - Organizer dashboard period open/closed/reopened state.
 - Organizer dashboard recent validation-failure panel.
 - Upload page period open/closed/reopened state beside normal/late choices.
@@ -264,7 +265,7 @@ Key decisions already made:
 - Subtask A and Subtask B submissions are uploaded separately.
 - Upload format is one TREC_EVAL-format file, any filename extension, maximum 10 MB.
 - Each subtask allows up to 5 runs.
-- One successful submission per team/subtask/period.
+- One current successful submission per team/subtask/period, with organizer-approved one-time replacement upload support.
 - Failed validation attempts do not count.
 - Normal deadline: August 1, 2026 at 15:00 JST.
 - Late deadline: October 15, 2026 at 23:59 JST.

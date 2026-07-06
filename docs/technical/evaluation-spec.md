@@ -4,7 +4,7 @@
 
 The system evaluates successful submissions internally after validation.
 
-Participants see their own aggregate run-level scores immediately. Organizers see all aggregate scores, organizer-only per-query diagnostics, and a private leaderboard.
+Participants see their own current aggregate run-level scores immediately. Organizers see current and superseded aggregate scores, organizer-only per-query diagnostics, and a private leaderboard.
 
 Ground truth is uploaded or configured by organizers and must not be accessible to participants.
 
@@ -106,7 +106,7 @@ For a successful submission containing multiple run IDs:
 - Compute metrics for each run.
 - Store all run-level scores.
 - Show participants their own run-level results.
-- Include all 5 submitted runs as official runs in the private leaderboard.
+- Include all 5 submitted runs from current evaluated submissions as official runs in the private leaderboard.
 - Store per-query metric details for each run and query.
 - Show per-query metric details only to organizers, such as on the organizer submission detail page.
 - Keep participant pages, private leaderboard sorting, and leaderboard CSV export based on aggregate run-level scores unless a later policy changes that behavior.
@@ -138,7 +138,7 @@ Re-evaluation should:
 - Create new per-query evaluation results tied to the new ground-truth version.
 - Keep prior evaluation results for audit unless explicitly superseded.
 - Keep participant-visible scores available; the system does not hide scores after correction.
-- Not allow participant re-upload after a successful submission.
+- Allow participant replacement upload only when an organizer grants one-time permission for the same team, subtask, and period.
 
 ## Private Leaderboard
 
@@ -149,4 +149,4 @@ Suggested sorting:
 - Subtask A: primary sort by nDCG@5, then nDCG@3, then nDCG@1.
 - Subtask B: primary sort by MRR.
 
-Leaderboard rows must indicate whether the submission belongs to the normal or late period. Late submissions use the same ground truth as normal submissions and appear in the same private admin leaderboard with a submission-period filter.
+Leaderboard rows must indicate whether the submission belongs to the normal or late period. Late submissions use the same ground truth as normal submissions and appear in the same private admin leaderboard with a submission-period filter. Superseded submissions remain visible in organizer submission history, but the private leaderboard and leaderboard CSV use current evaluated submissions only.

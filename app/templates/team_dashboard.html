@@ -66,7 +66,9 @@
                   <span class="small-muted d-block">{{ slot.period.deadline_at_jst }} JST</span>
                 </div>
                 <div class="slot-action">
-                  {% if slot.is_submitted %}
+                  {% if slot.resubmission_allowed and slot.can_submit %}
+                    <a class="btn btn-primary btn-sm" href="/team/submissions/{{ subtask }}/new">Upload replacement</a>
+                  {% elif slot.is_submitted %}
                     <span class="badge text-bg-success">submitted</span>
                   {% elif slot.can_submit %}
                     <a class="btn btn-primary btn-sm" href="/team/submissions/{{ subtask }}/new">Upload</a>

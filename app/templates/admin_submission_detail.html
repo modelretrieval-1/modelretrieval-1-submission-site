@@ -4,6 +4,13 @@
 
 {% block content %}
   <section class="panel">
+    {% if success %}
+      <div class="alert alert-success" role="status">{{ success }}</div>
+    {% endif %}
+    {% if error %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
     <div class="page-header">
       <div>
         <h1>Submission {{ submission.submission_id }}</h1>
@@ -30,7 +37,24 @@
         <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
           {{ submission.status }}
         </span>
+        {% if submission.is_current %}
+          <span class="badge text-bg-primary">current</span>
+        {% elif submission.superseded_at_jst %}
+          <span class="badge text-bg-secondary">superseded</span>
+        {% endif %}
       </dd>
+      {% if submission.superseded_at_jst %}
+        <dt>Superseded</dt>
+        <dd>
+          {{ submission.superseded_at_jst }} JST
+          {% if submission.superseded_by_submission_id %}
+            by submission {{ submission.superseded_by_submission_id }}
+          {% endif %}
+          {% if submission.superseded_reason %}
+            <span class="small-muted d-block">{{ submission.superseded_reason }}</span>
+          {% endif %}
+        </dd>
+      {% endif %}
       <dt>File</dt>
       <dd>{{ submission.original_filename }}</dd>
       <dt>Submitted</dt>
@@ -46,6 +70,117 @@
       <dt>Summary</dt>
       <dd>{{ submission.validation_summary or "" }}</dd>
     </dl>
+
+    <div class="section-header detail-section-header">
+      <div>
+        <h2>Replacement Upload</h2>
+        <p>Grant a one-time permission for this team, subtask, and period.</p>
+      </div>
+    </div>
+    {% set pending_permission = resubmission_permissions|selectattr("is_used", "equalto", false)|first %}
+    {% if pending_permission %}
+      <p class="alert alert-info">
+        Replacement upload is already allowed. Granted by {{ pending_permission.granted_by_display_name }} at {{ pending_permission.granted_at_jst }} JST.
+      </p>
+    {% elif submission.is_current and submission.status in ("accepted", "evaluated", "evaluation_failed") %}
+      <form method="post" action="/admin/submissions/{{ submission.submission_id }}/resubmission" class="stacked-form">
+        <div>
+          <label class="form-label" for="resubmission_reason">Reason</label>
+          <textarea class="form-control" id="resubmission_reason" name="reason" rows="2" placeholder="Optional organizer note"></textarea>
+        </div>
+        <button class="btn btn-outline-primary btn-sm" type="submit">Allow replacement upload</button>
+      </form>
+    {% else %}
+      <p class="empty-state">Replacement upload can only be granted for a current successful submission.</p>
+    {% endif %}
+
+    <div class="section-header detail-section-header">
+      <div>
+        <h2>Submission History</h2>
+        <p>Current and superseded attempts for this team, subtask, and period.</p>
+      </div>
+    </div>
+    {% if history %}
+      <div class="table-wrap">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>State</th>
+              <th>File</th>
+              <th>Submitted</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in history %}
+              <tr>
+                <td>{{ item.submission_id }}</td>
+                <td>{{ item.status }}</td>
+                <td>
+                  {% if item.is_current %}
+                    <span class="badge text-bg-primary">current</span>
+                  {% elif item.superseded_at_jst %}
+                    <span class="badge text-bg-secondary">superseded</span>
+                  {% else %}
+                    <span class="badge text-bg-light text-dark">attempt</span>
+                  {% endif %}
+                </td>
+                <td>{{ item.original_filename }}</td>
+                <td>{{ item.submitted_at_jst }} JST</td>
+                <td><a class="btn btn-outline-primary btn-sm" href="/admin/submissions/{{ item.submission_id }}">Open</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty-state">No related submission history recorded.</p>
+    {% endif %}
+
+    {% if resubmission_permissions %}
+      <div class="section-header detail-section-header">
+        <div>
+          <h2>Replacement Permissions</h2>
+          <p>Organizer grants and their usage for this team, subtask, and period.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Granted</th>
+              <th>By</th>
+              <th>Status</th>
+              <th>Used By</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for permission in resubmission_permissions %}
+              <tr>
+                <td>{{ permission.granted_at_jst }} JST</td>
+                <td>{{ permission.granted_by_display_name }}</td>
+                <td>
+                  <span class="badge text-bg-{% if permission.is_used %}secondary{% else %}info{% endif %}">
+                    {% if permission.is_used %}used{% else %}pending{% endif %}
+                  </span>
+                </td>
+                <td>
+                  {% if permission.used_by_submission_id %}
+                    <a href="/admin/submissions/{{ permission.used_by_submission_id }}">Submission {{ permission.used_by_submission_id }}</a>
+                  {% else %}
+                    Not used
+                  {% endif %}
+                </td>
+                <td>{{ permission.reason or "" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
 
     <div class="section-header detail-section-header">
       <div>

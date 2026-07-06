@@ -26,6 +26,7 @@ class DatabaseTests(unittest.TestCase):
                 self.assertIn("submissions", table_names)
                 self.assertIn("evaluation_results", table_names)
                 self.assertIn("evaluation_query_results", table_names)
+                self.assertIn("resubmission_permissions", table_names)
                 self.assertIn("alembic_version", table_names)
 
                 period_rows = connection.execute(
@@ -41,7 +42,7 @@ class DatabaseTests(unittest.TestCase):
                     ("normal", "2026-08-01 15:00:00"),
                 ],
             )
-            self.assertEqual(revision[0], "20260706_0001")
+            self.assertEqual(revision[0], "20260706_0002")
             verify_database_current(database_path)
 
     def test_initialize_database_is_idempotent(self):
@@ -66,12 +67,12 @@ class DatabaseTests(unittest.TestCase):
                 indexes = connection.execute("PRAGMA index_list(submissions)").fetchall()
                 index_names = {row["name"] for row in indexes}
 
-                self.assertIn("idx_one_successful_submission", index_names)
+                self.assertIn("idx_one_current_successful_submission", index_names)
 
                 index_sql = connection.execute(
                     """
                     SELECT sql FROM sqlite_master
-                    WHERE type = 'index' AND name = 'idx_one_successful_submission'
+                    WHERE type = 'index' AND name = 'idx_one_current_successful_submission'
                     """
                 ).fetchone()["sql"]
 
@@ -79,6 +80,7 @@ class DatabaseTests(unittest.TestCase):
                 "WHERE status IN ('accepted', 'evaluated', 'evaluation_failed')",
                 index_sql,
             )
+            self.assertIn("is_current = 1", index_sql)
 
 
 if __name__ == "__main__":

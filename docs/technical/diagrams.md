@@ -186,7 +186,7 @@ Important branches:
 
 - Invalid file creates a `rejected` submission and `validation_errors`.
 - Valid file becomes `accepted` transiently, then `evaluated` or `evaluation_failed`.
-- Existing successful submission blocks a second successful upload for the same team/subtask/period.
+- Existing current successful submission blocks a second successful upload for the same team/subtask/period unless organizer-approved replacement permission is pending.
 
 Best home:
 
@@ -276,7 +276,7 @@ Important notes:
 
 - `accepted` is mostly transient before evaluation persistence.
 - `rejected` attempts are retained forever and do not count as successful submissions.
-- `accepted`, `evaluated`, and `evaluation_failed` count as successful for the one-successful-submission rule.
+- `accepted`, `evaluated`, and `evaluation_failed` count as successful for the one-current-successful-submission rule.
 
 Best home:
 

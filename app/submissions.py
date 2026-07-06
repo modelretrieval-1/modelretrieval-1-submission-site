@@ -11,6 +11,8 @@ from app.ground_truth import JST, GroundTruthRequirements, jst_now_text, safe_fi
 
 MAX_RUNS_PER_SUBTASK = 5
 EXPECTED_FIELD_COUNT = 6
+SUCCESSFUL_SUBMISSION_STATUSES = ("accepted", "evaluated", "evaluation_failed")
+SUCCESSFUL_SUBMISSION_STATUS_SQL = "('accepted', 'evaluated', 'evaluation_failed')"
 
 
 @dataclass(frozen=True)
@@ -74,11 +76,15 @@ class StoredSubmissionFile:
 @dataclass(frozen=True)
 class AdminSubmissionSummary:
     submission_id: int
+    internal_team_id: int
     team_public_id: str
     team_display_name: str
     subtask: str
     period_name: str
+    submission_period_id: int
     status: str
+    is_current: bool
+    superseded_at_jst: str | None
     original_filename: str
     submitted_at_jst: str
     validation_summary: str | None
@@ -87,11 +93,18 @@ class AdminSubmissionSummary:
 @dataclass(frozen=True)
 class AdminSubmissionDetail:
     submission_id: int
+    internal_team_id: int
     team_public_id: str
     team_display_name: str
     subtask: str
+    submission_period_id: int
     period_name: str
     status: str
+    is_current: bool
+    superseded_at_jst: str | None
+    superseded_by_submission_id: int | None
+    superseded_reason: str | None
+    superseded_by_organizer_id: int | None
     original_filename: str
     stored_file_path: str | None
     file_sha256: str | None
@@ -122,6 +135,21 @@ class SubmissionBundleEntry:
     file_size_bytes: int
     submitted_at_jst: str
     validation_summary: str | None
+
+
+@dataclass(frozen=True)
+class ResubmissionPermission:
+    id: int
+    team_id: int
+    subtask: str
+    submission_period_id: int
+    granted_by_organizer_id: int
+    granted_by_display_name: str
+    granted_at_jst: str
+    reason: str | None
+    used_by_submission_id: int | None
+    used_at_jst: str | None
+    is_used: bool
 
 
 def parse_trec_eval(content: str, *, max_runs: int = MAX_RUNS_PER_SUBTASK) -> ParsedSubmission:
@@ -597,6 +625,29 @@ def create_submission_attempt(
     return cursor.lastrowid
 
 
+def get_current_successful_submission_id(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+    subtask: str,
+    submission_period_id: int,
+) -> int | None:
+    row = connection.execute(
+        f"""
+        SELECT id
+        FROM submissions
+        WHERE team_id = ?
+          AND subtask = ?
+          AND submission_period_id = ?
+          AND status IN {SUCCESSFUL_SUBMISSION_STATUS_SQL}
+          AND is_current = 1
+        LIMIT 1
+        """,
+        (internal_team_id, subtask, submission_period_id),
+    ).fetchone()
+    return row["id"] if row is not None else None
+
+
 def has_successful_submission(
     connection: sqlite3.Connection,
     *,
@@ -604,19 +655,255 @@ def has_successful_submission(
     subtask: str,
     submission_period_id: int,
 ) -> bool:
+    return (
+        get_current_successful_submission_id(
+            connection,
+            internal_team_id=internal_team_id,
+            subtask=subtask,
+            submission_period_id=submission_period_id,
+        )
+        is not None
+    )
+
+
+def get_unused_resubmission_permission_id(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+    subtask: str,
+    submission_period_id: int,
+) -> int | None:
     row = connection.execute(
         """
-        SELECT 1
-        FROM submissions
+        SELECT id
+        FROM resubmission_permissions
         WHERE team_id = ?
           AND subtask = ?
           AND submission_period_id = ?
-          AND status IN ('accepted', 'evaluated', 'evaluation_failed')
+          AND is_used = 0
+        ORDER BY id DESC
         LIMIT 1
         """,
         (internal_team_id, subtask, submission_period_id),
     ).fetchone()
-    return row is not None
+    return row["id"] if row is not None else None
+
+
+def has_unused_resubmission_permission(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+    subtask: str,
+    submission_period_id: int,
+) -> bool:
+    return (
+        get_unused_resubmission_permission_id(
+            connection,
+            internal_team_id=internal_team_id,
+            subtask=subtask,
+            submission_period_id=submission_period_id,
+        )
+        is not None
+    )
+
+
+def grant_resubmission_permission_for_submission(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+    organizer_id: int,
+    reason: str | None = None,
+) -> bool:
+    submission = connection.execute(
+        f"""
+        SELECT team_id, subtask, submission_period_id, status, is_current
+        FROM submissions
+        WHERE id = ?
+          AND status IN {SUCCESSFUL_SUBMISSION_STATUS_SQL}
+          AND is_current = 1
+        """,
+        (submission_id,),
+    ).fetchone()
+    if submission is None:
+        return False
+
+    existing_permission_id = get_unused_resubmission_permission_id(
+        connection,
+        internal_team_id=submission["team_id"],
+        subtask=submission["subtask"],
+        submission_period_id=submission["submission_period_id"],
+    )
+    if existing_permission_id is not None:
+        return True
+
+    connection.execute(
+        """
+        INSERT INTO resubmission_permissions (
+          team_id,
+          subtask,
+          submission_period_id,
+          granted_by_organizer_id,
+          granted_at_jst,
+          reason,
+          is_used
+        )
+        VALUES (?, ?, ?, ?, ?, ?, 0)
+        """,
+        (
+            submission["team_id"],
+            submission["subtask"],
+            submission["submission_period_id"],
+            organizer_id,
+            jst_now_text(),
+            reason,
+        ),
+    )
+    connection.commit()
+    return True
+
+
+def activate_current_submission(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+    superseded_submission_id: int | None = None,
+    resubmission_permission_id: int | None = None,
+    organizer_id: int | None = None,
+    reason: str | None = None,
+) -> None:
+    now_jst = jst_now_text()
+    if superseded_submission_id is not None:
+        connection.execute(
+            """
+            UPDATE submissions
+            SET is_current = 0,
+                superseded_at_jst = ?,
+                superseded_by_submission_id = ?,
+                superseded_reason = ?,
+                superseded_by_organizer_id = ?
+            WHERE id = ?
+            """,
+            (
+                now_jst,
+                submission_id,
+                reason,
+                organizer_id,
+                superseded_submission_id,
+            ),
+        )
+
+    connection.execute(
+        """
+        UPDATE submissions
+        SET is_current = 1
+        WHERE id = ?
+        """,
+        (submission_id,),
+    )
+
+    if resubmission_permission_id is not None:
+        connection.execute(
+            """
+            UPDATE resubmission_permissions
+            SET is_used = 1,
+                used_by_submission_id = ?,
+                used_at_jst = ?
+            WHERE id = ?
+            """,
+            (submission_id, now_jst, resubmission_permission_id),
+        )
+
+    connection.commit()
+
+
+def list_resubmission_permissions_for_slot(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+    subtask: str,
+    submission_period_id: int,
+) -> tuple[ResubmissionPermission, ...]:
+    rows = connection.execute(
+        """
+        SELECT
+          resubmission_permissions.id,
+          resubmission_permissions.team_id,
+          resubmission_permissions.subtask,
+          resubmission_permissions.submission_period_id,
+          resubmission_permissions.granted_by_organizer_id,
+          organizers.display_name AS granted_by_display_name,
+          resubmission_permissions.granted_at_jst,
+          resubmission_permissions.reason,
+          resubmission_permissions.used_by_submission_id,
+          resubmission_permissions.used_at_jst,
+          resubmission_permissions.is_used
+        FROM resubmission_permissions
+        JOIN organizers ON organizers.id = resubmission_permissions.granted_by_organizer_id
+        WHERE resubmission_permissions.team_id = ?
+          AND resubmission_permissions.subtask = ?
+          AND resubmission_permissions.submission_period_id = ?
+        ORDER BY resubmission_permissions.id DESC
+        """,
+        (internal_team_id, subtask, submission_period_id),
+    ).fetchall()
+    return tuple(
+        ResubmissionPermission(
+            id=row["id"],
+            team_id=row["team_id"],
+            subtask=row["subtask"],
+            submission_period_id=row["submission_period_id"],
+            granted_by_organizer_id=row["granted_by_organizer_id"],
+            granted_by_display_name=row["granted_by_display_name"],
+            granted_at_jst=row["granted_at_jst"],
+            reason=row["reason"],
+            used_by_submission_id=row["used_by_submission_id"],
+            used_at_jst=row["used_at_jst"],
+            is_used=bool(row["is_used"]),
+        )
+        for row in rows
+    )
+
+
+def get_resubmission_permission(
+    connection: sqlite3.Connection,
+    *,
+    permission_id: int,
+) -> ResubmissionPermission | None:
+    row = connection.execute(
+        """
+        SELECT
+          resubmission_permissions.id,
+          resubmission_permissions.team_id,
+          resubmission_permissions.subtask,
+          resubmission_permissions.submission_period_id,
+          resubmission_permissions.granted_by_organizer_id,
+          organizers.display_name AS granted_by_display_name,
+          resubmission_permissions.granted_at_jst,
+          resubmission_permissions.reason,
+          resubmission_permissions.used_by_submission_id,
+          resubmission_permissions.used_at_jst,
+          resubmission_permissions.is_used
+        FROM resubmission_permissions
+        JOIN organizers ON organizers.id = resubmission_permissions.granted_by_organizer_id
+        WHERE resubmission_permissions.id = ?
+        """,
+        (permission_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return ResubmissionPermission(
+        id=row["id"],
+        team_id=row["team_id"],
+        subtask=row["subtask"],
+        submission_period_id=row["submission_period_id"],
+        granted_by_organizer_id=row["granted_by_organizer_id"],
+        granted_by_display_name=row["granted_by_display_name"],
+        granted_at_jst=row["granted_at_jst"],
+        reason=row["reason"],
+        used_by_submission_id=row["used_by_submission_id"],
+        used_at_jst=row["used_at_jst"],
+        is_used=bool(row["is_used"]),
+    )
 
 
 def list_admin_submission_summaries(
@@ -648,11 +935,15 @@ def list_admin_submission_summaries(
         f"""
         SELECT
           submissions.id,
+          submissions.team_id AS internal_team_id,
           teams.team_id,
           teams.display_name,
           submissions.subtask,
+          submissions.submission_period_id,
           submission_periods.name AS period_name,
           submissions.status,
+          submissions.is_current,
+          submissions.superseded_at_jst,
           submissions.original_filename,
           submissions.submitted_at_jst,
           submissions.validation_summary
@@ -667,11 +958,15 @@ def list_admin_submission_summaries(
     return tuple(
         AdminSubmissionSummary(
             submission_id=row["id"],
+            internal_team_id=row["internal_team_id"],
             team_public_id=row["team_id"],
             team_display_name=row["display_name"],
             subtask=row["subtask"],
+            submission_period_id=row["submission_period_id"],
             period_name=row["period_name"],
             status=row["status"],
+            is_current=bool(row["is_current"]),
+            superseded_at_jst=row["superseded_at_jst"],
             original_filename=row["original_filename"],
             submitted_at_jst=row["submitted_at_jst"],
             validation_summary=row["validation_summary"],
@@ -689,11 +984,18 @@ def get_admin_submission_detail(
         """
         SELECT
           submissions.id,
+          submissions.team_id AS internal_team_id,
           teams.team_id,
           teams.display_name,
           submissions.subtask,
+          submissions.submission_period_id,
           submission_periods.name AS period_name,
           submissions.status,
+          submissions.is_current,
+          submissions.superseded_at_jst,
+          submissions.superseded_by_submission_id,
+          submissions.superseded_reason,
+          submissions.superseded_by_organizer_id,
           submissions.original_filename,
           submissions.stored_file_path,
           submissions.file_sha256,
@@ -712,11 +1014,18 @@ def get_admin_submission_detail(
         return None
     return AdminSubmissionDetail(
         submission_id=row["id"],
+        internal_team_id=row["internal_team_id"],
         team_public_id=row["team_id"],
         team_display_name=row["display_name"],
         subtask=row["subtask"],
+        submission_period_id=row["submission_period_id"],
         period_name=row["period_name"],
         status=row["status"],
+        is_current=bool(row["is_current"]),
+        superseded_at_jst=row["superseded_at_jst"],
+        superseded_by_submission_id=row["superseded_by_submission_id"],
+        superseded_reason=row["superseded_reason"],
+        superseded_by_organizer_id=row["superseded_by_organizer_id"],
         original_filename=row["original_filename"],
         stored_file_path=row["stored_file_path"],
         file_sha256=row["file_sha256"],
