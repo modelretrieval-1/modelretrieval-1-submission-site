@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the plan for adopting Alembic as the database migration tool for the NTCIR-19 ModelRetrieval submission system.
+This document defines the Alembic database migration workflow for the NTCIR-19 ModelRetrieval submission system.
 
 The goal is to make schema changes explicit, reviewable, repeatable, and safe for staging and production data.
 
@@ -21,14 +21,17 @@ Atlas is not selected for the current phase because it would add a separate sche
 
 ## Current State
 
-The app currently initializes the SQLite schema from `app/db.py` at application startup:
+The app now manages SQLite schema changes with Alembic:
 
-- `initialize_database()` runs `CREATE TABLE IF NOT EXISTS` statements.
-- Default submission periods are inserted with `INSERT OR IGNORE`.
-- Tests and local development rely on this bootstrap behavior.
-- Staging and production currently start the app with `docker compose up -d`, which causes startup initialization to run inside the app process.
+- `alembic.ini` and `migrations/` define the migration environment.
+- Revision `20260706_0001` creates the baseline schema.
+- Default submission periods are inserted by the baseline revision.
+- `initialize_database()` is migration-backed for local development and tests.
+- `python -m app.cli migrate` applies migrations using the app settings.
+- Staging and production deployment runs `alembic upgrade head` before app startup.
+- Staging and production app startup verifies the database is already at the Alembic head revision.
 
-This is simple, but it is not enough once existing databases need ordered schema changes.
+The legacy `CREATE TABLE IF NOT EXISTS` schema string remains temporarily in `app/db.py` only as compatibility reference during the migration transition. Alembic is the schema authority.
 
 ## Target State
 
@@ -37,15 +40,15 @@ Alembic owns schema versioning.
 Target behavior:
 
 - Schema changes are represented as Alembic revision files under `migrations/versions/`.
-- The current schema becomes the baseline Alembic revision.
+- The current schema is the baseline Alembic revision.
 - Staging and production deployments run `alembic upgrade head` before the app serves traffic.
 - The app no longer relies on startup-time `CREATE TABLE IF NOT EXISTS` for deployed environments.
 - Local tests and development remain easy to bootstrap.
 - Default reference data, such as normal and late submission periods, remains deterministic and idempotent.
 
-## Scope
+## Implemented Scope
 
-Initial adoption should include:
+Initial adoption includes:
 
 - Add Alembic as an application dependency.
 - Add `alembic.ini`.
@@ -53,7 +56,7 @@ Initial adoption should include:
 - Add an initial revision that creates the current schema.
 - Add the partial unique index for one successful submission per team, subtask, and period.
 - Add idempotent insertion of default submission periods.
-- Add a small CLI or documented command for applying migrations.
+- Add `python -m app.cli migrate` as the app-native migration command.
 - Update tests to create databases through migrations or through a migration-aware helper.
 - Update Docker image contents so migration files are included.
 - Update deployment docs and CI/CD flow to run migrations before app startup.
@@ -120,6 +123,12 @@ docker compose up -d
 deployment/scripts/smoke-check.sh
 ```
 
+The app-native equivalent is:
+
+```text
+docker compose run --rm app python -m app.cli migrate
+```
+
 Production deployment should become:
 
 ```text
@@ -128,6 +137,12 @@ docker compose pull
 docker compose run --rm app alembic upgrade head
 docker compose up -d
 deployment/scripts/smoke-check.sh
+```
+
+The app-native equivalent is:
+
+```text
+docker compose run --rm app python -m app.cli migrate
 ```
 
 The production backup must happen before migration.
@@ -188,18 +203,20 @@ uv run --extra dev pytest
 uv run --extra dev ruff check .
 ```
 
-## Implementation Steps
+## Implementation Record
 
-1. Add Alembic dependency and lockfile update.
-2. Add Alembic config and migration environment.
-3. Create initial schema revision.
-4. Add migration application helper or CLI command.
-5. Adjust `app/db.py` so schema creation is no longer duplicated as the long-term source of truth.
-6. Update tests to use migration-aware database setup.
-7. Update Dockerfile to copy migration files and Alembic config.
-8. Update CI/CD deployment commands to run migrations before `docker compose up -d`.
-9. Update deployment runbook, checklist, and handoff.
-10. Run full tests, lint, and local smoke verification.
+Completed implementation:
+
+1. Added Alembic dependency and lockfile update.
+2. Added Alembic config and migration environment.
+3. Created initial schema revision `20260706_0001`.
+4. Added `python -m app.cli migrate`.
+5. Adjusted `app/db.py` so migration-backed initialization is used for development and tests.
+6. Updated tests to verify migrated database setup.
+7. Updated Dockerfile to copy migration files and Alembic config.
+8. Updated CI/CD deployment commands to run migrations before `docker compose up -d`.
+9. Updated deployment runbook and handoff.
+10. Ran full tests and lint.
 
 ## Acceptance Criteria
 

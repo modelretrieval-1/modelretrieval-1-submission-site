@@ -595,7 +595,7 @@ Status:
 - Deployment docs capture the GHCR login path, `APP_IMAGE` meaning, `SECRET_KEY` generation, passwordless deploy user, bind-mounted data ownership fix, and Nginx long-hostname hash bucket fix.
 - GitHub Actions staging deployment from `main` has been verified.
 - Remaining Sprint 6 work is staging end-to-end operations verification, production promotion rehearsal, and final E2E regression coverage.
-- New document-driven addition: adopt Alembic before production launch using `../technical/database-migrations.md` as the source of truth.
+- Alembic migration adoption is implemented using `../technical/database-migrations.md` as the source of truth.
 
 ### Sprint 6A: Application UI Redesign
 

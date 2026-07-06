@@ -5,6 +5,7 @@ description = "Submission and evaluation system for the NTCIR-19 ModelRetrieval 
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+  "alembic>=1.13.0",
   "fastapi>=0.115.0",
   "jinja2>=3.1.0",
   "python-multipart>=0.0.9",

@@ -35,7 +35,7 @@ SQLite is appropriate because:
 - Backups are simple.
 - It avoids operating a separate database service.
 
-Alembic is the planned migration tool because staging and production use persistent SQLite databases that need explicit, repeatable schema changes. See [Database Migration Plan](database-migrations.md).
+Alembic is used for schema migrations because staging and production use persistent SQLite databases that need explicit, repeatable schema changes. See [Database Migration Plan](database-migrations.md).
 
 Local filesystem storage is appropriate because:
 

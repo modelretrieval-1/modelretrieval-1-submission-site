@@ -3,6 +3,10 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+from alembic import command
+from alembic.config import Config
+from alembic.script import ScriptDirectory
+
 SCHEMA = """
 PRAGMA foreign_keys = ON;
 
@@ -153,6 +157,20 @@ DEFAULT_PERIODS = [
     ("late", None, "2026-10-15 23:59:00"),
 ]
 
+EXPECTED_BASELINE_TABLES = {
+    "audit_events",
+    "evaluation_query_results",
+    "evaluation_results",
+    "ground_truth_versions",
+    "organizers",
+    "runs",
+    "submission_periods",
+    "submissions",
+    "team_subtasks",
+    "teams",
+    "validation_errors",
+}
+
 
 def connect(database_path: Path) -> sqlite3.Connection:
     database_path.parent.mkdir(parents=True, exist_ok=True)
@@ -162,14 +180,77 @@ def connect(database_path: Path) -> sqlite3.Connection:
     return connection
 
 
-def initialize_database(database_path: Path) -> None:
+def alembic_config(database_path: Path) -> Config:
+    project_root = Path(__file__).resolve().parent.parent
+    config = Config(str(project_root / "alembic.ini"))
+    config.attributes["database_path"] = database_path
+    return config
+
+
+def _table_names(connection: sqlite3.Connection) -> set[str]:
+    rows = connection.execute(
+        """
+        SELECT name FROM sqlite_master
+        WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+        """
+    ).fetchall()
+    return {row[0] for row in rows}
+
+
+def _current_revision(connection: sqlite3.Connection) -> str | None:
+    table_names = _table_names(connection)
+    if "alembic_version" not in table_names:
+        return None
+    row = connection.execute("SELECT version_num FROM alembic_version").fetchone()
+    if row is None:
+        return None
+    return row[0]
+
+
+def _head_revision(config: Config) -> str:
+    script = ScriptDirectory.from_config(config)
+    return script.get_current_head()
+
+
+def _stamp_existing_baseline_if_needed(database_path: Path, config: Config) -> None:
+    if not database_path.exists():
+        return
+
     with connect(database_path) as connection:
-        connection.executescript(SCHEMA)
-        connection.executemany(
-            """
-            INSERT OR IGNORE INTO submission_periods (name, starts_at_jst, deadline_at_jst)
-            VALUES (?, ?, ?)
-            """,
-            DEFAULT_PERIODS,
+        table_names = _table_names(connection)
+        if "alembic_version" in table_names or not table_names:
+            return
+
+        missing_tables = EXPECTED_BASELINE_TABLES - table_names
+        if missing_tables:
+            missing = ", ".join(sorted(missing_tables))
+            raise RuntimeError(
+                "Existing database is not managed by Alembic and does not match the "
+                f"baseline schema. Missing tables: {missing}."
+            )
+
+    command.stamp(config, "head")
+
+
+def run_migrations(database_path: Path) -> None:
+    config = alembic_config(database_path)
+    _stamp_existing_baseline_if_needed(database_path, config)
+    command.upgrade(config, "head")
+
+
+def verify_database_current(database_path: Path) -> None:
+    config = alembic_config(database_path)
+    head_revision = _head_revision(config)
+
+    with connect(database_path) as connection:
+        current_revision = _current_revision(connection)
+
+    if current_revision != head_revision:
+        raise RuntimeError(
+            "Database schema is not at the expected Alembic revision. "
+            f"Current revision: {current_revision or 'none'}; expected: {head_revision}."
         )
-        connection.commit()
+
+
+def initialize_database(database_path: Path) -> None:
+    run_migrations(database_path)

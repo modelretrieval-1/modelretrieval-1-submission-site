@@ -133,6 +133,7 @@ jobs:
             "cd '${DEPLOY_PATH}' && \
              if grep -q '^APP_IMAGE=' .env; then sed -i.bak \"s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE}|\" .env; else printf '\nAPP_IMAGE=${IMAGE}\n' >> .env; fi && \
              docker compose pull && \
+             docker compose run --rm app alembic upgrade head && \
              docker compose up -d"
 
       - name: Smoke check staging
@@ -188,6 +189,7 @@ jobs:
              ENVIRONMENT=production ./backup.sh && \
              if grep -q '^APP_IMAGE=' .env; then sed -i.bak \"s|^APP_IMAGE=.*|APP_IMAGE=${IMAGE}|\" .env; else printf '\nAPP_IMAGE=${IMAGE}\n' >> .env; fi && \
              docker compose pull && \
+             docker compose run --rm app alembic upgrade head && \
              docker compose up -d"
 
       - name: Smoke check production

@@ -113,20 +113,23 @@ The repository-level `deployment/` directory is reserved for runtime deployment 
 - If the container cannot create `/data/storage`, fix ownership of `/opt/modelretrieval/<env>/data` to match the app container UID/GID.
 - If Nginx cannot build `server_names_hash`, set `server_names_hash_bucket_size 128;` in the `http { ... }` block.
 
-## Planned Database Migration Work
+## Database Migration Work
 
-Alembic has been selected as the planned database migration tool before production launch.
+Alembic is implemented as the database migration tool.
 
 Source of truth:
 
 - `docs/technical/database-migrations.md`
 
-Implementation intent:
+Implementation state:
 
 - Keep the runtime app on raw `sqlite3` for now.
-- Add Alembic only for versioned schema management.
-- Convert the current `app/db.py` schema into the baseline Alembic revision.
+- Alembic is used only for versioned schema management.
+- The current schema is captured in baseline revision `20260706_0001`.
+- `python -m app.cli migrate` applies migrations using the app settings.
 - Run `alembic upgrade head` explicitly during staging and production deployment before app startup.
+- Development and test startup use migration-backed `initialize_database()`.
+- Staging and production app startup verifies that the database is already at the Alembic head revision.
 - Keep production rollback based on pre-deploy backups rather than relying on Alembic downgrades.
 
 ## Setup Commands

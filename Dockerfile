@@ -10,7 +10,9 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev
 
+COPY alembic.ini ./
 COPY app ./app
+COPY migrations ./migrations
 
 RUN mkdir -p /data/storage \
     && groupadd --system app \

@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from app.config import Settings, settings
-from app.db import initialize_database
+from app.db import initialize_database, verify_database_current
 from app.routes.admin import router as admin_router
 from app.routes.auth import router as auth_router
 from app.routes.team import router as team_router
@@ -20,7 +20,10 @@ def build_lifespan(app_settings: Settings):
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         ensure_storage(app_settings)
-        initialize_database(app_settings.database_path)
+        if app_settings.environment in {"staging", "production"}:
+            verify_database_current(app_settings.database_path)
+        else:
+            initialize_database(app_settings.database_path)
         yield
 
     return lifespan
