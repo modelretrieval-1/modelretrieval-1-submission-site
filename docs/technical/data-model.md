@@ -20,6 +20,8 @@ Core entities:
 
 The implemented SQLite schema includes the core entities below, including `evaluation_query_results` for organizer-only per-query diagnostics. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
 
+Schema migrations are planned with Alembic before production launch. The current schema should become the initial Alembic revision, and future schema changes should be added as versioned migration files. See [Database Migration Plan](database-migrations.md).
+
 Participant upload attempts use:
 
 - `rejected` for failed validation attempts.

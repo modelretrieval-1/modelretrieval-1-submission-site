@@ -377,12 +377,36 @@ Stories:
 - Add deployment checklist.
 - Add first-admin creation command.
 - Add Sakura VPS setup and GitHub secrets guides.
+- Add Alembic database migration workflow for staging and production.
 
 Required tests:
 
 - Smoke test app startup.
 - Smoke test database migration/init.
 - Manual VPS deployment checklist.
+
+### Epic 9: Database Migrations
+
+Goal:
+
+- Replace startup-only schema bootstrap as the long-term schema authority with explicit Alembic migrations.
+
+Stories:
+
+- Add Alembic dependency and configuration.
+- Create an initial migration matching the current SQLite schema.
+- Preserve deterministic default submission-period rows.
+- Add a migration command for local, staging, and production use.
+- Update tests to verify migration from an empty database to head.
+- Update Docker image and CI/CD deployment flow so migrations run before app startup.
+- Document baseline, stamping, rollback, and SQLite migration constraints.
+
+Required tests:
+
+- Integration test that a fresh database migrates to head.
+- Integration test that default periods exist after migration.
+- Integration test that the one-successful-submission partial unique index exists and behaves correctly.
+- Full regression test suite after migration adoption.
 
 ## Suggested Sprint Plan
 
@@ -571,6 +595,7 @@ Status:
 - Deployment docs capture the GHCR login path, `APP_IMAGE` meaning, `SECRET_KEY` generation, passwordless deploy user, bind-mounted data ownership fix, and Nginx long-hostname hash bucket fix.
 - GitHub Actions staging deployment from `main` has been verified.
 - Remaining Sprint 6 work is staging end-to-end operations verification, production promotion rehearsal, and final E2E regression coverage.
+- New document-driven addition: adopt Alembic before production launch using `../technical/database-migrations.md` as the source of truth.
 
 ### Sprint 6A: Application UI Redesign
 

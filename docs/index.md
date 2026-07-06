@@ -20,6 +20,7 @@ Document role: this file is only the documentation map. Keep current implementat
 
 - [Architecture](technical/architecture.md): recommended application and VPS architecture.
 - [Data Model](technical/data-model.md): database/entity design.
+- [Database Migrations](technical/database-migrations.md): Alembic adoption plan and migration policy.
 - [Submission Specification](technical/submission-spec.md): participant upload format and validation rules.
 - [Evaluation Specification](technical/evaluation-spec.md): metric definitions and evaluation behavior.
 - [Diagrams](technical/diagrams.md): diagram inventory and Mermaid conventions.

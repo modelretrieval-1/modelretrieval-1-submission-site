@@ -16,6 +16,7 @@ Recommended stack:
 - Local project CSS for task-specific visual polish.
 - uv for Python dependency management and reproducible installs.
 - SQLite for relational data.
+- Alembic for versioned SQLite schema migrations.
 - Local filesystem storage for uploaded submissions, ground truth, validation logs, and export bundles.
 - Host Nginx as the public reverse proxy.
 - HTTPS using Let's Encrypt.
@@ -33,6 +34,8 @@ SQLite is appropriate because:
 - Writes are low volume.
 - Backups are simple.
 - It avoids operating a separate database service.
+
+Alembic is the planned migration tool because staging and production use persistent SQLite databases that need explicit, repeatable schema changes. See [Database Migration Plan](database-migrations.md).
 
 Local filesystem storage is appropriate because:
 

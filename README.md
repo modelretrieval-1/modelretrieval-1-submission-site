@@ -81,6 +81,7 @@ uv lock
 - [docs/product/decisions.md](docs/product/decisions.md): resolved product and implementation decisions.
 - [docs/ui/app-ui-redesign.md](docs/ui/app-ui-redesign.md): application-shell and dashboard redesign plan and acceptance criteria.
 - [docs/technical/data-model.md](docs/technical/data-model.md): database/entity design.
+- [docs/technical/database-migrations.md](docs/technical/database-migrations.md): Alembic migration adoption plan.
 - [docs/technical/submission-spec.md](docs/technical/submission-spec.md): participant upload format and validation rules.
 - [docs/deployment/deployment-runbook.md](docs/deployment/deployment-runbook.md): operational deployment, rollback, backup, and restore guide.
 - [docs/planning/implementation-plan.md](docs/planning/implementation-plan.md): Scrum plan, epics, testing strategy, sprint plan.

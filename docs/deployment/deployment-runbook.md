@@ -27,6 +27,8 @@ The repository includes the first Docker deployment files:
 
 The GitHub Actions workflow runs tests, linting, image publishing, staging deployment, production backup, production deployment, and smoke checks.
 
+Database schema changes should be managed with Alembic after the migration plan is implemented. See `../technical/database-migrations.md`.
+
 For first-time VPS setup, start with `vps-setup.md`.
 
 For GitHub Actions secret configuration, use `github-secrets.md`.
@@ -274,6 +276,7 @@ Deployment command shape:
 ```bash
 cd /opt/modelretrieval/staging
 docker compose pull
+docker compose run --rm app alembic upgrade head
 docker compose up -d
 docker compose exec app python -m app.cli create-admin --username admin --display-name "Admin User"
 ```
@@ -297,6 +300,7 @@ Deploy:
 
 ```bash
 docker compose pull
+docker compose run --rm app alembic upgrade head
 docker compose up -d
 ```
 
@@ -312,6 +316,8 @@ Then verify:
 - Organizer login works.
 - Team dashboard loads for a test team if available.
 - Admin pages are still protected from participant accounts.
+
+The production backup must run before `alembic upgrade head`. If a migration fails, do not start the new app version until the migration issue is understood.
 
 ## Promotion Flow
 
@@ -362,9 +368,9 @@ PRODUCTION_PATH=/opt/modelretrieval/production
 PRODUCTION_URL=https://submission.modelretrieval-1.happysocial.net
 ```
 
-The staging deploy job updates `APP_IMAGE` in the remote staging `.env`, pulls the image, starts the Compose stack, and runs `deployment/scripts/smoke-check.sh`.
+After the Alembic migration plan is implemented, the staging deploy job should update `APP_IMAGE` in the remote staging `.env`, pull the image, run `alembic upgrade head`, start the Compose stack, and run `deployment/scripts/smoke-check.sh`.
 
-The production deploy job runs `./backup.sh` in the remote production directory before updating `APP_IMAGE`, pulling the image, starting the Compose stack, and running the smoke check.
+After the Alembic migration plan is implemented, the production deploy job should run `./backup.sh` in the remote production directory before updating `APP_IMAGE`, pulling the image, running `alembic upgrade head`, starting the Compose stack, and running the smoke check.
 
 The workflow publishes images to GitHub Container Registry using the repository's `GITHUB_TOKEN`.
 
