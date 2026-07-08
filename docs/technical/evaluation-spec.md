@@ -85,6 +85,11 @@ Expected ground-truth fields:
 - `image_id`
 - `model_id`
 
+Image IDs are matched between the submission and ground truth with an optional
+trailing `.png` suffix ignored on either side, so `test-0001-0011` and
+`test-0001-0011.png` refer to the same query image. Both validation and MRR scoring
+apply this normalization.
+
 ### MRR Calculation
 
 For each query, find the rank of the first relevant model.
