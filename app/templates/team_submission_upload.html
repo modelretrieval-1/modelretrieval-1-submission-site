@@ -72,7 +72,7 @@
         <p>Choose normal or late submission, then upload the run file for Subtask {{ subtask }}.</p>
       </div>
     </div>
-    <form class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
       <fieldset class="border rounded p-3">
         <legend>Submission period</legend>
         {% for period_state in period_states %}
@@ -108,9 +108,100 @@
         <div class="form-text">Upload one TREC_EVAL-format file, maximum 50 MB and up to 5 RunID values. The filename extension is not checked.</div>
       </div>
       <div class="action-row">
-        <button class="btn btn-primary" type="submit">Upload</button>
+        <button id="uploadSubmit" class="btn btn-primary" type="submit">Upload</button>
         <a class="btn btn-outline-secondary" href="/team">Cancel</a>
+      </div>
+
+      <div id="uploadStatus" class="upload-status" hidden>
+        <div id="uploadProgressPhase" class="upload-status-phase" hidden>
+          <div class="upload-status-label">
+            <span>Uploading submission…</span>
+            <span id="uploadPercent" class="upload-status-percent">0%</span>
+          </div>
+          <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="uploadBar" class="progress-bar" style="width: 0%"></div>
+          </div>
+        </div>
+        <div id="uploadProcessingPhase" class="upload-status-phase upload-status-processing" hidden>
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+          <span>Validating &amp; evaluating…</span>
+        </div>
+        <div id="uploadError" class="alert alert-danger mb-0" role="alert" hidden></div>
       </div>
     </form>
   </section>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    (function () {
+      var form = document.getElementById("uploadForm");
+      if (!form || !window.FormData || !window.XMLHttpRequest) {
+        return; // Fall back to a normal browser submit.
+      }
+      var xhrProbe = new XMLHttpRequest();
+      if (!("upload" in xhrProbe)) {
+        return; // No upload-progress support; keep native submit.
+      }
+
+      var submitButton = document.getElementById("uploadSubmit");
+      var statusBox = document.getElementById("uploadStatus");
+      var progressPhase = document.getElementById("uploadProgressPhase");
+      var processingPhase = document.getElementById("uploadProcessingPhase");
+      var errorBox = document.getElementById("uploadError");
+      var bar = document.getElementById("uploadBar");
+      var percent = document.getElementById("uploadPercent");
+      var progressWrap = statusBox.querySelector(".progress");
+
+      function show(el) { el.hidden = false; }
+      function hide(el) { el.hidden = true; }
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        errorBox.textContent = "";
+        hide(errorBox);
+        show(statusBox);
+        show(progressPhase);
+        hide(processingPhase);
+        submitButton.disabled = true;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", form.action);
+
+        xhr.upload.addEventListener("progress", function (evt) {
+          if (!evt.lengthComputable) { return; }
+          var pct = Math.round((evt.loaded / evt.total) * 100);
+          bar.style.width = pct + "%";
+          percent.textContent = pct + "%";
+          progressWrap.setAttribute("aria-valuenow", String(pct));
+        });
+
+        xhr.upload.addEventListener("loadend", function () {
+          hide(progressPhase);
+          show(processingPhase);
+        });
+
+        xhr.addEventListener("load", function () {
+          // The response is the full page (scores or validation errors).
+          document.open();
+          document.write(xhr.responseText);
+          document.close();
+        });
+
+        xhr.addEventListener("error", failed);
+        xhr.addEventListener("abort", failed);
+        xhr.addEventListener("timeout", failed);
+
+        function failed() {
+          hide(progressPhase);
+          hide(processingPhase);
+          errorBox.textContent = "Upload failed. Check your connection and try again.";
+          show(errorBox);
+          submitButton.disabled = false;
+        }
+
+        xhr.send(new FormData(form));
+      });
+    })();
+  </script>
 {% endblock %}

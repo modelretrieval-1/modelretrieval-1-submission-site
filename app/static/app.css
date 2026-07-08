@@ -296,6 +296,39 @@ label {
   align-items: center;
 }
 
+.upload-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.upload-status-phase {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.upload-status-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.upload-status-percent {
+  font-variant-numeric: tabular-nums;
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+.upload-status-processing {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
 .alert ul {
   margin-bottom: 0;
 }

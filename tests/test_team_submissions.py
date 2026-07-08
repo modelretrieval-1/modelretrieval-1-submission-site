@@ -221,6 +221,22 @@ def test_team_can_open_upload_page_for_eligible_subtask():
         assert "open" in response.text
 
 
+def test_upload_page_includes_progress_ui_hooks():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        _organizer, team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        response = client.get("/team/submissions/A/new")
+
+        assert response.status_code == 200
+        # Progressive-enhancement hooks for the two-phase upload progress UI.
+        assert 'id="uploadForm"' in response.text
+        assert 'id="uploadStatus"' in response.text
+        assert "Validating &amp; evaluating" in response.text
+
+
 def test_upload_page_shows_period_closed_and_reopened_states():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
