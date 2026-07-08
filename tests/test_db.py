@@ -51,7 +51,7 @@ class DatabaseTests(unittest.TestCase):
                     ("normal", "2026-08-01 15:00:00"),
                 ],
             )
-            self.assertEqual(revision[0], "20260706_0002")
+            self.assertEqual(revision[0], "20260708_0003")
             verify_database_current(database_path)
 
     def test_initialize_database_is_idempotent(self):
@@ -86,7 +86,8 @@ class DatabaseTests(unittest.TestCase):
                 ).fetchone()["sql"]
 
             self.assertIn(
-                "WHERE status IN ('accepted', 'evaluated', 'evaluation_failed')",
+                "WHERE status IN ('accepted', 'queued', 'processing', 'evaluated', "
+                "'evaluation_failed')",
                 index_sql,
             )
             self.assertIn("is_current = 1", index_sql)
@@ -112,7 +113,7 @@ class DatabaseTests(unittest.TestCase):
                     """
                 ).fetchone()
 
-            self.assertEqual(revision["version_num"], "20260706_0002")
+            self.assertEqual(revision["version_num"], "20260708_0003")
             self.assertIsNotNone(permissions_table)
 
     def test_migrations_stamp_unversioned_current_schema_database(self):
@@ -128,7 +129,7 @@ class DatabaseTests(unittest.TestCase):
             with connect(database_path) as connection:
                 revision = connection.execute("SELECT version_num FROM alembic_version").fetchone()
 
-            self.assertEqual(revision["version_num"], "20260706_0002")
+            self.assertEqual(revision["version_num"], "20260708_0003")
 
 
 if __name__ == "__main__":

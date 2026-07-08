@@ -94,7 +94,8 @@ CREATE TABLE IF NOT EXISTS submissions (
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_one_current_successful_submission
 ON submissions(team_id, subtask, submission_period_id)
-WHERE status IN ('accepted', 'evaluated', 'evaluation_failed') AND is_current = 1;
+WHERE status IN ('accepted', 'queued', 'processing', 'evaluated', 'evaluation_failed')
+  AND is_current = 1;
 
 CREATE TABLE IF NOT EXISTS resubmission_permissions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
