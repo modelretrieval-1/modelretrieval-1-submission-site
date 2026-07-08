@@ -12,7 +12,9 @@ Ground-truth files are stored on the server local filesystem.
 
 ## Implementation Status
 
-Aggregate run-level evaluation is implemented for accepted participant uploads. Organizer-only per-query metric persistence and organizer submission-detail display are also implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
+Aggregate run-level evaluation is implemented for valid participant uploads. Organizer-only per-query metric persistence and organizer submission-detail display are also implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint.
+
+Evaluation runs asynchronously. After synchronous validation, a valid upload is stored as `queued`; an in-process worker thread claims it (`processing`), re-reads and re-parses the preserved file, computes metrics, and persists results (`evaluated`) or records a failure (`evaluation_failed`). Re-parsing from the stored file keeps evaluation reproducible from the exact bytes that were preserved. Interrupted `processing` submissions are re-queued on startup, and a synchronous `eager` mode drains the queue inline for tests and single-shot runs.
 
 ## Subtask A: Language Model Retrieval
 

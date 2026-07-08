@@ -18,7 +18,7 @@ Current test status:
 
 ```text
 uv run --extra dev pytest
-146 passed
+164 passed
 
 uv run --extra dev ruff check .
 All checks passed

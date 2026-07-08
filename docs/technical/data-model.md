@@ -25,9 +25,17 @@ Schema migrations are managed with Alembic. The current schema is captured in th
 Participant upload attempts use:
 
 - `rejected` for failed validation attempts.
-- `accepted` only transiently before successful evaluation persistence.
+- `queued` for valid submissions awaiting asynchronous evaluation (slot reserved).
+- `processing` while the evaluation worker is scoring the submission.
+- `accepted` retained as a legacy value; new uploads move directly to `queued`.
 - `evaluated` for valid submissions with persisted metric rows.
 - `evaluation_failed` when a valid stored submission cannot be evaluated.
+
+Validation stays synchronous, so `rejected` is still returned on the upload
+request. Evaluation is asynchronous: a valid upload is stored as `queued`, then a
+background worker moves it `queued` → `processing` → `evaluated` /
+`evaluation_failed`. The `queued` and `processing` states reserve the current
+submission slot so a team cannot enqueue several files at once.
 
 Submissions store the selected `submission_period_id`, and the partial unique index enforces one current successful submission per team, subtask, and selected period. Older successful submissions can be retained as superseded history after an organizer-approved replacement upload.
 
@@ -279,6 +287,8 @@ Suggested fields:
 Allowed `status` values:
 
 - `rejected`
+- `queued`
+- `processing`
 - `accepted`
 - `evaluated`
 - `evaluation_failed`

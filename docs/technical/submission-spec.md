@@ -26,7 +26,7 @@ sequenceDiagram
   participant App as FastAPI app
   participant DB as SQLite
   participant Storage as Local storage
-  participant Eval as Evaluation logic
+  participant Worker as Evaluation worker
 
   Team->>App: Upload one file for subtask and period
   App->>DB: Load session account
@@ -51,21 +51,35 @@ sequenceDiagram
       App-->>Team: Show validation errors
     else Validation succeeds
       App->>Storage: Store submitted file
-      App->>DB: Persist accepted submission and runs
-      App->>Eval: Evaluate using active ground truth
+      App->>DB: Persist queued submission and runs (reserve slot)
+      App-->>Team: Redirect (303) to submission status page
+
+      Note over Worker,DB: Evaluation runs asynchronously
+      Worker->>DB: Claim next queued submission (mark processing)
+      Worker->>Storage: Re-read stored file
+      Worker->>Worker: Re-parse TREC_EVAL and evaluate using active ground truth
 
       alt Evaluation succeeds
-        Eval->>DB: Persist evaluation_results
-        Eval->>DB: Persist organizer-only evaluation_query_results
-        Eval->>DB: Mark submission evaluated
-        App-->>Team: Show run-level scores
+        Worker->>DB: Persist evaluation_results
+        Worker->>DB: Persist organizer-only evaluation_query_results
+        Worker->>DB: Mark submission evaluated
       else Evaluation fails
-        Eval->>DB: Mark submission evaluation_failed
-        App-->>Team: Show evaluation failure state
+        Worker->>DB: Mark submission evaluation_failed
       end
+      Team->>App: Poll status page / status JSON
+      App-->>Team: Show queued/processing, then run-level scores or failure
     end
   end
 ```
+
+Validation is synchronous, so format and slot errors are shown immediately on the
+upload request. Evaluation is asynchronous: a valid upload is stored as `queued`
+and the participant is redirected to a submission status page that shows
+`queued` → `processing` → `evaluated` / `evaluation_failed` and refreshes itself.
+An in-process worker thread drains the SQLite-backed queue one submission at a
+time and re-parses the preserved file so scoring stays reproducible. In the
+`eager` evaluation mode (used by tests and single-shot runs) the queue is drained
+inline before the redirect.
 
 ## Submission Turns
 

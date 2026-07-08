@@ -11,6 +11,7 @@ The implemented stack matches this recommendation. Use `../../HANDOFF.md` for th
 Recommended stack:
 
 - FastAPI for the backend.
+- An in-process background worker thread for asynchronous submission evaluation, backed by a SQLite-managed queue (no external broker or extra service). Validation stays synchronous inside the upload request; only the slow scoring is deferred. Interrupted jobs are re-queued on startup, and an `eager` mode drains the queue inline for tests.
 - Jinja2 templates for server-rendered pages.
 - Bootstrap 5 for UI components and layout.
 - Local project CSS for task-specific visual polish.

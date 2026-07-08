@@ -30,6 +30,7 @@ Scrum implementation is underway.
 - Bootstrap 5
 - SQLite
 - Local filesystem storage
+- In-process background worker thread for asynchronous submission evaluation (SQLite-backed queue; no external broker)
 - Pytest
 - Ruff
 - Playwright planned for E2E tests
@@ -71,7 +72,7 @@ Implemented Sprint 6A UI slices:
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.
-- Two-phase participant upload progress: determinate upload progress bar then indeterminate "Validating & evaluating…" spinner, as a client-side progressive enhancement with a native no-JS fallback and no async backend split.
+- Two-phase participant upload progress: determinate upload progress bar then indeterminate "Validating…" spinner, as a client-side progressive enhancement with a native no-JS fallback. The upload request now 303-redirects to a submission status page where the asynchronous evaluation state (`queued` → `processing` → `evaluated`/`evaluation_failed`) is shown and polled.
 - Responsive app-shell guards for mobile navigation, visible labels, table wrappers, and compact row overflow.
 
 ## Current Refactor State
@@ -171,7 +172,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-146 passed
+164 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -185,7 +186,13 @@ curl -fsS http://127.0.0.1:8000/health
 curl -fsS http://127.0.0.1:8000/login
 Rendered public login shell with sign-in form
 
-In-app browser backend was unavailable during the latest verification, so visual browser smoke verification remains pending.
+Asynchronous evaluation verified end-to-end in worker mode via a scripted
+TestClient run with lifespan active: a valid upload was stored as queued, the
+background worker thread evaluated it to evaluated, and the status page rendered
+the run-level scores.
+
+In-app browser backend was unavailable during the latest verification, so visual
+browser smoke verification remains pending.
 ```
 
 ## Implemented Code
@@ -206,6 +213,9 @@ Foundation:
 - `app/submissions.py`: also includes organizer submission list/detail query helpers.
 - `app/submissions.py`: also includes submission bundle query helpers.
 - `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation (with `.png`-tolerant image_id and zero-padding-tolerant model_id matching), ground-truth metric loading, evaluation result persistence, leaderboard query helpers, and evaluation status helpers.
+- `app/submissions.py`: also includes async-evaluation helpers `mark_submission_status`, `claim_next_queued_submission`, `requeue_processing_submissions`, and ownership-scoped `get_team_submission_status`, plus the `queued`/`processing` statuses in `SUCCESSFUL_SUBMISSION_STATUSES`.
+- `app/processing.py`: asynchronous evaluation — `process_submission` (re-reads and re-parses the stored file, then evaluates), `EvaluationWorker` thread, `recover_orphaned_submissions`, `run_pending_evaluations` (eager/test drain), and `start/stop_evaluation_worker`.
+- `app/routes/team.py`: also includes the participant submission status page (`GET /team/submissions/{id}`) and status JSON endpoint (`GET /team/submissions/{id}/status`); valid uploads are enqueued as `queued` and 303-redirect to the status page.
 
 Accounts and sessions:
 
@@ -231,6 +241,7 @@ Templates:
 - `app/templates/admin_submissions.html`
 - `app/templates/admin_submission_detail.html`
 - `app/templates/admin_leaderboard.html`
+- `app/templates/team_submission_status.html`
 - `app/static/app.css`: Bootstrap companion styling for layout, navigation, badges, tables, forms, and responsive polish.
 
 Tests:
@@ -253,6 +264,7 @@ Tests:
 - `tests/test_admin_periods.py`
 - `tests/test_admin_submissions.py`
 - `tests/test_admin_leaderboard.py`
+- `tests/test_async_evaluation.py`
 
 ## Product Decisions
 
@@ -274,7 +286,8 @@ Key decisions already made:
 - Normal deadline: August 1, 2026 at 15:00 JST.
 - Late deadline: October 15, 2026 at 23:59 JST.
 - Organizers can reopen periods.
-- Participants see scores immediately.
+- Validation is synchronous (immediate format errors); evaluation is asynchronous via an in-process worker thread with a participant-checkable status page.
+- Participants see scores as soon as evaluation completes; a valid upload is queued and evaluated in the background.
 - Leaderboard is organizer-only.
 - Ground truth is uploaded/configured by organizers and stored on the server local filesystem.
 - Evaluation is internal.
@@ -378,31 +391,57 @@ Current deployment notes captured in docs:
 Detailed completed story notes are archived at `docs/archive/implementation-history.md`. Keep `HANDOFF.md` focused on current continuation state, verification status, and next work.
 
 
-## Approved Upcoming Feature: Asynchronous Evaluation
+## Implemented Feature: Asynchronous Evaluation
 
-An approved-but-not-yet-implemented plan exists to move submission evaluation off the
-upload request into a background worker, with a participant-checkable status page.
+Submission evaluation now runs off the upload request in an in-process background
+worker, with a participant-checkable status page.
 
-- Plan: `docs/planning/async-evaluation-plan.md` (authoritative spec).
-- Confirmed decisions: evaluation-only async (validation stays synchronous); in-process
-  worker thread + SQLite-backed queue (no new services); state-level progress only.
-- New submission statuses: `queued` and `processing`, in addition to the existing
-  `rejected` / `accepted` / `evaluated` / `evaluation_failed`.
-- Not started: no feature code, migration, or worker module has been written yet.
+- Plan: `docs/planning/async-evaluation-plan.md` (now marked IMPLEMENTED).
+- Decisions in effect: evaluation-only async (validation stays synchronous);
+  in-process worker thread + SQLite-backed queue (no new services); state-level
+  progress only.
+- Submission statuses: `queued` and `processing` added alongside the existing
+  `rejected` / `accepted` / `evaluated` / `evaluation_failed`. `queued`/`processing`
+  reserve the current-submission slot.
+- Migration `20260708_0003` widens `idx_one_current_successful_submission` to include
+  `queued`/`processing` (mirrored in the `SCHEMA` string in `app/db.py`). New Alembic
+  head is `20260708_0003`.
+- `app/processing.py` holds `process_submission`, `EvaluationWorker`,
+  `recover_orphaned_submissions`, `run_pending_evaluations`, and
+  `start/stop_evaluation_worker`.
+- `EVALUATION_MODE` setting (`app/config.py`): `worker` (default) runs the thread;
+  `eager` drains the queue inline in the request (used by tests).
+- `app/main.py` lifespan recovers orphaned `processing` rows and starts/stops the
+  worker in `worker` mode.
+- `upload_submission` now stores a valid upload as `queued`, reserves the slot
+  (supersede + consume replacement permission at enqueue time), and 303-redirects to
+  `GET /team/submissions/{id}`. `GET /team/submissions/{id}/status` returns status JSON.
+- `app/templates/team_submission_status.html` renders the state badge, spinner + poll
+  for in-flight states, and the metric table when evaluated.
 
 ## Session Handoff State (2026-07-08)
 
-Recently completed and committed on `master` (see git log):
+Recently completed on `master` (see git log) before this session:
 
 - Subtask B `image_id` matches ground truth with or without a `.png` suffix.
 - Subtask B numeric `model_id` matches ground truth with or without left zero-padding.
-- Two-phase participant upload progress (determinate upload bar → indeterminate
-  "Validating & evaluating…" spinner; progressive enhancement with a no-JS fallback).
+- Two-phase participant upload progress (determinate upload bar → indeterminate spinner).
+
+Completed this session (not yet committed):
+
+- Asynchronous submission evaluation (see the section above). Tests: 164 passing,
+  ruff clean.
 
 Open operational decisions carried into the next session:
 
-- `master` was ahead of `origin/master` by the two-phase upload-progress commits at
-  last check; decide whether to push (staging auto-deploys from `master`).
+- Commit the async-evaluation work, then decide whether to push `master` (staging
+  auto-deploys from `master`).
+- Staging/production deploys must run `alembic upgrade head` to apply
+  `20260708_0003` before app startup (the app verifies head revision in those
+  environments).
+- Production runs in the default `worker` evaluation mode; no `EVALUATION_MODE` env
+  var is required there. Leave `EVALUATION_MODE=eager` for local deterministic runs
+  only.
 - The fully merged branch `feat/subtask-b-png-image-id` can be deleted.
 
 ## Next Recommended Work

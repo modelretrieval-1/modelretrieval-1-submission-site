@@ -55,7 +55,7 @@ Current visual system:
 - Top navigation with role-aware links and active page state.
 - Constrained main content width with consistent vertical rhythm.
 - Bootstrap forms, inputs, selects, file inputs, buttons, alerts, tables, badges, cards only where they frame a specific object or repeated item.
-- Status badges for `rejected`, `accepted`, `evaluated`, `evaluation_failed`, `normal`, `late`, `open`, `closed`, and `reopened`.
+- Status badges for `rejected`, `queued`, `processing`, `accepted`, `evaluated`, `evaluation_failed`, `normal`, `late`, `open`, `closed`, and `reopened`.
 - Compact filter toolbars for organizer submissions and leaderboard pages.
 - Clear primary and secondary actions on every form.
 
@@ -171,6 +171,8 @@ Status labels:
 
 - Not submitted.
 - Validation failed.
+- Queued for evaluation.
+- Evaluating.
 - Submitted and evaluated.
 - Closed.
 - Reopened by organizer.
@@ -220,17 +222,24 @@ Rules shown near the form:
 Submit behavior:
 
 - Upload file.
-- Validate immediately.
-- If validation passes, evaluate immediately.
-- Redirect to results page.
-- If validation fails, show validation errors.
+- Validate immediately (synchronous).
+- If validation fails, show validation errors on the upload page.
+- If validation passes, reserve the submission slot as `queued` and redirect (303) to the submission status page. Evaluation runs asynchronously.
+
+Submission status page (`/team/submissions/{id}`):
+
+- Ownership-checked; a team can only view its own submissions.
+- Shows a state badge: `queued` → `processing` → `evaluated` / `evaluation_failed`.
+- While `queued`/`processing`, shows a spinner and polls `/team/submissions/{id}/status` (JSON) every ~2 seconds, reloading when a terminal state is reached.
+- When `evaluated`, shows the run-level metric table.
+- Participants can leave and return later to check progress.
 
 Progress feedback:
 
 - While the file transfers, show a determinate upload progress bar with a percentage.
-- Once the upload completes, show an indeterminate "Validating & evaluating…" spinner while the server processes the submission.
-- Processing is not split into a separate asynchronous backend step; the single request still validates and evaluates before returning the results or validation errors. The two phases are a client-side progressive enhancement only.
-- If JavaScript is unavailable, the form submits normally without the progress indicators.
+- Once the upload completes, show an indeterminate "Validating…" spinner while the server validates the submission synchronously.
+- The upload request then redirects to the status page, where the asynchronous "processing/evaluating" state now lives. The upload-page phases remain a client-side progressive enhancement.
+- If JavaScript is unavailable, the form submits normally and the browser follows the redirect to the status page, which still polls and refreshes on its own.
 
 Required states:
 

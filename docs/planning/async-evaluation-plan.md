@@ -5,7 +5,10 @@ evaluation asynchronous with a participant-checkable status. This is the
 authoritative spec for the feature; execute it in a fresh session. Keep current
 implementation status in `../../HANDOFF.md`.
 
-Status: **APPROVED, NOT IMPLEMENTED.** No feature code has been written yet.
+Status: **IMPLEMENTED (2026-07-08).** The async evaluation worker, `queued`/
+`processing` statuses, migration `20260708_0003`, the participant status page and
+status JSON endpoint, and the `EVALUATION_MODE` setting are all in place. See
+`../../HANDOFF.md` for the current implementation checkpoint.
 
 ## Context
 
