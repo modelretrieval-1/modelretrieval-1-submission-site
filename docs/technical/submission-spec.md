@@ -108,7 +108,7 @@ Example:
 |---|---|
 | `topicID` | Must be a valid query/task ID for the selected subtask. For Subtask B this is the `image_id`, which matches with or without a `.png` suffix. |
 | `Q0` | Must be exactly `Q0`. |
-| `docID` | Must be a valid candidate model ID for the selected subtask. |
+| `docID` | Must be a valid candidate model ID for the selected subtask. For Subtask B this is the `model_id`, which matches numerically regardless of left zero-padding. |
 | `Rank` | Must be a positive integer where `1` is the highest rank. |
 | `Score` | Must be a numeric predicted score. |
 | `RunID` | Must identify the submitted run. |
@@ -122,6 +122,14 @@ both directions: a `.png` suffix present in the ground truth, in the submission,
 in neither is accepted. Subtask A topic IDs are matched exactly and do not treat
 `.png` as special.
 
+### Subtask B model ID matching
+
+For Subtask B, the `docID` is the candidate `model_id`. Numeric model IDs are matched
+after removing left zero-padding, so `0001` and `1`, or `0111` and `111`, refer to the
+same model. This tolerance applies in both directions between the ground truth and the
+submission. Non-numeric model IDs are matched exactly, and Subtask A document IDs treat
+zero-padding as significant.
+
 ## Run Count Rule
 
 A submission may contain at most 5 distinct `RunID` values for the selected subtask.
@@ -134,6 +142,7 @@ Required validation rules:
 
 - A `(RunID, topicID, docID)` combination must not appear more than once.
 - For Subtask B, `topicID` (`image_id`) is compared to ground truth with an optional `.png` suffix ignored on either side.
+- For Subtask B, numeric `docID` (`model_id`) values are compared to ground truth with left zero-padding ignored on either side.
 - A run must include every required test query.
 - Every query must include all candidate models for the selected subtask.
 - Missing required queries or candidate models must reject the submission.

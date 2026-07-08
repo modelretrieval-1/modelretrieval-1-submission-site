@@ -117,6 +117,7 @@ Required validation:
 - Each non-empty line must contain exactly 6 whitespace-separated fields.
 - `topicID` must identify a valid query for the selected subtask and split.
 - For Subtask B, `topicID` is the query `image_id` and matches ground truth with or without a trailing `.png` suffix on either side.
+- For Subtask B, `docID` is the candidate `model_id` and numeric values match ground truth with or without left zero-padding on either side.
 - The second field must be exactly `Q0`.
 - `docID` must identify a valid candidate model for the selected subtask.
 - `Rank` must be a positive integer.
@@ -162,6 +163,7 @@ Subtask B:
 - Use organizer-provided ground truth for hidden test queries.
 - Each query has one relevant model.
 - Query image IDs match ground truth with an optional `.png` suffix ignored on either side.
+- Numeric model IDs match ground truth with left zero-padding ignored on either side.
 
 Participants should see their scores immediately after a successful submission.
 Participant-visible scores must remain run-level aggregate scores only.

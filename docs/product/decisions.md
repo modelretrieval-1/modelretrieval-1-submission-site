@@ -30,6 +30,7 @@ For the latest implementation status, use `../../HANDOFF.md`. This document shou
 - Missing relevant documents are rejected during validation because all candidate models are required.
 - `Rank` is not blindly trusted; the system recomputes order from `Score` and compares it with submitted ranks.
 - For Subtask B, the query `image_id` matches ground truth with or without a trailing `.png` suffix on either side.
+- For Subtask B, numeric `model_id` values match ground truth with or without left zero-padding on either side.
 
 ## Deadlines
 

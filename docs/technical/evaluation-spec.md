@@ -87,8 +87,9 @@ Expected ground-truth fields:
 
 Image IDs are matched between the submission and ground truth with an optional
 trailing `.png` suffix ignored on either side, so `test-0001-0011` and
-`test-0001-0011.png` refer to the same query image. Both validation and MRR scoring
-apply this normalization.
+`test-0001-0011.png` refer to the same query image. Numeric model IDs are matched with
+left zero-padding ignored on either side, so `0001` and `1`, or `0111` and `111`, refer
+to the same model. Both validation and MRR scoring apply these normalizations.
 
 ### MRR Calculation
 

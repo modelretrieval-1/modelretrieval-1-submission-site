@@ -200,11 +200,11 @@ Foundation:
 - `app/routes/team.py`: team dashboard and participant submission upload routes.
 - `app/routes/admin.py`: organizer dashboard, team/user management, ground-truth upload/activation, submission-period controls, submission review/detail, private leaderboard, CSV export, and submission bundle download routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
-- `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation with subtask-aware `.png`-tolerant Subtask B image_id matching, combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
+- `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation with subtask-aware Subtask B matching (`.png`-tolerant image_id and zero-padding-tolerant numeric model_id), combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.
 - `app/submissions.py`: also includes organizer submission list/detail query helpers.
 - `app/submissions.py`: also includes submission bundle query helpers.
-- `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation (with `.png`-tolerant image_id matching), ground-truth metric loading, evaluation result persistence, leaderboard query helpers, and evaluation status helpers.
+- `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation (with `.png`-tolerant image_id and zero-padding-tolerant model_id matching), ground-truth metric loading, evaluation result persistence, leaderboard query helpers, and evaluation status helpers.
 
 Accounts and sessions:
 
@@ -265,6 +265,7 @@ Key decisions already made:
 - Only registered teams can submit.
 - Subtask A and Subtask B submissions are uploaded separately.
 - Subtask B query image IDs match ground truth with or without a trailing `.png` suffix on either side.
+- Subtask B numeric model IDs match ground truth with or without left zero-padding on either side.
 - Upload format is one TREC_EVAL-format file, any filename extension, maximum 50 MB.
 - Each subtask allows up to 5 runs.
 - One current successful submission per team/subtask/period, with organizer-approved one-time replacement upload support.
