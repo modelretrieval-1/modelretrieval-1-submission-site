@@ -54,20 +54,42 @@ def render_submission_upload(
     selected_period: str = "normal",
 ) -> HTMLResponse:
     app_settings: Settings = request.app.state.settings
+    now_jst = datetime.now(JST)
+    period_states = []
     with connect(app_settings.database_path) as connection:
         periods = list_submission_periods(connection)
-    now_jst = datetime.now(JST)
-    period_states = [
-        {
-            "period": period,
-            "state": "reopened"
-            if period.is_open_override
-            else "open"
-            if is_submission_period_open(period, now_jst=now_jst)
-            else "closed",
-        }
-        for period in periods
-    ]
+        for period in periods:
+            is_submitted = has_successful_submission(
+                connection,
+                internal_team_id=account.id,
+                subtask=subtask,
+                submission_period_id=period.id,
+            )
+            resubmission_allowed = has_unused_resubmission_permission(
+                connection,
+                internal_team_id=account.id,
+                subtask=subtask,
+                submission_period_id=period.id,
+            )
+            is_open = is_submission_period_open(period, now_jst=now_jst)
+            can_submit = is_open and (not is_submitted or resubmission_allowed)
+            state = (
+                "reopened"
+                if period.is_open_override
+                else "open"
+                if is_open
+                else "closed"
+            )
+            period_states.append(
+                {
+                    "period": period,
+                    "state": state,
+                    "is_submitted": is_submitted,
+                    "resubmission_allowed": resubmission_allowed,
+                    "can_submit": can_submit,
+                }
+            )
+
     return templates.TemplateResponse(
         request,
         "team_submission_upload.html",

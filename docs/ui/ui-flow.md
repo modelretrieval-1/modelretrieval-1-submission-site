@@ -203,7 +203,7 @@ Purpose:
 Inputs:
 
 - Subtask selector: A or B, limited to registered subtasks.
-- Submission period selector: normal or late.
+- Submission period selector: normal or late. Options are disabled if a successful submission already exists for that period and no replacement permission is granted.
 - File input accepting any filename extension.
 
 Rules shown near the form:
@@ -257,6 +257,8 @@ UI modernization notes:
 
 - Group subtask, period, and file inputs in one clear form.
 - Show period deadlines and reopen status near the period selector.
+- Disable period radio options if already submitted without replacement permission, and show an "Already submitted" badge.
+- If all period selectors are disabled/submitted, disable the entire upload form (file input and upload button) and display a prominent warning banner instructing the participant to request replacement permission from an organizer.
 - Use Bootstrap file input, helper text, and alert components.
 - Keep the validation rules visible but compact.
 
