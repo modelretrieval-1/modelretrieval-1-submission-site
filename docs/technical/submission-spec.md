@@ -12,7 +12,7 @@ Each subtask has its own submission limit of up to 5 runs per team per submissio
 Each upload must be a single file. Filename extensions are not used to accept or reject submissions.
 Files with any extension, or no extension, are accepted when their content is valid TREC_EVAL text.
 
-Maximum upload size: 10 MB.
+Maximum upload size: 50 MB.
 
 ## Implementation Status
 

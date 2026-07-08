@@ -7,7 +7,7 @@ server {
     listen [::]:80;
     server_name staging.example.jp;
 
-    client_max_body_size 12m;
+    client_max_body_size 60m;
 
     location /.well-known/acme-challenge/ {
         root /var/www/html;

@@ -19,7 +19,7 @@ def make_settings(tmp: str) -> Settings:
         database_path=root / "app.sqlite3",
         storage_root=root / "storage",
         secret_key="test-secret",
-        max_upload_bytes=10 * 1024 * 1024,
+        max_upload_bytes=50 * 1024 * 1024,
     )
 
 

@@ -264,7 +264,7 @@ Key decisions already made:
 - Participant team self-service password change is implemented at `/account/password`.
 - Only registered teams can submit.
 - Subtask A and Subtask B submissions are uploaded separately.
-- Upload format is one TREC_EVAL-format file, any filename extension, maximum 10 MB.
+- Upload format is one TREC_EVAL-format file, any filename extension, maximum 50 MB.
 - Each subtask allows up to 5 runs.
 - One current successful submission per team/subtask/period, with organizer-approved one-time replacement upload support.
 - Failed validation attempts do not count.
@@ -332,7 +332,7 @@ Nginx templates added:
 - `deployment/nginx/staging.conf.example`
 - `deployment/nginx/production.conf.example`
 
-The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 12m`, proxy timeouts, forwarded headers, and localhost upstreams for staging and production.
+The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 60m`, proxy timeouts, forwarded headers, and localhost upstreams for staging and production.
 
 ## Backup Deployment Files
 

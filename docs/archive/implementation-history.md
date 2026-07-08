@@ -302,7 +302,7 @@ Target behavior:
 
 - Team dashboard links to a submission form for each eligible subtask.
 - Team uploads one TREC_EVAL-format file for one subtask at a time.
-- Accept any filename extension and reject files larger than 10 MB.
+- Accept any filename extension and reject files larger than 50 MB.
 - Use active ground-truth requirements for validation.
 - Show validation errors immediately.
 - Persist failed validation attempts for audit/debugging.
@@ -313,7 +313,7 @@ Suggested tests:
 - Team can open the upload page for an eligible subtask.
 - Team cannot open the upload page for an ineligible subtask.
 - Files with non-TREC_EVAL content are rejected regardless of filename extension.
-- Upload larger than 10 MB is rejected.
+- Upload larger than 50 MB is rejected.
 - Missing active ground truth shows a clear error.
 - Invalid TREC_EVAL content shows validation errors and persists a failed attempt.
 - Organizer-only pages remain inaccessible to teams.

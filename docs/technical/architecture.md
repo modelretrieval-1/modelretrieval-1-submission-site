@@ -40,7 +40,7 @@ Alembic is used for schema migrations because staging and production use persist
 Local filesystem storage is appropriate because:
 
 - Ground truth is required to live on the server.
-- Uploaded submission files are small, with a 10 MB maximum, and are validated by content rather than filename extension.
+- Uploaded submission files are small, with a 50 MB maximum, and are validated by content rather than filename extension.
 - Organizers need downloadable bundles.
 - Evaluation should be reproducible from preserved files.
 

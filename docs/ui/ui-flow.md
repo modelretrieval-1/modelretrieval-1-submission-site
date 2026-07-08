@@ -207,7 +207,7 @@ Inputs:
 Rules shown near the form:
 
 - One file only.
-- Maximum file size: 10 MB.
+- Maximum file size: 50 MB.
 - Filename extension is not checked; the content must be valid TREC_EVAL text.
 - Up to 5 `RunID` values.
 - TREC_EVAL format: `topicID Q0 docID Rank Score RunID`.

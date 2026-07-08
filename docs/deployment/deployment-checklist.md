@@ -33,7 +33,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Certbot is installed.
 - [ ] Staging Nginx config has real hostname and proxies to `127.0.0.1:8001`.
 - [ ] Production Nginx config has real hostname and proxies to `127.0.0.1:8002`.
-- [ ] Nginx config includes `client_max_body_size 12m` or larger.
+- [ ] Nginx config includes `client_max_body_size 60m` or larger.
 - [ ] Nginx `server_names_hash_bucket_size` is increased if long hostnames make `nginx -t` fail.
 - [ ] `sudo nginx -t` passes.
 - [ ] `/opt/modelretrieval/staging` exists.
@@ -66,7 +66,7 @@ This checklist is used before launch and before each production deployment.
 - [x] Staging `APP_IMAGE` was updated in remote `.env`.
 - [x] `https://submission-staging.modelretrieval-1.happysocial.net/health` returns success.
 - [x] Login page loads over HTTPS.
-- [ ] Upload-size behavior is not blocked by Nginx before the app's 10 MB validation rule.
+- [ ] Upload-size behavior is not blocked by Nginx before the app's 50 MB validation rule.
 - [ ] Organizer login works.
 - [ ] Organizer can create a team.
 - [ ] Team login works.

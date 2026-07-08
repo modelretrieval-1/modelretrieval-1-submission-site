@@ -102,7 +102,7 @@ Each subtask has its own run limit.
 - Filename extensions are not used to accept or reject submissions.
 - The system must validate the uploaded file by reading its content as TREC_EVAL text.
 - Files with any extension, or no extension, are accepted when their content satisfies the submission format.
-- Maximum upload size is 10 MB.
+- Maximum upload size is 50 MB.
 
 ## Submission File Format
 

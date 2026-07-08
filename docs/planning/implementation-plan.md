@@ -301,7 +301,7 @@ Goal:
 Stories:
 
 - Parse uploaded files as TREC_EVAL text.
-- Enforce 10 MB limit.
+- Enforce 50 MB limit.
 - Accept any filename extension and reject invalid content through submission-format validation.
 - Enforce up to 5 RunIDs.
 - Enforce all queries and all candidate models.
