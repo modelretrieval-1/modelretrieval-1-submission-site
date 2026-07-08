@@ -378,6 +378,33 @@ Current deployment notes captured in docs:
 Detailed completed story notes are archived at `docs/archive/implementation-history.md`. Keep `HANDOFF.md` focused on current continuation state, verification status, and next work.
 
 
+## Approved Upcoming Feature: Asynchronous Evaluation
+
+An approved-but-not-yet-implemented plan exists to move submission evaluation off the
+upload request into a background worker, with a participant-checkable status page.
+
+- Plan: `docs/planning/async-evaluation-plan.md` (authoritative spec).
+- Confirmed decisions: evaluation-only async (validation stays synchronous); in-process
+  worker thread + SQLite-backed queue (no new services); state-level progress only.
+- New submission statuses: `queued` and `processing`, in addition to the existing
+  `rejected` / `accepted` / `evaluated` / `evaluation_failed`.
+- Not started: no feature code, migration, or worker module has been written yet.
+
+## Session Handoff State (2026-07-08)
+
+Recently completed and committed on `master` (see git log):
+
+- Subtask B `image_id` matches ground truth with or without a `.png` suffix.
+- Subtask B numeric `model_id` matches ground truth with or without left zero-padding.
+- Two-phase participant upload progress (determinate upload bar → indeterminate
+  "Validating & evaluating…" spinner; progressive enhancement with a no-JS fallback).
+
+Open operational decisions carried into the next session:
+
+- `master` was ahead of `origin/master` by the two-phase upload-progress commits at
+  last check; decide whether to push (staging auto-deploys from `master`).
+- The fully merged branch `feat/subtask-b-png-image-id` can be deleted.
+
 ## Next Recommended Work
 
 Run the visual browser smoke check when a browser backend is available, then complete the staging end-to-end operations workflow and prepare production promotion.
