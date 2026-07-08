@@ -173,7 +173,10 @@ def test_team_dashboard_shows_closed_submission_slots_without_upload_actions():
         assert "Available submissions" in response.text
         assert '<strong class="stat-value">0</strong>' in response.text
         assert "closed" in response.text
-        assert 'class="btn btn-primary btn-sm" href="/team/submissions/A/new">Upload</a>' not in response.text
+        assert (
+            'class="btn btn-primary btn-sm" href="/team/submissions/A/new">Upload</a>'
+            not in response.text
+        )
         assert 'href="/team/submissions/new">Upload submission</a>' not in response.text
 
 
