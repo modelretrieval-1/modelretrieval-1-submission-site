@@ -216,7 +216,7 @@ UI modernization notes:
 
 URL:
 
-- `/team/submissions/new`
+- `/team/submissions/{subtask}/new` (with redirect helper at `/team/submissions/new`)
 
 Purpose:
 
