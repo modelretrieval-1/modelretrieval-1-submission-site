@@ -23,6 +23,7 @@ class AuthenticatedAccount:
     id: int
     user_id: str
     display_name: str
+    subtasks: tuple[Subtask, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -185,11 +186,13 @@ def get_team_account(
     ).fetchone()
     if row is None:
         return None
+    subtasks = sorted(list(get_team_subtasks(connection, internal_team_id)))
     return AuthenticatedAccount(
         role="team",
         id=row["id"],
         user_id=row["team_id"],
         display_name=row["display_name"],
+        subtasks=tuple(subtasks),
     )
 
 

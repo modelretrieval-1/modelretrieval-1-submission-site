@@ -144,6 +144,28 @@ UI modernization notes:
 - Place submit and cancel/navigation actions predictably at the bottom of the form.
 - In the application shell, show the password page in both organizer and participant navigation.
 
+## Navigation Menu Layout
+
+The left navigation sidebar (on desktop) and the mobile offcanvas menu use the same role-aware link macro:
+
+- **Organizer Navigation**:
+  - Dashboard (`/admin`)
+  - Teams (`/admin/teams`)
+  - Users (`/admin/users`)
+  - Ground Truth (`/admin/ground-truth`)
+  - Periods (`/admin/periods`)
+  - Submissions (`/admin/submissions`)
+  - Leaderboard (`/admin/leaderboard`)
+  - Password (`/account/password`)
+
+- **Participant/Team Navigation**:
+  - Dashboard (`/team`)
+  - **Upload (Subtask-Aware Dropdown/Expander)**:
+    - If the team is registered for multiple subtasks (e.g., both Subtask A and Subtask B), the "Upload" item is rendered as a collapsible submenu displaying separate links for each subtask (e.g., "Subtask A" pointing to `/team/submissions/A/new` and "Subtask B" pointing to `/team/submissions/B/new`). The submenu is expanded automatically if the current page belongs to any subtask upload flow.
+    - If the team is registered for exactly one subtask, the "Upload" item is rendered as a single direct link to that subtask's upload page.
+    - If the team has no registered subtasks, the "Upload" link is hidden.
+  - Password (`/account/password`)
+
 ## Participant Team Flow
 
 ### Team Dashboard

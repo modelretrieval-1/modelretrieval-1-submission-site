@@ -22,7 +22,21 @@
           <a class="app-nav-link {% if current_path.startswith('/account/password') %}active{% endif %}" href="/account/password">Password</a>
         {% elif account.role == "team" %}
           <a class="app-nav-link {% if current_path == '/team' %}active{% endif %}" href="/team">Dashboard</a>
-          <a class="app-nav-link {% if current_path.startswith('/team/submissions') %}active{% endif %}" href="/team/submissions/new">Upload</a>
+          {% if account.subtasks|length > 1 %}
+            <button class="app-nav-link w-100 border-0 text-start bg-transparent {% if current_path.startswith('/team/submissions') %}active{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#uploadSubmenu_{{ location }}" aria-expanded="{% if current_path.startswith('/team/submissions') %}true{% else %}false{% endif %}" aria-controls="uploadSubmenu_{{ location }}">
+              Upload
+            </button>
+            <div class="collapse {% if current_path.startswith('/team/submissions') %}show{% endif %}" id="uploadSubmenu_{{ location }}">
+              <div class="app-nav ps-3 mt-1">
+                {% for subtask in account.subtasks %}
+                  <a class="app-nav-link {% if current_path == '/team/submissions/' ~ subtask ~ '/new' %}active{% endif %}" href="/team/submissions/{{ subtask }}/new">Subtask {{ subtask }}</a>
+                {% endfor %}
+              </div>
+            </div>
+          {% else %}
+            {% set single_subtask = account.subtasks[0] if account.subtasks else 'A' %}
+            <a class="app-nav-link {% if current_path.startswith('/team/submissions') %}active{% endif %}" href="/team/submissions/{{ single_subtask }}/new">Upload</a>
+          {% endif %}
           <a class="app-nav-link {% if current_path.startswith('/account/password') %}active{% endif %}" href="/account/password">Password</a>
         {% endif %}
       {% endmacro %}

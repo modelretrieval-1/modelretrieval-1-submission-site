@@ -98,7 +98,7 @@ def test_team_shell_hides_organizer_navigation():
 
         assert response.status_code == 200
         assert 'href="/team">Dashboard</a>' in response.text
-        assert 'href="/team/submissions/new">Upload</a>' in response.text
+        assert 'href="/team/submissions/A/new">Upload</a>' in response.text
         assert 'href="/account/password">Password</a>' in response.text
         assert 'href="/admin/teams">Teams</a>' not in response.text
         assert 'href="/admin/users">Users</a>' not in response.text
@@ -144,7 +144,7 @@ def test_team_upload_page_marks_upload_navigation_active():
         response = client.get("/team/submissions/A/new")
 
         assert response.status_code == 200
-        assert 'app-nav-link active" href="/team/submissions/new"' in response.text
+        assert 'app-nav-link active" href="/team/submissions/A/new"' in response.text
 
 
 def test_key_workspace_tables_use_responsive_wrappers():
@@ -214,3 +214,29 @@ def test_admin_dashboard_links_to_submission_bundle_route():
         assert response.status_code == 200
         assert 'href="/admin/submissions/bundle.zip"' in response.text
         assert 'href="/admin/submissions/bundle"' not in response.text
+
+
+def test_team_shell_multiple_subtasks_renders_submenu():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, _ = seed_accounts(settings)
+        # Create team with both subtasks
+        with connect(settings.database_path) as connection:
+            team = create_team(
+                connection,
+                team_id="team-002",
+                display_name="Team 002",
+                subtasks={"A", "B"},
+                created_by_organizer_id=organizer.id,
+            )
+        client = TestClient(create_app(settings))
+        login(client, "team-002", team.password)
+
+        response = client.get("/team")
+
+        assert response.status_code == 200
+        # Should render collapse submenu trigger
+        assert 'data-bs-toggle="collapse"' in response.text
+        assert 'data-bs-target="#uploadSubmenu_desktop"' in response.text
+        assert 'href="/team/submissions/A/new">Subtask A</a>' in response.text
+        assert 'href="/team/submissions/B/new">Subtask B</a>' in response.text
