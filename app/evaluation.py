@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 from collections import defaultdict
+from collections.abc import Callable
 from csv import DictReader
 from dataclasses import dataclass
 from math import log2
@@ -9,7 +10,7 @@ from pathlib import Path
 
 from app.accounts import Subtask
 from app.ground_truth import GroundTruthVersion, jst_now_text
-from app.submissions import ParsedSubmission, SubmissionLine
+from app.submissions import ParsedSubmission, SubmissionLine, strip_optional_png_suffix
 
 
 @dataclass(frozen=True)
@@ -278,12 +279,26 @@ def evaluate_subtask_a_query_metrics(
     return tuple(metrics)
 
 
+def _normalize_subtask_b_topics(
+    relevant_doc_by_topic: dict[str, str],
+) -> dict[str, str]:
+    # Subtask B image_ids match with or without the .png suffix on either side.
+    return {
+        strip_optional_png_suffix(topic_id): relevant_doc_id
+        for topic_id, relevant_doc_id in relevant_doc_by_topic.items()
+    }
+
+
 def evaluate_subtask_b(
     parsed: ParsedSubmission,
     relevant_doc_by_topic: dict[str, str],
 ) -> tuple[RunMetric, ...]:
     metrics: list[RunMetric] = []
-    lines_by_run_topic = _lines_by_run_topic(parsed.lines)
+    relevant_doc_by_topic = _normalize_subtask_b_topics(relevant_doc_by_topic)
+    lines_by_run_topic = _lines_by_run_topic(
+        parsed.lines,
+        normalize_topic=strip_optional_png_suffix,
+    )
 
     for run_id in parsed.run_ids:
         query_scores = []
@@ -312,7 +327,11 @@ def evaluate_subtask_b_query_metrics(
     relevant_doc_by_topic: dict[str, str],
 ) -> tuple[QueryMetric, ...]:
     metrics: list[QueryMetric] = []
-    lines_by_run_topic = _lines_by_run_topic(parsed.lines)
+    relevant_doc_by_topic = _normalize_subtask_b_topics(relevant_doc_by_topic)
+    lines_by_run_topic = _lines_by_run_topic(
+        parsed.lines,
+        normalize_topic=strip_optional_png_suffix,
+    )
 
     for run_id in parsed.run_ids:
         for topic_id, relevant_doc_id in sorted(relevant_doc_by_topic.items()):
@@ -681,10 +700,13 @@ def _leaderboard_sort_key(row: LeaderboardRow) -> tuple[str, str, float, float, 
 
 def _lines_by_run_topic(
     lines: tuple[SubmissionLine, ...],
+    *,
+    normalize_topic: Callable[[str], str] | None = None,
 ) -> defaultdict[tuple[str, str], list[SubmissionLine]]:
     grouped: defaultdict[tuple[str, str], list[SubmissionLine]] = defaultdict(list)
     for line in lines:
-        grouped[(line.run_id, line.topic_id)].append(line)
+        topic_id = normalize_topic(line.topic_id) if normalize_topic else line.topic_id
+        grouped[(line.run_id, topic_id)].append(line)
     return grouped
 
 

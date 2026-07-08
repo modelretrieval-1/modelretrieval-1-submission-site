@@ -13,6 +13,31 @@ MAX_RUNS_PER_SUBTASK = 5
 EXPECTED_FIELD_COUNT = 6
 SUCCESSFUL_SUBMISSION_STATUSES = ("accepted", "evaluated", "evaluation_failed")
 SUCCESSFUL_SUBMISSION_STATUS_SQL = "('accepted', 'evaluated', 'evaluation_failed')"
+IMAGE_ID_SUFFIX = ".png"
+
+
+def strip_optional_png_suffix(image_id: str) -> str:
+    """Return a Subtask B image_id without its optional ``.png`` suffix.
+
+    Subtask B image identifiers may be written with or without the ``.png``
+    extension (for example ``test-0001-0011`` or ``test-0001-0011.png``).
+    Matching between a submission and ground truth ignores the extension, so a
+    ``.png`` value on either side matches its bare counterpart on the other.
+    """
+    if image_id.lower().endswith(IMAGE_ID_SUFFIX):
+        return image_id[: -len(IMAGE_ID_SUFFIX)]
+    return image_id
+
+
+def normalize_topic_id(topic_id: str, subtask: str) -> str:
+    """Normalize a topicID for identity comparison within a subtask.
+
+    Only Subtask B (image_id) tolerates the optional ``.png`` suffix; Subtask A
+    topic identifiers are compared as-is.
+    """
+    if subtask == "B":
+        return strip_optional_png_suffix(topic_id)
+    return topic_id
 
 
 @dataclass(frozen=True)
@@ -324,11 +349,17 @@ def validate_query_model_completeness(
     *,
     required_topic_ids: set[str],
     required_doc_ids: set[str],
+    subtask: str = "A",
 ) -> tuple[SubmissionValidationError, ...]:
     errors: list[SubmissionValidationError] = []
 
+    def norm(topic_id: str) -> str:
+        return normalize_topic_id(topic_id, subtask)
+
+    normalized_required_topics = {norm(topic_id) for topic_id in required_topic_ids}
+
     for line in parsed.lines:
-        if line.topic_id not in required_topic_ids:
+        if norm(line.topic_id) not in normalized_required_topics:
             errors.append(
                 SubmissionValidationError(
                     line_number=line.line_number,
@@ -356,8 +387,8 @@ def validate_query_model_completeness(
 
     for run_id in parsed.run_ids:
         run_lines = lines_by_run.get(run_id, [])
-        present_topics = {line.topic_id for line in run_lines}
-        missing_topics = sorted(required_topic_ids - present_topics)
+        present_topics = {norm(line.topic_id) for line in run_lines}
+        missing_topics = sorted(normalized_required_topics - present_topics)
         for topic_id in missing_topics:
             errors.append(
                 SubmissionValidationError(
@@ -366,11 +397,11 @@ def validate_query_model_completeness(
                 )
             )
 
-        for topic_id in sorted(required_topic_ids):
+        for topic_id in sorted(normalized_required_topics):
             present_docs = {
                 line.doc_id
                 for line in run_lines
-                if line.topic_id == topic_id
+                if norm(line.topic_id) == topic_id
             }
             missing_docs = sorted(required_doc_ids - present_docs)
             for doc_id in missing_docs:
@@ -412,6 +443,7 @@ def validate_submission_against_requirements(
             parsed,
             required_topic_ids=set(requirements.required_topic_ids),
             required_doc_ids=set(requirements.required_doc_ids),
+            subtask=requirements.subtask,
         )
     )
 

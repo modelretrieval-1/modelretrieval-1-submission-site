@@ -259,6 +259,61 @@ def test_query_model_completeness_checks_each_run_independently():
     assert errors[0].message == "RunID Run02 topicID Q1 is missing docID M2."
 
 
+def test_subtask_b_image_id_matches_with_and_without_png_suffix():
+    # Ground truth uses the .png suffix; the submission omits it (and vice versa).
+    parsed = parse_trec_eval(
+        """
+        img-1 Q0 M1 1 0.9 Run01
+        img-1 Q0 M2 2 0.8 Run01
+        img-2.png Q0 M1 1 0.7 Run01
+        img-2.png Q0 M2 2 0.6 Run01
+        """
+    )
+
+    errors = validate_query_model_completeness(
+        parsed,
+        required_topic_ids={"img-1.png", "img-2"},
+        required_doc_ids={"M1", "M2"},
+        subtask="B",
+    )
+
+    assert errors == ()
+
+
+def test_subtask_a_topic_id_png_suffix_is_not_stripped():
+    # Subtask A must keep exact topicID matching; .png is not special there.
+    parsed = parse_trec_eval("img-1 Q0 M1 1 0.9 Run01\n")
+
+    errors = validate_query_model_completeness(
+        parsed,
+        required_topic_ids={"img-1.png"},
+        required_doc_ids={"M1"},
+        subtask="A",
+    )
+
+    assert errors[0].error_code == "unknown_topic_id"
+
+
+def test_validate_submission_against_requirements_matches_subtask_b_png_image_ids():
+    requirements = GroundTruthRequirements(
+        subtask="B",
+        ground_truth_version_id=7,
+        required_topic_ids=frozenset({"img-1.png", "img-2.png"}),
+        required_doc_ids=frozenset({"M1"}),
+    )
+
+    result = validate_submission_against_requirements(
+        """
+        img-1 Q0 M1 1 0.9 Run01
+        img-2 Q0 M1 1 0.8 Run01
+        """,
+        requirements,
+    )
+
+    assert result.is_valid
+    assert result.ground_truth_version_id == 7
+
+
 def test_validate_submission_against_requirements_accepts_complete_submission():
     requirements = GroundTruthRequirements(
         subtask="A",
