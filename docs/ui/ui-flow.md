@@ -225,6 +225,13 @@ Submit behavior:
 - Redirect to results page.
 - If validation fails, show validation errors.
 
+Progress feedback:
+
+- While the file transfers, show a determinate upload progress bar with a percentage.
+- Once the upload completes, show an indeterminate "Validating & evaluating…" spinner while the server processes the submission.
+- Processing is not split into a separate asynchronous backend step; the single request still validates and evaluates before returning the results or validation errors. The two phases are a client-side progressive enhancement only.
+- If JavaScript is unavailable, the form submits normally without the progress indicators.
+
 Required states:
 
 - Upload form.

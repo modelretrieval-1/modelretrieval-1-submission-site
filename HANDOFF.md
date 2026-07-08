@@ -71,6 +71,7 @@ Implemented Sprint 6A UI slices:
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.
+- Two-phase participant upload progress: determinate upload progress bar then indeterminate "Validating & evaluating…" spinner, as a client-side progressive enhancement with a native no-JS fallback and no async backend split.
 - Responsive app-shell guards for mobile navigation, visible labels, table wrappers, and compact row overflow.
 
 ## Current Refactor State
