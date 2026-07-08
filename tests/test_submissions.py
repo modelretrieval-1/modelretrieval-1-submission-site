@@ -294,6 +294,39 @@ def test_subtask_a_topic_id_png_suffix_is_not_stripped():
     assert errors[0].error_code == "unknown_topic_id"
 
 
+def test_subtask_b_model_id_matches_with_and_without_zero_padding():
+    # Ground truth is zero-padded; the submission is not (and vice versa).
+    parsed = parse_trec_eval(
+        """
+        img-1 Q0 1 1 0.9 Run01
+        img-1 Q0 0111 2 0.8 Run01
+        """
+    )
+
+    errors = validate_query_model_completeness(
+        parsed,
+        required_topic_ids={"img-1"},
+        required_doc_ids={"0001", "111"},
+        subtask="B",
+    )
+
+    assert errors == ()
+
+
+def test_subtask_a_model_id_zero_padding_is_not_stripped():
+    # Subtask A must keep exact docID matching; zero-padding is significant.
+    parsed = parse_trec_eval("Q1 Q0 1 1 0.9 Run01\n")
+
+    errors = validate_query_model_completeness(
+        parsed,
+        required_topic_ids={"Q1"},
+        required_doc_ids={"0001"},
+        subtask="A",
+    )
+
+    assert errors[0].error_code == "unknown_doc_id"
+
+
 def test_validate_submission_against_requirements_matches_subtask_b_png_image_ids():
     requirements = GroundTruthRequirements(
         subtask="B",

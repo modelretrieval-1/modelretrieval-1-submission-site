@@ -10,7 +10,12 @@ from pathlib import Path
 
 from app.accounts import Subtask
 from app.ground_truth import GroundTruthVersion, jst_now_text
-from app.submissions import ParsedSubmission, SubmissionLine, strip_optional_png_suffix
+from app.submissions import (
+    ParsedSubmission,
+    SubmissionLine,
+    strip_left_zero_padding,
+    strip_optional_png_suffix,
+)
 
 
 @dataclass(frozen=True)
@@ -279,12 +284,13 @@ def evaluate_subtask_a_query_metrics(
     return tuple(metrics)
 
 
-def _normalize_subtask_b_topics(
+def _normalize_subtask_b_relevance(
     relevant_doc_by_topic: dict[str, str],
 ) -> dict[str, str]:
-    # Subtask B image_ids match with or without the .png suffix on either side.
+    # Subtask B image_ids match with or without the .png suffix on either side,
+    # and model_ids match with or without left zero-padding.
     return {
-        strip_optional_png_suffix(topic_id): relevant_doc_id
+        strip_optional_png_suffix(topic_id): strip_left_zero_padding(relevant_doc_id)
         for topic_id, relevant_doc_id in relevant_doc_by_topic.items()
     }
 
@@ -294,7 +300,7 @@ def evaluate_subtask_b(
     relevant_doc_by_topic: dict[str, str],
 ) -> tuple[RunMetric, ...]:
     metrics: list[RunMetric] = []
-    relevant_doc_by_topic = _normalize_subtask_b_topics(relevant_doc_by_topic)
+    relevant_doc_by_topic = _normalize_subtask_b_relevance(relevant_doc_by_topic)
     lines_by_run_topic = _lines_by_run_topic(
         parsed.lines,
         normalize_topic=strip_optional_png_suffix,
@@ -306,7 +312,7 @@ def evaluate_subtask_b(
             run_lines = lines_by_run_topic[(run_id, topic_id)]
             query_scores.append(
                 mean_reciprocal_rank(
-                    _ranked_doc_ids(run_lines),
+                    _ranked_model_ids(run_lines),
                     relevant_doc_id,
                 )
             )
@@ -327,7 +333,7 @@ def evaluate_subtask_b_query_metrics(
     relevant_doc_by_topic: dict[str, str],
 ) -> tuple[QueryMetric, ...]:
     metrics: list[QueryMetric] = []
-    relevant_doc_by_topic = _normalize_subtask_b_topics(relevant_doc_by_topic)
+    relevant_doc_by_topic = _normalize_subtask_b_relevance(relevant_doc_by_topic)
     lines_by_run_topic = _lines_by_run_topic(
         parsed.lines,
         normalize_topic=strip_optional_png_suffix,
@@ -342,7 +348,7 @@ def evaluate_subtask_b_query_metrics(
                     topic_id=topic_id,
                     metric_name="reciprocal_rank",
                     metric_value=mean_reciprocal_rank(
-                        _ranked_doc_ids(run_lines),
+                        _ranked_model_ids(run_lines),
                         relevant_doc_id,
                     ),
                 )
@@ -715,3 +721,8 @@ def _ranked_doc_ids(lines: list[SubmissionLine]) -> list[str]:
         line.doc_id
         for line in sorted(lines, key=lambda line: (line.rank, line.source_order))
     ]
+
+
+def _ranked_model_ids(lines: list[SubmissionLine]) -> list[str]:
+    # Subtask B ranking compared to ground truth with left zero-padding ignored.
+    return [strip_left_zero_padding(doc_id) for doc_id in _ranked_doc_ids(lines)]

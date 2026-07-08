@@ -180,6 +180,29 @@ def test_evaluate_subtask_b_matches_image_ids_across_png_suffix():
     assert by_run["run-a"] == approx((1 + 1 / 2) / 2)
 
 
+def test_evaluate_subtask_b_matches_model_ids_across_zero_padding():
+    # Submission uses unpadded model IDs; ground truth is zero-padded.
+    parsed = parse_trec_eval(
+        """
+        image1 Q0 1 1 3.0 run-a
+        image1 Q0 2 2 2.0 run-a
+        image2 Q0 1 1 3.0 run-a
+        image2 Q0 2 2 2.0 run-a
+        """
+    )
+
+    metrics = evaluate_subtask_b(
+        parsed,
+        {
+            "image1": "0001",
+            "image2": "0002",
+        },
+    )
+
+    by_run = {metric.run_id: metric.metric_value for metric in metrics}
+    assert by_run["run-a"] == approx((1 + 1 / 2) / 2)
+
+
 def test_evaluate_subtask_b_returns_per_query_reciprocal_rank():
     parsed = parse_trec_eval(
         """

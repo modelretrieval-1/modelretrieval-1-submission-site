@@ -40,6 +40,30 @@ def normalize_topic_id(topic_id: str, subtask: str) -> str:
     return topic_id
 
 
+def strip_left_zero_padding(model_id: str) -> str:
+    """Return a numeric Subtask B model_id without left zero-padding.
+
+    Subtask B model identifiers may be written with or without left
+    zero-padding (for example ``0001`` or ``1``, ``0111`` or ``111``). A purely
+    numeric identifier is compared by its unpadded value; ``0`` and ``0000``
+    both normalize to ``0``. Non-numeric identifiers are returned unchanged.
+    """
+    if model_id.isdigit():
+        return model_id.lstrip("0") or "0"
+    return model_id
+
+
+def normalize_doc_id(doc_id: str, subtask: str) -> str:
+    """Normalize a docID for identity comparison within a subtask.
+
+    Only Subtask B (model_id) ignores left zero-padding; Subtask A document
+    identifiers are compared as-is.
+    """
+    if subtask == "B":
+        return strip_left_zero_padding(doc_id)
+    return doc_id
+
+
 @dataclass(frozen=True)
 class SubmissionLine:
     line_number: int
@@ -356,7 +380,11 @@ def validate_query_model_completeness(
     def norm(topic_id: str) -> str:
         return normalize_topic_id(topic_id, subtask)
 
+    def norm_doc(doc_id: str) -> str:
+        return normalize_doc_id(doc_id, subtask)
+
     normalized_required_topics = {norm(topic_id) for topic_id in required_topic_ids}
+    normalized_required_docs = {norm_doc(doc_id) for doc_id in required_doc_ids}
 
     for line in parsed.lines:
         if norm(line.topic_id) not in normalized_required_topics:
@@ -368,7 +396,7 @@ def validate_query_model_completeness(
                     message=f"Unknown topicID: {line.topic_id}.",
                 )
             )
-        if line.doc_id not in required_doc_ids:
+        if norm_doc(line.doc_id) not in normalized_required_docs:
             errors.append(
                 SubmissionValidationError(
                     line_number=line.line_number,
@@ -399,11 +427,11 @@ def validate_query_model_completeness(
 
         for topic_id in sorted(normalized_required_topics):
             present_docs = {
-                line.doc_id
+                norm_doc(line.doc_id)
                 for line in run_lines
                 if norm(line.topic_id) == topic_id
             }
-            missing_docs = sorted(required_doc_ids - present_docs)
+            missing_docs = sorted(normalized_required_docs - present_docs)
             for doc_id in missing_docs:
                 errors.append(
                     SubmissionValidationError(
