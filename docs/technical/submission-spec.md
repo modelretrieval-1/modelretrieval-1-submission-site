@@ -167,6 +167,14 @@ Required validation rules:
 - If submitted ranks disagree with score-derived ordering, the submission is rejected with a warning-style validation message.
 - Lines with only whitespace should be ignored.
 
+## Validation Performance Target
+
+Format validation is synchronous (running within the upload request loop to provide immediate feedback to participants). For large files (up to the 50 MB / ~320k lines limit), validation must be highly efficient:
+
+- **Linear complexity**: Completeness checks must run in $O(L)$ linear time relative to the number of lines $L$ in the submission file, avoiding nested $O(T \times L)$ loops where $T$ is the number of required topic IDs.
+- **Normalization caching**: Normalization operations (such as `.png` suffix stripping and left zero-padding removal) must be cached per-request to avoid redundant string operations on millions of topic and document ID references.
+- **Execution target**: Synchronous validation of a maximum-sized submission file (320k lines, 5 runs) should complete in under 5 seconds in standard production environments.
+
 ## Rejection Behavior
 
 Invalid submissions are rejected immediately and are not evaluated.

@@ -571,6 +571,7 @@ Deliverables:
 - CI/CD deployment workflow.
 - Backup plan.
 - Final E2E regression suite.
+- Optimized submission validation efficiency for large files.
 
 Demo:
 
@@ -579,6 +580,7 @@ Demo:
 
 Status:
 
+- Optimized submission validation efficiency: completeness validation loops optimized to linear time $O(L)$ complexity, and normalization caching added (addressing the bottleneck with files > 320k lines).
 - Deployment planning documents have been added and updated:
   - `../deployment/deployment-strategy.md`
   - `../deployment/deployment-environments.md`

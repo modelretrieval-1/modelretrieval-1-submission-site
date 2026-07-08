@@ -398,12 +398,20 @@ def validate_query_model_completeness(
 ) -> tuple[SubmissionValidationError, ...]:
     errors: list[SubmissionValidationError] = []
 
+    topic_cache: dict[str, str] = {}
+    doc_cache: dict[str, str] = {}
+
     def norm(topic_id: str) -> str:
-        return normalize_topic_id(topic_id, subtask)
+        if topic_id not in topic_cache:
+            topic_cache[topic_id] = normalize_topic_id(topic_id, subtask)
+        return topic_cache[topic_id]
 
     def norm_doc(doc_id: str) -> str:
-        return normalize_doc_id(doc_id, subtask)
+        if doc_id not in doc_cache:
+            doc_cache[doc_id] = normalize_doc_id(doc_id, subtask)
+        return doc_cache[doc_id]
 
+    # Pre-normalize the required sets using the cached helpers
     normalized_required_topics = {norm(topic_id) for topic_id in required_topic_ids}
     normalized_required_docs = {norm_doc(doc_id) for doc_id in required_doc_ids}
 
@@ -436,7 +444,15 @@ def validate_query_model_completeness(
 
     for run_id in parsed.run_ids:
         run_lines = lines_by_run.get(run_id, [])
-        present_topics = {norm(line.topic_id) for line in run_lines}
+
+        # Pre-group run_lines by normalized topic_id in a single linear pass
+        docs_by_topic: dict[str, set[str]] = {}
+        for line in run_lines:
+            n_topic = norm(line.topic_id)
+            n_doc = norm_doc(line.doc_id)
+            docs_by_topic.setdefault(n_topic, set()).add(n_doc)
+
+        present_topics = set(docs_by_topic.keys())
         missing_topics = sorted(normalized_required_topics - present_topics)
         for topic_id in missing_topics:
             errors.append(
@@ -447,11 +463,7 @@ def validate_query_model_completeness(
             )
 
         for topic_id in sorted(normalized_required_topics):
-            present_docs = {
-                norm_doc(line.doc_id)
-                for line in run_lines
-                if norm(line.topic_id) == topic_id
-            }
+            present_docs = docs_by_topic.get(topic_id, set())
             missing_docs = sorted(normalized_required_docs - present_docs)
             for doc_id in missing_docs:
                 errors.append(
