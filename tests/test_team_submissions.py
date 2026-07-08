@@ -23,6 +23,7 @@ def make_settings(tmp: str, *, max_upload_bytes: int = 10 * 1024 * 1024) -> Sett
         storage_root=root / "storage",
         secret_key="test-secret",
         max_upload_bytes=max_upload_bytes,
+        evaluation_mode="eager",
     )
 
 
@@ -234,7 +235,7 @@ def test_upload_page_includes_progress_ui_hooks():
         # Progressive-enhancement hooks for the two-phase upload progress UI.
         assert 'id="uploadForm"' in response.text
         assert 'id="uploadStatus"' in response.text
-        assert "Validating &amp; evaluating" in response.text
+        assert "Validating…" in response.text
 
 
 def test_upload_page_shows_period_closed_and_reopened_states():

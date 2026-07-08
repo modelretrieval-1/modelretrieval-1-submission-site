@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Subtask {{ submission.subtask }} Submission - {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="page-header">
+      <div>
+        <h1>Subtask {{ submission.subtask }} Submission</h1>
+        <p>{{ submission.original_filename }} · submitted {{ submission.submitted_at_jst }} JST</p>
+      </div>
+      <div class="header-actions">
+        <a class="btn btn-outline-secondary btn-sm" href="/team">Team dashboard</a>
+      </div>
+    </div>
+
+    <div
+      id="submissionStatus"
+      class="submission-status"
+      data-submission-id="{{ submission.submission_id }}"
+      data-status="{{ submission.status }}"
+      data-terminal="{{ 'true' if is_terminal else 'false' }}"
+    >
+      <p>
+        Status:
+        <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' or submission.status == 'evaluation_failed' %}danger{% elif submission.status == 'processing' %}info{% else %}secondary{% endif %}">
+          {{ submission.status }}
+        </span>
+      </p>
+
+      {% if submission.status == 'evaluated' %}
+        <div class="alert alert-success" role="status">Submission accepted and evaluated.</div>
+      {% elif submission.status == 'evaluation_failed' %}
+        <div class="alert alert-danger" role="alert">
+          Evaluation failed. Please contact the organizers.
+          {% if submission.validation_summary %}<span class="d-block small">{{ submission.validation_summary }}</span>{% endif %}
+        </div>
+      {% elif submission.status == 'rejected' %}
+        <div class="alert alert-danger" role="alert">Submission rejected.</div>
+      {% else %}
+        <div class="alert alert-info d-flex align-items-center gap-2" role="status">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+          <span>
+            {% if submission.status == 'processing' %}
+              Evaluating your submission…
+            {% else %}
+              Queued for evaluation…
+            {% endif %}
+            This page updates automatically; you can also leave and return later.
+          </span>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if metric_table.rows %}
+      <div class="section-header">
+        <div>
+          <h2>Scores</h2>
+          <p>Run-level metrics persisted for this accepted submission.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table table-sm table-hover align-middle metric-table">
+          <thead class="table-light">
+            <tr>
+              <th>RunID</th>
+              {% for column in metric_table.columns %}
+                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in metric_table.rows %}
+              <tr>
+                <td>{{ row.run_id }}</td>
+                {% for column in metric_table.columns %}
+                  {% set value = row.metric_values.get(column.key) %}
+                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
+                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  {% if not is_terminal %}
+    <script>
+      (function () {
+        var box = document.getElementById("submissionStatus");
+        if (!box || !window.fetch) {
+          return; // No polling; a manual refresh still shows the latest state.
+        }
+        var url = "/team/submissions/" + box.dataset.submissionId + "/status";
+        var timer = window.setInterval(function () {
+          fetch(url, { headers: { "Accept": "application/json" } })
+            .then(function (response) { return response.ok ? response.json() : null; })
+            .then(function (data) {
+              if (!data) { return; }
+              if (data.status !== "queued" && data.status !== "processing") {
+                window.clearInterval(timer);
+                window.location.reload();
+              }
+            })
+            .catch(function () { /* transient error; keep polling */ });
+        }, 2000);
+      })();
+    </script>
+  {% endif %}
+{% endblock %}

@@ -112,7 +112,7 @@
               <tr>
                 <td>Subtask {{ submission.subtask }}</td>
                 <td>
-                  <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
+                  <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% elif submission.status == 'processing' %}info{% elif submission.status == 'queued' %}secondary{% else %}secondary{% endif %}">
                     {{ submission.status }}
                   </span>
                 </td>

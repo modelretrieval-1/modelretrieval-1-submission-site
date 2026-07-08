@@ -4,21 +4,18 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 
 from app.accounts import get_team_subtasks
 from app.config import Settings
 from app.db import connect
 from app.evaluation import (
-    evaluate_submission,
-    evaluate_submission_query_metrics,
     list_latest_team_submission_summaries,
     list_submission_results,
-    mark_evaluation_failed,
-    persist_evaluation_results,
     pivot_evaluation_results,
 )
-from app.ground_truth import JST, get_active_ground_truth_requirements, get_ground_truth_version
+from app.ground_truth import JST, get_active_ground_truth_requirements
+from app.processing import process_submission
 from app.submissions import (
     SubmissionValidationError,
     activate_current_submission,
@@ -26,6 +23,7 @@ from app.submissions import (
     get_current_successful_submission_id,
     get_resubmission_permission,
     get_submission_period_by_name,
+    get_team_submission_status,
     get_unused_resubmission_permission_id,
     has_successful_submission,
     has_unused_resubmission_permission,
@@ -38,6 +36,9 @@ from app.submissions import (
     validate_submission_size,
 )
 from app.web import get_session_account, redirect, require_team, templates
+
+# Submission statuses that are still awaiting a terminal evaluation outcome.
+IN_FLIGHT_STATUSES = ("queued", "processing")
 
 router = APIRouter()
 
@@ -310,85 +311,67 @@ async def upload_submission(
                 ),
             )
 
-        submission_id = create_submission_attempt(
-            connection,
-            internal_team_id=account.id,
-            subtask=subtask,
-            submission_period_id=period.id,
-            status="rejected" if validation_errors else "accepted",
-            original_filename=filename or "submission.txt",
-            file_size_bytes=len(content),
-            stored_file_path=stored_file.path if stored_file is not None else None,
-            file_sha256=stored_file.sha256 if stored_file is not None else None,
-            validation_summary=(
-                f"{len(validation_errors)} validation error(s)."
-                if validation_errors
-                else "Submission accepted."
-            ),
-            ground_truth_version_id=(
-                validation_result.ground_truth_version_id
-                if validation_result is not None
-                else None
-            ),
-        )
         if validation_errors:
+            submission_id = create_submission_attempt(
+                connection,
+                internal_team_id=account.id,
+                subtask=subtask,
+                submission_period_id=period.id,
+                status="rejected",
+                original_filename=filename or "submission.txt",
+                file_size_bytes=len(content),
+                stored_file_path=stored_file.path if stored_file is not None else None,
+                file_sha256=stored_file.sha256 if stored_file is not None else None,
+                validation_summary=f"{len(validation_errors)} validation error(s).",
+                ground_truth_version_id=(
+                    validation_result.ground_truth_version_id
+                    if validation_result is not None
+                    else None
+                ),
+            )
             persist_validation_errors(
                 connection,
                 submission_id=submission_id,
                 errors=validation_errors,
             )
-            metrics = ()
-        elif validation_result is not None:
+        else:
+            # Validation passed. Reserve the slot as ``queued`` and defer the
+            # slow scoring to the evaluation worker; the file, runs, supersession,
+            # and replacement-permission consumption are all committed now.
+            submission_id = create_submission_attempt(
+                connection,
+                internal_team_id=account.id,
+                subtask=subtask,
+                submission_period_id=period.id,
+                status="queued",
+                original_filename=filename or "submission.txt",
+                file_size_bytes=len(content),
+                stored_file_path=stored_file.path if stored_file is not None else None,
+                file_sha256=stored_file.sha256 if stored_file is not None else None,
+                validation_summary="Queued for evaluation.",
+                ground_truth_version_id=validation_result.ground_truth_version_id,
+            )
             persist_submission_runs(
                 connection,
                 submission_id=submission_id,
                 parsed=validation_result.parsed,
             )
-            ground_truth_version = get_ground_truth_version(
-                connection,
-                validation_result.ground_truth_version_id,
+            permission = (
+                get_resubmission_permission(
+                    connection,
+                    permission_id=resubmission_permission_id,
+                )
+                if resubmission_permission_id is not None
+                else None
             )
-            if ground_truth_version is None:
-                mark_evaluation_failed(connection, submission_id=submission_id)
-                if current_submission_id is None:
-                    activate_current_submission(connection, submission_id=submission_id)
-            else:
-                metrics = evaluate_submission(
-                    validation_result.parsed,
-                    subtask=subtask,  # type: ignore[arg-type]
-                    ground_truth_version=ground_truth_version,
-                )
-                query_metrics = evaluate_submission_query_metrics(
-                    validation_result.parsed,
-                    subtask=subtask,  # type: ignore[arg-type]
-                    ground_truth_version=ground_truth_version,
-                )
-                persist_evaluation_results(
-                    connection,
-                    submission_id=submission_id,
-                    ground_truth_version_id=ground_truth_version.id,
-                    metrics=metrics,
-                    query_metrics=query_metrics,
-                )
-                permission = (
-                    get_resubmission_permission(
-                        connection,
-                        permission_id=resubmission_permission_id,
-                    )
-                    if resubmission_permission_id is not None
-                    else None
-                )
-                activate_current_submission(
-                    connection,
-                    submission_id=submission_id,
-                    superseded_submission_id=current_submission_id,
-                    resubmission_permission_id=resubmission_permission_id,
-                    organizer_id=permission.granted_by_organizer_id if permission else None,
-                    reason=permission.reason if permission else None,
-                )
-            metrics = list_submission_results(connection, submission_id=submission_id)
-        else:
-            metrics = ()
+            activate_current_submission(
+                connection,
+                submission_id=submission_id,
+                superseded_submission_id=current_submission_id,
+                resubmission_permission_id=resubmission_permission_id,
+                organizer_id=permission.granted_by_organizer_id if permission else None,
+                reason=permission.reason if permission else None,
+            )
 
     if validation_errors:
         return render_submission_upload(
@@ -399,11 +382,62 @@ async def upload_submission(
             errors=validation_errors,
         )
 
-    return render_submission_upload(
+    # Evaluation is asynchronous. Eager mode drains the queue inline for
+    # deterministic flows (tests, single-shot runs); worker mode leaves the
+    # submission queued for the background thread. Either way, Post/Redirect/Get
+    # sends the participant to the status page.
+    if app_settings.evaluation_mode == "eager":
+        process_submission(app_settings, submission_id)
+
+    return redirect(f"/team/submissions/{submission_id}")
+
+
+@router.get("/team/submissions/{submission_id}", response_class=HTMLResponse)
+def submission_status_page(request: Request, submission_id: int) -> Response:
+    account, redirect_response = require_team(request)
+    if redirect_response is not None:
+        return redirect_response
+
+    app_settings: Settings = request.app.state.settings
+    with connect(app_settings.database_path) as connection:
+        submission = get_team_submission_status(
+            connection,
+            submission_id=submission_id,
+            internal_team_id=account.id,
+        )
+        if submission is None:
+            return redirect("/team")
+        metrics = list_submission_results(connection, submission_id=submission_id)
+
+    is_terminal = submission.status not in IN_FLIGHT_STATUSES
+    return templates.TemplateResponse(
         request,
-        account=account,
-        subtask=subtask,
-        selected_period=selected_period,
-        metrics=metrics,
-        success="Submission accepted and evaluated.",
+        "team_submission_status.html",
+        {
+            "app_name": app_settings.app_name,
+            "account": account,
+            "submission": submission,
+            "metrics": metrics,
+            "metric_table": pivot_evaluation_results(tuple(metrics)),
+            "is_terminal": is_terminal,
+        },
     )
+
+
+@router.get("/team/submissions/{submission_id}/status")
+def submission_status_json(request: Request, submission_id: int) -> Response:
+    account, redirect_response = require_team(request)
+    if redirect_response is not None:
+        return redirect_response
+
+    app_settings: Settings = request.app.state.settings
+    with connect(app_settings.database_path) as connection:
+        submission = get_team_submission_status(
+            connection,
+            submission_id=submission_id,
+            internal_team_id=account.id,
+        )
+
+    if submission is None:
+        return JSONResponse({"error": "not_found"}, status_code=404)
+    return JSONResponse({"status": submission.status, "summary": submission.validation_summary})

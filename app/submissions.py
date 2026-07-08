@@ -11,8 +11,19 @@ from app.ground_truth import JST, GroundTruthRequirements, jst_now_text, safe_fi
 
 MAX_RUNS_PER_SUBTASK = 5
 EXPECTED_FIELD_COUNT = 6
-SUCCESSFUL_SUBMISSION_STATUSES = ("accepted", "evaluated", "evaluation_failed")
-SUCCESSFUL_SUBMISSION_STATUS_SQL = "('accepted', 'evaluated', 'evaluation_failed')"
+# Statuses that occupy the "one current successful submission per (team, subtask,
+# period)" slot. ``queued``/``processing`` are in-flight evaluation states that
+# reserve the slot so a team cannot enqueue several files at once.
+SUCCESSFUL_SUBMISSION_STATUSES = (
+    "accepted",
+    "queued",
+    "processing",
+    "evaluated",
+    "evaluation_failed",
+)
+SUCCESSFUL_SUBMISSION_STATUS_SQL = (
+    "('accepted', 'queued', 'processing', 'evaluated', 'evaluation_failed')"
+)
 IMAGE_ID_SUFFIX = ".png"
 
 
@@ -168,6 +179,16 @@ class PersistedSubmissionRun:
     run_id: str
     line_count: int
     query_count: int
+
+
+@dataclass(frozen=True)
+class TeamSubmissionStatus:
+    submission_id: int
+    subtask: str
+    status: str
+    validation_summary: str | None
+    original_filename: str
+    submitted_at_jst: str
 
 
 @dataclass(frozen=True)
@@ -1257,3 +1278,93 @@ def persist_submission_runs(
         rows,
     )
     connection.commit()
+
+
+def mark_submission_status(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+    status: str,
+    validation_summary: str | None = None,
+) -> None:
+    """Set a submission's status, optionally replacing its human-readable note."""
+    if validation_summary is None:
+        connection.execute(
+            "UPDATE submissions SET status = ? WHERE id = ?",
+            (status, submission_id),
+        )
+    else:
+        connection.execute(
+            "UPDATE submissions SET status = ?, validation_summary = ? WHERE id = ?",
+            (status, validation_summary, submission_id),
+        )
+    connection.commit()
+
+
+def claim_next_queued_submission(connection: sqlite3.Connection) -> int | None:
+    """Atomically claim the oldest ``queued`` submission for evaluation.
+
+    Returns the claimed submission id after transitioning it to ``processing``,
+    or ``None`` when the queue is empty. The guarded UPDATE keeps the claim
+    correct even if two callers race for the same row.
+    """
+    row = connection.execute(
+        """
+        SELECT id
+        FROM submissions
+        WHERE status = 'queued'
+        ORDER BY id
+        LIMIT 1
+        """
+    ).fetchone()
+    if row is None:
+        return None
+
+    cursor = connection.execute(
+        """
+        UPDATE submissions
+        SET status = 'processing'
+        WHERE id = ? AND status = 'queued'
+        """,
+        (row["id"],),
+    )
+    connection.commit()
+    if cursor.rowcount == 0:
+        return None
+    return row["id"]
+
+
+def requeue_processing_submissions(connection: sqlite3.Connection) -> int:
+    """Return interrupted ``processing`` submissions to ``queued`` on startup."""
+    cursor = connection.execute(
+        "UPDATE submissions SET status = 'queued' WHERE status = 'processing'"
+    )
+    connection.commit()
+    return cursor.rowcount
+
+
+def get_team_submission_status(
+    connection: sqlite3.Connection,
+    *,
+    submission_id: int,
+    internal_team_id: int,
+) -> TeamSubmissionStatus | None:
+    """Return ownership-scoped status details, or ``None`` if not the team's own."""
+    row = connection.execute(
+        """
+        SELECT id, subtask, status, validation_summary, original_filename, submitted_at_jst
+        FROM submissions
+        WHERE id = ? AND team_id = ?
+        """,
+        (submission_id, internal_team_id),
+    ).fetchone()
+    if row is None:
+        return None
+    return TeamSubmissionStatus(
+        submission_id=row["id"],
+        subtask=row["subtask"],
+        status=row["status"],
+        validation_summary=row["validation_summary"],
+        original_filename=row["original_filename"],
+        submitted_at_jst=row["submitted_at_jst"],
+    )

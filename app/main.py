@@ -9,6 +9,11 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import Settings, settings
 from app.db import initialize_database, verify_database_current
+from app.processing import (
+    recover_orphaned_submissions,
+    start_evaluation_worker,
+    stop_evaluation_worker,
+)
 from app.routes.admin import router as admin_router
 from app.routes.auth import router as auth_router
 from app.routes.team import router as team_router
@@ -24,7 +29,16 @@ def build_lifespan(app_settings: Settings):
             verify_database_current(app_settings.database_path)
         else:
             initialize_database(app_settings.database_path)
-        yield
+
+        worker_enabled = app_settings.evaluation_mode == "worker"
+        if worker_enabled:
+            recover_orphaned_submissions(app_settings)
+            start_evaluation_worker(app)
+        try:
+            yield
+        finally:
+            if worker_enabled:
+                stop_evaluation_worker(app)
 
     return lifespan
 

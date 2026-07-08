@@ -13,6 +13,7 @@ class Settings:
     storage_root: Path
     secret_key: str
     max_upload_bytes: int
+    evaluation_mode: str = "worker"
 
     @property
     def submissions_dir(self) -> Path:
@@ -42,6 +43,7 @@ def load_settings() -> Settings:
         storage_root=Path(os.getenv("STORAGE_ROOT", data_root / "storage")),
         secret_key=os.getenv("SECRET_KEY", "change-me-before-production"),
         max_upload_bytes=int(os.getenv("MAX_UPLOAD_BYTES", str(50 * 1024 * 1024))),
+        evaluation_mode=os.getenv("EVALUATION_MODE", "worker"),
     )
 
 

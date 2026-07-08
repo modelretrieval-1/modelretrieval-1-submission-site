@@ -18,6 +18,7 @@ def make_settings(tmp: str) -> Settings:
         storage_root=root / "storage",
         secret_key="test-secret",
         max_upload_bytes=50 * 1024 * 1024,
+        evaluation_mode="eager",
     )
 
 
