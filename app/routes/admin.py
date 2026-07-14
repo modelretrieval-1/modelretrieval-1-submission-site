@@ -21,6 +21,7 @@ from app.accounts import (
     reset_organizer_password_by_username,
     reset_team_password_by_team_id,
 )
+from app.audit import record_audit_event
 from app.config import Settings
 from app.db import connect
 from app.evaluation import (
@@ -882,6 +883,16 @@ async def allow_resubmission(request: Request, submission_id: int) -> Response:
             organizer_id=account.id,
             reason=reason,
         )
+        if granted:
+            record_audit_event(
+                connection,
+                actor_type="organizer",
+                actor_id=account.id,
+                event_type="replacement_permission_granted",
+                entity_type="submission",
+                entity_id=submission_id,
+                metadata={"reason": reason},
+            )
 
     message = (
         "Replacement upload permission granted."

@@ -13,6 +13,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
+from app.audit import record_audit_event
 from app.config import Settings
 from app.db import connect
 from app.evaluation import (
@@ -51,6 +52,14 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
             submission_id=submission_id,
             status="processing",
         )
+        record_audit_event(
+            connection,
+            actor_type="system",
+            actor_id=None,
+            event_type="submission_evaluation_started",
+            entity_type="submission",
+            entity_id=submission_id,
+        )
 
         try:
             if not detail.stored_file_path:
@@ -71,6 +80,15 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
                     status="evaluation_failed",
                     validation_summary="Evaluation failed: ground truth version is unavailable.",
                 )
+                record_audit_event(
+                    connection,
+                    actor_type="system",
+                    actor_id=None,
+                    event_type="submission_evaluation_failed",
+                    entity_type="submission",
+                    entity_id=submission_id,
+                    metadata={"reason": "ground_truth_unavailable"},
+                )
                 return
 
             metrics = evaluate_submission(
@@ -90,6 +108,18 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
                 metrics=metrics,
                 query_metrics=query_metrics,
             )
+            record_audit_event(
+                connection,
+                actor_type="system",
+                actor_id=None,
+                event_type="submission_evaluated",
+                entity_type="submission",
+                entity_id=submission_id,
+                metadata={
+                    "run_count": len(metrics),
+                    "ground_truth_version_id": ground_truth_version.id,
+                },
+            )
         except Exception as exc:  # noqa: BLE001 - any failure must land the submission in a terminal state
             logger.exception("Evaluation failed for submission %s", submission_id)
             mark_submission_status(
@@ -97,6 +127,15 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
                 submission_id=submission_id,
                 status="evaluation_failed",
                 validation_summary=f"Evaluation failed: {exc}",
+            )
+            record_audit_event(
+                connection,
+                actor_type="system",
+                actor_id=None,
+                event_type="submission_evaluation_failed",
+                entity_type="submission",
+                entity_id=submission_id,
+                metadata={"reason": type(exc).__name__},
             )
 
 

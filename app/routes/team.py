@@ -7,6 +7,7 @@ from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 
 from app.accounts import get_team_subtasks
+from app.audit import record_audit_event
 from app.config import Settings
 from app.db import connect
 from app.evaluation import (
@@ -392,6 +393,19 @@ async def upload_submission(
                 submission_id=submission_id,
                 errors=validation_errors,
             )
+            record_audit_event(
+                connection,
+                actor_type="team",
+                actor_id=account.id,
+                event_type="submission_validation_failed",
+                entity_type="submission",
+                entity_id=submission_id,
+                metadata={
+                    "subtask": subtask,
+                    "period": selected_period,
+                    "error_count": len(validation_errors),
+                },
+            )
         else:
             # Validation passed. Reserve the slot as ``queued`` and defer the
             # slow scoring to the evaluation worker; the file, runs, supersession,
@@ -430,6 +444,34 @@ async def upload_submission(
                 organizer_id=permission.granted_by_organizer_id if permission else None,
                 reason=permission.reason if permission else None,
             )
+            record_audit_event(
+                connection,
+                actor_type="team",
+                actor_id=account.id,
+                event_type="submission_accepted",
+                entity_type="submission",
+                entity_id=submission_id,
+                metadata={
+                    "subtask": subtask,
+                    "period": selected_period,
+                    "run_count": len(validation_result.parsed.run_ids),
+                    "filename": filename or "submission.txt",
+                    "checksum": stored_file.sha256 if stored_file is not None else None,
+                },
+            )
+            if current_submission_id is not None:
+                record_audit_event(
+                    connection,
+                    actor_type="team",
+                    actor_id=account.id,
+                    event_type="submission_replaced",
+                    entity_type="submission",
+                    entity_id=submission_id,
+                    metadata={
+                        "previous_submission_id": current_submission_id,
+                        "replacement_submission_id": submission_id,
+                    },
+                )
 
     if validation_errors:
         return render_submission_upload(
