@@ -240,3 +240,26 @@ def test_team_shell_multiple_subtasks_renders_submenu():
         assert 'data-bs-target="#uploadSubmenu_desktop"' in response.text
         assert 'href="/team/submissions/A/new">Subtask A</a>' in response.text
         assert 'href="/team/submissions/B/new">Subtask B</a>' in response.text
+
+
+def test_team_dashboard_upload_button_lets_team_choose_subtask():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, _ = seed_accounts(settings)
+        with connect(settings.database_path) as connection:
+            team = create_team(
+                connection,
+                team_id="team-002",
+                display_name="Team 002",
+                subtasks={"A", "B"},
+                created_by_organizer_id=organizer.id,
+            )
+        client = TestClient(create_app(settings))
+        login(client, "team-002", team.password)
+
+        response = client.get("/team")
+
+        assert response.status_code == 200
+        assert 'class="btn btn-primary dropdown-toggle"' in response.text
+        assert 'href="/team/submissions/A/new">Subtask A</a>' in response.text
+        assert 'href="/team/submissions/B/new">Subtask B</a>' in response.text

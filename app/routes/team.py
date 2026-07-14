@@ -194,6 +194,9 @@ def team_dashboard(request: Request) -> Response:
             "periods": periods,
             "submission_slots": submission_slots,
             "available_submission_slots": sum(1 for slot in submission_slots if slot["can_submit"]),
+            "available_subtasks": sorted(
+                {slot["subtask"] for slot in submission_slots if slot["can_submit"]}
+            ),
             "submission_summaries": submission_summaries,
         },
     )

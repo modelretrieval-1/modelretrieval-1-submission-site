@@ -262,6 +262,17 @@ Purpose:
 
 - Let a team upload one submission file for one registered subtask and one selected submission period.
 
+Dashboard entry:
+
+- The participant dashboard's `Upload submission` action is a dropdown listing
+  only registered subtasks that currently have an available submission slot or
+  an approved replacement slot.
+- Selecting a subtask opens `/team/submissions/{subtask}/new` directly; the
+  dashboard never silently chooses Subtask A when multiple subtasks are
+  available.
+- The generic `/team/submissions/new` route remains as a compatibility redirect
+  for older links and chooses the first registered subtask.
+
 Inputs:
 
 - Subtask selector: A or B, limited to registered subtasks.

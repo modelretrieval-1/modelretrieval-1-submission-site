@@ -10,8 +10,17 @@
       <p>{{ account.display_name }} ({{ account.user_id }})</p>
     </div>
     <div class="header-actions">
-      {% if available_submission_slots %}
-        <a class="btn btn-primary" href="/team/submissions/new">Upload submission</a>
+      {% if available_subtasks %}
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Upload submission
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for subtask in available_subtasks %}
+              <li><a class="dropdown-item" href="/team/submissions/{{ subtask }}/new">Subtask {{ subtask }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
       {% endif %}
     </div>
   </div>
@@ -51,7 +60,10 @@
     <div class="alert alert-warning" role="alert">
       <strong>Replacement upload approved.</strong>
       Your previous scores are temporarily hidden while you submit a replacement. The permission is used only after a valid replacement is accepted; failed validation does not consume it.
-      <a href="/team/submissions/new" class="alert-link">Upload replacement</a>
+      <span class="d-block mt-2">Choose the subtask:</span>
+      {% for subtask in available_subtasks %}
+        <a href="/team/submissions/{{ subtask }}/new" class="alert-link me-3">Subtask {{ subtask }}</a>
+      {% endfor %}
     </div>
   {% endif %}
 

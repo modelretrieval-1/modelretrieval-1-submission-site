@@ -61,7 +61,9 @@ Key points:
 Implemented Sprint 6A UI slices:
 
 - Shared authenticated app shell with role-aware sidebar/topbar navigation.
-- Participant upload navigation entry at `/team/submissions/new`.
+- Participant dashboard upload chooser with links for each currently available
+  registered subtask; `/team/submissions/new` remains a backward-compatible
+  redirect helper.
 - Participant dashboard submission availability by subtask and period.
 - Organizer-approved one-time replacement uploads with participant-hidden superseded metrics and organizer-visible metric history.
 - Organizer dashboard period open/closed/reopened state.
