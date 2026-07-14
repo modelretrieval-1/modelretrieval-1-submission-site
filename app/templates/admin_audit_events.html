@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Audit Log - {{ app_name }}{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="page-header"><div><h1>Audit Log</h1><p>Read-only history of security and workflow activity.</p></div></div>
+  <form method="get" class="form-grid mb-4">
+    <input class="form-control" name="event_type" placeholder="Event type" value="{{ filters.event_type }}">
+    <select class="form-select" name="actor_type"><option value="">All actors</option>{% for value in ("organizer", "team", "system", "anonymous") %}<option value="{{ value }}" {% if filters.actor_type == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+    <input class="form-control" name="entity_type" placeholder="Entity type" value="{{ filters.entity_type }}">
+    <input class="form-control" name="entity_id" placeholder="Entity ID" value="{{ filters.entity_id }}">
+    <input class="form-control" name="date_from" type="date" value="{{ filters.date_from }}">
+    <input class="form-control" name="date_to" type="date" value="{{ filters.date_to }}">
+    <button class="btn btn-primary" type="submit">Filter</button><a class="btn btn-outline-secondary" href="/admin/audit-events">Clear</a>
+  </form>
+  <p>Showing {{ events|length }} of {{ total }} event{{ "s" if total != 1 else "" }}.</p>
+  <div class="table-wrap"><table class="table table-sm table-hover"><thead><tr><th>Time</th><th>Actor</th><th>Event</th><th>Entity</th><th>Metadata</th></tr></thead><tbody>
+  {% for event in events %}<tr><td>{{ event.created_at_jst }} JST</td><td>{{ event.actor_type }}{% if event.actor_id %} #{{ event.actor_id }}{% endif %}</td><td><code>{{ event.event_type }}</code></td><td>{{ event.entity_type or "" }}{% if event.entity_id %} #{{ event.entity_id }}{% endif %}</td><td><code>{{ event.metadata_json or "" }}</code></td></tr>{% else %}<tr><td colspan="5">No audit events match these filters.</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% if page_count > 1 %}<nav aria-label="Audit log pages"><ul class="pagination">{% for number in range(1, page_count + 1) %}<li class="page-item {% if number == page %}active{% endif %}"><a class="page-link" href="?event_type={{ filters.event_type|urlencode }}&actor_type={{ filters.actor_type|urlencode }}&entity_type={{ filters.entity_type|urlencode }}&entity_id={{ filters.entity_id|urlencode }}&date_from={{ filters.date_from|urlencode }}&date_to={{ filters.date_to|urlencode }}&page={{ number }}">{{ number }}</a></li>{% endfor %}</ul></nav>{% endif %}
+</section>
+{% endblock %}

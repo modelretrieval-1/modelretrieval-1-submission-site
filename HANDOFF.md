@@ -466,8 +466,8 @@ It defines the MVP P0 audit events for authentication, submissions, organizer
 configuration, protected data access, and exports. The existing `audit_events`
 table now records authentication/account events, submission lifecycle events,
 organizer configuration changes, protected ground-truth access, and exports.
-The next audit slice is the organizer-only read-only `/admin/audit-events` viewer;
-its implementation scope is documented in the audit logging plan.
+The organizer-only read-only `/admin/audit-events` viewer is implemented with
+filters and pagination; its scope is documented in the audit logging plan.
 
 Target behavior:
 

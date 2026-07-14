@@ -21,7 +21,7 @@ from app.accounts import (
     reset_organizer_password_by_username,
     reset_team_password_by_team_id,
 )
-from app.audit import record_audit_event
+from app.audit import list_audit_events, record_audit_event
 from app.config import Settings
 from app.db import connect
 from app.evaluation import (
@@ -56,6 +56,37 @@ from app.submissions import (
 from app.web import get_session_account, redirect, require_organizer, templates
 
 router = APIRouter()
+
+
+@router.get("/admin/audit-events", response_class=HTMLResponse)
+def admin_audit_events(request: Request) -> Response:
+    account, redirect_response = require_organizer(request)
+    if redirect_response is not None:
+        return redirect_response
+    values = {key: request.query_params.get(key, "").strip() for key in (
+        "event_type", "actor_type", "entity_type", "entity_id", "date_from", "date_to"
+    )}
+    try:
+        page = max(int(request.query_params.get("page", "1")), 1)
+    except ValueError:
+        page = 1
+    with connect(request.app.state.settings.database_path) as connection:
+        events, total = list_audit_events(connection, **values, page=page)
+    page_size = 50
+    return templates.TemplateResponse(
+        request,
+        "admin_audit_events.html",
+        {
+            "app_name": request.app.state.settings.app_name,
+            "account": account,
+            "events": events,
+            "filters": values,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "page_count": max((total + page_size - 1) // page_size, 1),
+        },
+    )
 
 
 def render_admin_teams(

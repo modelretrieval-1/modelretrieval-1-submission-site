@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from app.accounts import create_organizer
-from app.audit import record_audit_event
+from app.audit import list_audit_events, record_audit_event
 from app.config import Settings
 from app.db import connect, initialize_database
 from app.main import create_app
@@ -68,3 +68,22 @@ def test_authentication_events_are_recorded_without_passwords():
             "logout",
         ]
         assert all(organizer.password not in (row["metadata_json"] or "") for row in rows)
+
+
+def test_list_audit_events_filters_and_paginates(tmp_path):
+    database_path = tmp_path / "audit.sqlite3"
+    initialize_database(database_path)
+    with connect(database_path) as connection:
+        for index in range(3):
+            record_audit_event(
+                connection,
+                actor_type="system" if index == 2 else "organizer",
+                actor_id=1,
+                event_type=f"event_{index}",
+                entity_type="submission",
+            )
+        rows, total = list_audit_events(
+            connection, actor_type="organizer", page=1, page_size=1
+        )
+    assert total == 2
+    assert len(rows) == 1

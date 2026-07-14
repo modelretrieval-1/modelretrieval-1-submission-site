@@ -19,6 +19,7 @@
           <a class="app-nav-link {% if current_path.startswith('/admin/periods') %}active{% endif %}" href="/admin/periods">Periods</a>
           <a class="app-nav-link {% if current_path.startswith('/admin/submissions') %}active{% endif %}" href="/admin/submissions">Submissions</a>
           <a class="app-nav-link {% if current_path.startswith('/admin/leaderboard') %}active{% endif %}" href="/admin/leaderboard">Leaderboard</a>
+          <a class="app-nav-link {% if current_path.startswith('/admin/audit-events') %}active{% endif %}" href="/admin/audit-events">Audit Log</a>
           <a class="app-nav-link {% if current_path.startswith('/account/password') %}active{% endif %}" href="/account/password">Password</a>
         {% elif account.role == "team" %}
           <a class="app-nav-link {% if current_path == '/team' %}active{% endif %}" href="/team">Dashboard</a>
