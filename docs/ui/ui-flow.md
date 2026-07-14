@@ -588,6 +588,7 @@ Actions:
 
 - Upload ground truth.
 - Activate version.
+- Download the preserved original file for a version.
 - View validation summary.
 - Trigger re-evaluation if supported.
 
@@ -597,6 +598,10 @@ Required states:
 - Upload validation failed.
 - Uploaded but inactive.
 - Active.
+
+Ground-truth downloads are organizer-only and are served through an authenticated
+endpoint. They are not exposed through the public static file mount or participant
+routes.
 
 ### Submissions Table
 

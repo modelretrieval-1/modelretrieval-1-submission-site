@@ -54,6 +54,7 @@ For the latest implementation status, use `../../HANDOFF.md`. This document shou
 ## Organizer Workflow
 
 - Organizers can download all submissions as a bundle.
+- Organizers can download the original uploaded ground-truth file for each stored version from the protected ground-truth administration page.
 - Organizers can export leaderboard results as CSV.
 - All 5 runs are official; organizers do not mark one official run per team.
 - The system does not send email notifications. Organizers send messages manually.

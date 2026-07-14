@@ -184,7 +184,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-165 passed
+169 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -218,7 +218,7 @@ Foundation:
 - `app/web.py`: shared Jinja templates, redirects, session account lookup, and role guards.
 - `app/routes/auth.py`: login, logout, and password-change routes.
 - `app/routes/team.py`: team dashboard and participant submission upload routes.
-- `app/routes/admin.py`: organizer dashboard, team/user management, ground-truth upload/activation, submission-period controls, submission review/detail, private leaderboard, CSV export, and submission bundle download routes.
+- `app/routes/admin.py`: organizer dashboard, team/user management, ground-truth upload/activation/download, submission-period controls, submission review/detail, private leaderboard, CSV export, and submission bundle download routes.
 - `app/ground_truth.py`: ground-truth file storage, SHA-256 calculation, CSV format validation, version metadata helpers, activation helpers, active ground-truth requirement extraction.
 - `app/submissions.py`: TREC_EVAL parser, field-level submission validation, duplicate row validation, score-vs-rank order validation, query/model completeness validation with subtask-aware Subtask B matching (`.png`-tolerant image_id and zero-padding-tolerant numeric model_id), combined validation against active ground truth, submission file guards, submission storage, submission attempt persistence helpers.
 - `app/submissions.py`: also includes submission-period lookup and open/closed deadline helpers.

@@ -190,6 +190,7 @@ Acceptance criteria:
 
 - Ground truth can be uploaded per subtask.
 - The system validates the ground-truth file before activation.
+- Organizers can download the preserved original file for each uploaded version.
 - Ground-truth versions are tracked.
 - Participants cannot access ground-truth data.
 - Ground-truth files are stored on the server local filesystem.

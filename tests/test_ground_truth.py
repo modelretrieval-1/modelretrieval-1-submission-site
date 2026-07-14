@@ -277,6 +277,55 @@ def test_ground_truth_files_are_not_served_as_static_files():
         assert response.status_code == 404
 
 
+def test_organizer_can_download_ground_truth_file():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, _team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "admin", organizer.password)
+        content = b"task_id,model_id,relevance_score\n1,model-1,3\n"
+        upload = client.post(
+            "/admin/ground-truth",
+            data={"subtask": "A", "version_label": "a-v1", "notes": ""},
+            files={"file": ("a-ground-truth.csv", content, "text/csv")},
+        )
+        assert upload.status_code == 200
+        version_id = ground_truth_ids(settings)[0]
+
+        response = client.get(f"/admin/ground-truth/{version_id}/download")
+
+        assert response.status_code == 200
+        assert response.content == content
+        assert response.headers["content-disposition"].startswith("attachment;")
+
+
+def test_team_cannot_download_ground_truth_file():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        client = TestClient(create_app(settings))
+        login(client, "admin", organizer.password)
+        client.post(
+            "/admin/ground-truth",
+            data={"subtask": "A", "version_label": "a-v1", "notes": ""},
+            files={
+                "file": (
+                    "a-ground-truth.csv",
+                    b"task_id,model_id,relevance_score\n1,m,3\n",
+                    "text/csv",
+                )
+            },
+        )
+        version_id = ground_truth_ids(settings)[0]
+        client.post("/logout")
+        login(client, "team-001", team.password)
+
+        response = client.get(f"/admin/ground-truth/{version_id}/download", follow_redirects=False)
+
+        assert response.status_code == 303
+        assert response.headers["location"] == "/team"
+
+
 def ground_truth_ids(settings: Settings) -> list[int]:
     with connect(settings.database_path) as connection:
         rows = connection.execute(

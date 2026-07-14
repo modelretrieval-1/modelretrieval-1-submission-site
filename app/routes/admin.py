@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from fastapi import APIRouter, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 
 from app.accounts import (
     create_organizer,
@@ -708,6 +708,38 @@ async def upload_ground_truth(
         request,
         account=account,
         success=f"Uploaded ground truth for Subtask {subtask}.",
+    )
+
+
+@router.get("/admin/ground-truth/{version_id}/download")
+def download_ground_truth(request: Request, version_id: int) -> Response:
+    app_settings: Settings = request.app.state.settings
+    account, redirect_response = require_organizer(request)
+    if redirect_response is not None:
+        return redirect_response
+
+    with connect(app_settings.database_path) as connection:
+        version = next(
+            (item for item in list_ground_truth_versions(connection) if item.id == version_id),
+            None,
+        )
+    if version is None:
+        return Response("Ground-truth version not found.", status_code=404)
+
+    stored_path = Path(version.stored_file_path)
+    ground_truth_root = app_settings.ground_truth_dir.resolve()
+    try:
+        safe_path = stored_path.resolve()
+        safe_path.relative_to(ground_truth_root)
+    except (OSError, ValueError):
+        return Response("Ground-truth file is unavailable.", status_code=404)
+    if not safe_path.is_file():
+        return Response("Ground-truth file is unavailable.", status_code=404)
+
+    return FileResponse(
+        safe_path,
+        filename=safe_filename(safe_path.name),
+        media_type="text/csv",
     )
 
 

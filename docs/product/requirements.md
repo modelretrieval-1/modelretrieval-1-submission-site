@@ -181,6 +181,10 @@ The system should also retain per-query metric details for organizer diagnostics
 
 Organizers must be able to upload or configure ground-truth data in the system.
 
+Organizers must be able to download the preserved original file for each stored
+ground-truth version. Ground-truth downloads must require organizer authentication
+and must not be available through participant or public static-file routes.
+
 Ground-truth data must be protected from participant access.
 
 Ground-truth files are stored on the server local filesystem.

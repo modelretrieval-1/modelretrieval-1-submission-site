@@ -154,6 +154,12 @@ Store:
 Each evaluation result must reference the ground-truth version used.
 Each per-query evaluation result must also reference the same ground-truth version used for the aggregate score.
 
+Organizers can download the preserved original file for each ground-truth version
+through an organizer-authenticated endpoint. Ground-truth files are never exposed
+through the public static file mount or participant routes. The download uses the
+stored filename and must reject missing files without exposing arbitrary filesystem
+paths.
+
 ## Re-Evaluation
 
 Organizers should be able to rerun evaluation after replacing or correcting ground truth.

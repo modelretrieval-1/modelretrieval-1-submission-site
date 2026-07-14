@@ -91,6 +91,9 @@
               <td><code>{{ version.file_sha256 }}</code></td>
               <td>{{ version.notes or "" }}</td>
               <td>
+                {% if version.validation_status == "validated" %}
+                  <a class="btn btn-outline-secondary btn-sm" href="/admin/ground-truth/{{ version.id }}/download">Download</a>
+                {% endif %}
                 {% if version.validation_status == "validated" and not version.is_active %}
                   <form method="post" action="/admin/ground-truth/{{ version.id }}/activate">
                     <button class="btn btn-outline-primary btn-sm" type="submit">Activate</button>
