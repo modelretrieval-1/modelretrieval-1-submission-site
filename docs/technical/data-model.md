@@ -446,3 +446,6 @@ Implemented MVP event types:
 
 Events are append-only. Metadata is structured JSON and must not contain
 passwords, session cookies, or uploaded file contents.
+
+The admin audit viewer should query this table with parameterized filters and
+pagination, ordering by `created_at_jst DESC, id DESC`. It should not modify rows.

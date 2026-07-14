@@ -112,11 +112,46 @@ activation/download, leaderboard export, and bundle download.
 Add tests confirming organizer-only actions have organizer actors and that export
 filters/row counts are recorded without storing file contents.
 
-### Slice 5: Organizer audit viewer (optional MVP+)
+### Slice 5: Organizer audit viewer
 
-Add a paginated organizer-only `/admin/audit-events` page with filters for event
-type, actor, entity, and date. This is useful operationally but is not required
-for the first logging slice; database inspection/export is sufficient initially.
+Add a paginated organizer-only `GET /admin/audit-events` page. This is the next
+planned implementation slice now that event recording is complete.
+
+Viewer requirements:
+
+- Organizer authentication is required; teams and anonymous users are redirected
+  or denied exactly like other admin pages.
+- Display newest events first with timestamp, actor type/ID, event type, entity,
+  and safely formatted metadata.
+- Support filters for event type, actor type, entity type/entity ID, and a JST
+  date range.
+- Support pagination with a bounded page size (for example 50 rows) and preserve
+  all active filters in page links.
+- Do not expose passwords, session cookies, or uploaded file contents. Metadata
+  should be rendered as escaped JSON or a safe key/value summary.
+- Keep the viewer read-only. No event editing or deletion actions.
+
+Implementation steps:
+
+1. Add a query helper that builds parameterized filters and returns rows plus a
+   total count/page information.
+2. Add the organizer route and a normalized Bootstrap table template using the
+   existing admin shell.
+3. Add navigation access from the organizer sidebar and an empty-state message.
+4. Add focused tests for authorization, filters, ordering, pagination, metadata
+   escaping, and filter-preserving links.
+5. Verify the page against realistic audit rows and update deployment/operations
+   documentation if log retention or access procedures change.
+
+Acceptance criteria:
+
+- An organizer can find a specific login, submission, ground-truth, or export
+  event using the relevant filters.
+- A team cannot access the page or infer audit data through its routes.
+- Pagination remains correct with more than one page of events.
+- Filter values survive pagination links.
+- HTML metadata is escaped and no secret values are rendered.
+- Existing tests remain green and the page follows the current admin UI shell.
 
 ## Acceptance Criteria
 

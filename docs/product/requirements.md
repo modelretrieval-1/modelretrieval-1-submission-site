@@ -235,6 +235,10 @@ uploads/activation/downloads, and organizer exports/bundle downloads. Audit even
 are append-only and use the `audit_events` table; passwords, session cookies, and
 uploaded file contents must not be included in event metadata.
 
+Organizers must be able to browse the audit trail through a protected, read-only
+admin page with event-type, actor, entity, date-range, and paginated filtering.
+Participant teams must not be able to access audit events.
+
 ## Non-Functional Requirements
 
 - Deadline checks must be deterministic and based on server-side time.
