@@ -21,37 +21,38 @@ This checklist is used before launch and before each production deployment.
 - [ ] Confirm who has SSH access to the VPS.
 - [ ] `vps-setup.md` has been followed for the target VPS.
 - [x] `github-secrets.md` has been followed for GitHub Actions staging deployment.
+- [x] First production deployment completed successfully from immutable tag `v2026.07.14.0` on July 14, 2026.
 
 ## One-Time VPS Checklist
 
 - [ ] DNS A record exists for staging.
-- [ ] DNS A record exists for production.
+- [x] DNS A record exists for production.
 - [ ] Firewall allows SSH, HTTP, and HTTPS.
 - [ ] Docker is installed.
 - [ ] Docker Compose plugin is installed.
 - [ ] Nginx is installed.
 - [ ] Certbot is installed.
 - [ ] Staging Nginx config has real hostname and proxies to `127.0.0.1:8001`.
-- [ ] Production Nginx config has real hostname and proxies to `127.0.0.1:8002`.
+- [x] Production Nginx config has real hostname and proxies to `127.0.0.1:8002`.
 - [ ] Nginx config includes `client_max_body_size 60m` or larger.
 - [ ] Nginx `server_names_hash_bucket_size` is increased if long hostnames make `nginx -t` fail.
-- [ ] `sudo nginx -t` passes.
+- [x] `sudo nginx -t` passes for the production HTTPS configuration.
 - [ ] `/opt/modelretrieval/staging` exists.
-- [ ] `/opt/modelretrieval/production` exists.
+- [x] `/opt/modelretrieval/production` exists.
 - [ ] `/opt/modelretrieval/backups` exists.
 - [ ] `deployment/scripts/backup.sh` is available on the VPS or runnable from the checkout.
-- [ ] `/opt/modelretrieval/production/backup.sh` exists and is executable.
+- [x] `/opt/modelretrieval/production/backup.sh` exists and is executable.
 - [ ] `compose.staging.yml` has been copied to staging as `compose.yml`.
-- [ ] `compose.production.yml` has been copied to production as `compose.yml`.
+- [x] `compose.production.yml` has been copied to production as `compose.yml`.
 - [ ] Staging `.env` exists and is not committed.
-- [ ] Production `.env` exists and is not committed.
+- [x] Production `.env` exists and is not committed.
 - [ ] Staging `APP_IMAGE` points to an existing GHCR image.
-- [ ] Production `APP_IMAGE` points to an immutable `v*` GHCR image.
+- [x] Production `APP_IMAGE` points to immutable image tag `v2026.07.14.0`.
 - [ ] Docker Compose user can pull `APP_IMAGE` from GHCR.
 - [ ] Staging and production use different `SECRET_KEY` values.
 - [ ] Staging and production use separate data directories.
 - [ ] Staging data directory ownership matches the app container UID/GID.
-- [ ] Production data directory ownership matches the app container UID/GID.
+- [x] Production data directory ownership matches the app container UID/GID.
 - [x] GitHub Actions deploy user can SSH to the VPS for staging deployment.
 - [ ] Deploy user has no usable password login.
 - [ ] Deploy user uses SSH keys only.
@@ -80,22 +81,22 @@ This checklist is used before launch and before each production deployment.
 
 ## Production Pre-Deploy
 
-- [ ] Production image tag is immutable.
-- [ ] Production `APP_IMAGE` is set in `/opt/modelretrieval/production/.env`.
-- [ ] Production deployment is triggered by a `v*` tag.
-- [ ] Staging was verified using the same commit or image.
-- [ ] Production backup completed.
-- [ ] Production `.env` is present.
-- [ ] Production data directory is present.
-- [ ] Nginx production config is enabled.
-- [ ] HTTPS certificate is valid.
+- [x] Production image tag `v2026.07.14.0` is immutable.
+- [x] Production `APP_IMAGE` is set in `/opt/modelretrieval/production/.env`.
+- [x] Production deployment was triggered by a `v*` tag.
+- [x] Staging was verified before production promotion.
+- [x] Production backup completed before deployment.
+- [x] Production `.env` is present.
+- [x] Production data directory is present.
+- [x] Nginx production config is enabled.
+- [x] HTTPS certificate is valid and managed by Certbot.
 - [ ] Production Nginx config preserves `X-Forwarded-*` headers.
 - [ ] Rollback image tag is known.
 
 ## Production Post-Deploy
 
-- [ ] `https://submission.modelretrieval-1.happysocial.net/health` returns success.
-- [ ] Login page loads over HTTPS.
+- [x] `https://submission.modelretrieval-1.happysocial.net/health` returns success through the deployment smoke check.
+- [x] Production HTTPS setup completed for `submission.modelretrieval-1.happysocial.net`.
 - [ ] Organizer login works.
 - [ ] Team login works for a test or official account.
 - [ ] Admin pages are inaccessible to team accounts.
@@ -106,7 +107,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Private leaderboard loads.
 - [ ] Nginx error logs show no deployment-related errors.
 - [ ] Application logs show no startup errors.
-- [ ] `deployment/scripts/smoke-check.sh` passes against production URL.
+- [x] `deployment/scripts/smoke-check.sh` passes against production URL.
 
 ## Backup Verification
 

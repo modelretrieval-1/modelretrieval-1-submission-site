@@ -10,7 +10,7 @@ The project is in **Sprint 6: Production Hardening**.
 
 The planned core app scope is implemented: participant upload, validation, evaluation, score display, organizer review, private leaderboard, exports, submission bundles, server-rendered Bootstrap UI, and the Sprint 6A application-shell redesign.
 
-The remaining focus is production hardening: visual browser smoke verification, staging end-to-end operations workflow, and production promotion from an immutable `v*` tag after staging passes.
+Staging has been tested successfully, and production was deployed successfully from immutable tag `v2026.07.14.0` with Nginx/Certbot HTTPS. The remaining focus is post-deploy operational verification, backup/restore readiness, and final browser/E2E regression coverage.
 
 Use [HANDOFF.md](HANDOFF.md) for the detailed implementation inventory and latest continuation notes.
 

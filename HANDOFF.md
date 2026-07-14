@@ -18,7 +18,7 @@ Scrum implementation is underway.
 - Sprint 3: complete for the planned evaluation and participant-result scope.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
-- Sprint 6: current sprint, focused on visual browser smoke verification, staging end-to-end operations verification, production promotion rehearsal, and production hardening.
+- Sprint 6: current sprint. Staging testing and the first tagged production deployment are complete; remaining work is post-deploy operational verification, backup/restore readiness, visual browser smoke verification, and final E2E coverage.
 - Sprint 6A: core application-shell, dashboard, page-normalization, and automated local UI regression slices are implemented; remaining UI work is visual browser smoke verification when browser automation is available.
 
 ## Current Stack
@@ -115,6 +115,8 @@ The repository-level `deployment/` directory is reserved for runtime deployment 
 - Docker images are published to GHCR.
 - Staging deploys automatically from `main`.
 - Production deploys from immutable `v*` tags.
+- Production deployment from immutable tag `v2026.07.14.0` completed successfully on July 14, 2026.
+- Production HTTPS is active at `submission.modelretrieval-1.happysocial.net` using host Nginx and a Certbot-issued certificate.
 - The VPS deploy user should be passwordless and use SSH key authentication.
 - Staging and production may use the same SSH deploy key, but they must not share `.env`, `SECRET_KEY`, database, storage directory, or Compose project name.
 - If GHCR pull returns unauthorized, log in on the VPS with a GitHub PAT that has `read:packages`.
@@ -446,16 +448,16 @@ Open operational decisions carried into the next session:
 
 ## Next Recommended Work
 
-Run the visual browser smoke check when a browser backend is available, then complete the staging end-to-end operations workflow and prepare production promotion.
+Run the visual browser smoke check when a browser backend is available, then complete the remaining production operational and launch-readiness checks.
 
 Target behavior:
 
-- Complete organizer/team workflow checks on staging.
-- Upload and activate staging ground truth.
-- Upload invalid and valid team submissions on staging.
-- Confirm participant scores, organizer leaderboard, CSV export, and bundle download on staging.
-- Take a production backup before each production update.
-- Promote production only from an immutable `v*` tag after staging passes.
+- Keep production updates gated by successful staging verification and immutable `v*` tags.
+- Take and verify a production backup before every production update.
+- Complete production organizer/team access-control and workflow checks.
+- Upload and activate production ground truth when the official data is ready.
+- Confirm production validation, evaluation, participant scores, leaderboard, CSV export, and bundle download.
+- Verify restore readiness and final browser/E2E regression coverage.
 
 Completed deployment checks:
 
@@ -464,15 +466,19 @@ Completed deployment checks:
 - GHCR image publish completed.
 - Staging `APP_IMAGE` was updated remotely.
 - Staging `/health` and `/login` checks passed over HTTPS.
+- Staging end-to-end testing was reported successful by the operator.
+- Production image `v2026.07.14.0` was deployed successfully through the tagged GitHub Actions workflow.
+- The production backup prerequisite, database migration, container deployment, and automated smoke check completed successfully.
+- Production Nginx and Certbot HTTPS setup completed successfully for `submission.modelretrieval-1.happysocial.net`.
 
 Suggested remaining checks:
 
-- Staging organizer login and team creation.
-- Staging team login and access-control check.
-- Staging ground-truth upload/activation.
-- Staging valid and invalid submission uploads.
-- Staging leaderboard, CSV export, and submission bundle download.
-- Production backup script before production deploy.
+- Production organizer login and team creation/import.
+- Production team login and access-control checks.
+- Production ground-truth upload/activation.
+- Production valid and invalid submission uploads.
+- Production leaderboard, CSV export, and submission bundle download.
+- Backup retention, off-VPS copy, and restore verification.
 
 ## Docs To Read First In A New Session
 

@@ -596,7 +596,9 @@ Status:
 - Current project domains are `submission-staging.modelretrieval-1.happysocial.net` and `submission.modelretrieval-1.happysocial.net`.
 - Deployment docs capture the GHCR login path, `APP_IMAGE` meaning, `SECRET_KEY` generation, passwordless deploy user, bind-mounted data ownership fix, and Nginx long-hostname hash bucket fix.
 - GitHub Actions staging deployment from `main` has been verified.
-- Remaining Sprint 6 work is staging end-to-end operations verification, production promotion rehearsal, and final E2E regression coverage.
+- Staging end-to-end testing was reported successful by the operator.
+- The first production deployment completed successfully from immutable tag `v2026.07.14.0`, including the pre-deploy backup, database migration, tagged image deployment, automated smoke check, and Nginx/Certbot HTTPS setup.
+- Remaining Sprint 6 work is production operational and launch-readiness verification, backup/restore readiness, visual browser smoke verification, and final E2E regression coverage.
 - Alembic migration adoption is implemented using `../technical/database-migrations.md` as the source of truth.
 
 ### Sprint 6A: Application UI Redesign
