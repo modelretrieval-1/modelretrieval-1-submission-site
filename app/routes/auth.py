@@ -4,6 +4,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, Response
 
 from app.accounts import authenticate, change_organizer_password, change_team_password
+from app.audit import record_audit_event
 from app.config import Settings
 from app.db import connect
 from app.sessions import SESSION_COOKIE, create_session_value
@@ -50,6 +51,25 @@ def login(request: Request, user_id: str = Form(...), password: str = Form(...))
     app_settings: Settings = request.app.state.settings
     with connect(app_settings.database_path) as connection:
         account = authenticate(connection, user_id, password)
+        if account is None:
+            record_audit_event(
+                connection,
+                actor_type="anonymous",
+                actor_id=None,
+                event_type="login_failed",
+                entity_type="account",
+                metadata={"user_id": user_id, "reason": "invalid_credentials"},
+            )
+        else:
+            record_audit_event(
+                connection,
+                actor_type=account.role,
+                actor_id=account.id,
+                event_type="login_succeeded",
+                entity_type="account",
+                entity_id=account.id,
+                metadata={"user_id": user_id},
+            )
 
     if account is None:
         return redirect("/login?error=invalid")
@@ -66,7 +86,18 @@ def login(request: Request, user_id: str = Form(...), password: str = Form(...))
 
 
 @router.get("/logout")
-def logout() -> Response:
+def logout(request: Request) -> Response:
+    account = get_session_account(request)
+    if account is not None:
+        with connect(request.app.state.settings.database_path) as connection:
+            record_audit_event(
+                connection,
+                actor_type=account.role,
+                actor_id=account.id,
+                event_type="logout",
+                entity_type="account",
+                entity_id=account.id,
+            )
     response = redirect("/login")
     response.delete_cookie(SESSION_COOKIE)
     return response
@@ -120,6 +151,15 @@ async def password_change(request: Request) -> Response:
                 internal_team_id=account.id,
                 current_password=current_password,
                 new_password=new_password,
+            )
+        if changed:
+            record_audit_event(
+                connection,
+                actor_type=account.role,
+                actor_id=account.id,
+                event_type="password_changed",
+                entity_type="account",
+                entity_id=account.id,
             )
 
     if not changed:

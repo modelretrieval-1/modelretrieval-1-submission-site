@@ -460,6 +460,12 @@ Open operational decisions carried into the next session:
 
 Run the visual browser smoke check when a browser backend is available, then complete the remaining production operational and launch-readiness checks.
 
+The next planned product slice for activity tracking is documented in
+[`docs/planning/audit-logging-plan.md`](docs/planning/audit-logging-plan.md).
+It defines the MVP P0 audit events for authentication, submissions, organizer
+configuration, protected data access, and exports. The existing `audit_events`
+table is currently schema-only; event emission is not yet implemented.
+
 Target behavior:
 
 - Keep production updates gated by successful staging verification and immutable `v*` tags.
