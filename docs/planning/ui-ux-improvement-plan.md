@@ -4,9 +4,9 @@ Document role: prioritized implementation plan for improving the participant
 and organizer experience while preserving the current FastAPI/Jinja2/
 Bootstrap architecture.
 
-Status: **P1 IMPLEMENTED**. The current application shell and responsive UI remain
-the baseline. P1 organizer attention and replacement-workflow improvements are
-implemented; this plan continues to track later accessibility and table work.
+Status: **P2 IMPLEMENTED**. The current application shell and responsive UI remain
+the baseline. P1 organizer attention, replacement-workflow, and P2 review-table
+improvements are implemented; this plan continues to track later refinements.
 
 Source documents:
 
@@ -178,6 +178,11 @@ Acceptance criteria:
 
 Likely files: organizer list/detail/leaderboard templates, route query/filter
 helpers, CSS, and organizer integration tests.
+
+Implementation status: **Complete**. Organizer review tables now support current
+and superseded state filters, preserve active filters in bundle links, keep
+identifying columns visible during horizontal scrolling, emphasize primary
+metrics, show leaderboard ranks, and display the leaderboard refresh timestamp.
 
 ## Recommended Delivery Sequence
 

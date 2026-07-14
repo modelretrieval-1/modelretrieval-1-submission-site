@@ -1006,6 +1006,7 @@ def list_admin_submission_summaries(
     subtask: str | None = None,
     period_name: str | None = None,
     status: str | None = None,
+    state: str | None = None,
 ) -> tuple[AdminSubmissionSummary, ...]:
     where_clauses = []
     parameters: list[str] = []
@@ -1022,6 +1023,12 @@ def list_admin_submission_summaries(
     if status:
         where_clauses.append("submissions.status = ?")
         parameters.append(status)
+    if state == "current":
+        where_clauses.append("submissions.is_current = 1")
+    elif state == "superseded":
+        where_clauses.append(
+            "submissions.is_current = 0 AND submissions.superseded_at_jst IS NOT NULL"
+        )
 
     where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
     rows = connection.execute(
@@ -1184,6 +1191,7 @@ def list_submission_bundle_entries(
     *,
     subtask: str | None = None,
     period_name: str | None = None,
+    state: str | None = None,
 ) -> tuple[SubmissionBundleEntry, ...]:
     where_clauses = []
     parameters: list[str] = []
@@ -1193,6 +1201,12 @@ def list_submission_bundle_entries(
     if period_name:
         where_clauses.append("submission_periods.name = ?")
         parameters.append(period_name)
+    if state == "current":
+        where_clauses.append("submissions.is_current = 1")
+    elif state == "superseded":
+        where_clauses.append(
+            "submissions.is_current = 0 AND submissions.superseded_at_jst IS NOT NULL"
+        )
 
     where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
     rows = connection.execute(

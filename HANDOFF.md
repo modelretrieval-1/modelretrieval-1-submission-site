@@ -19,7 +19,7 @@ Scrum implementation is underway.
 - Sprint 4: complete for the planned organizer-operations scope.
 - Sprint 5: complete for the planned UI modernization scope.
 - Sprint 6: current sprint. Staging testing and the first tagged production deployment are complete; remaining work is post-deploy operational verification, backup/restore readiness, visual browser smoke verification, and final E2E coverage.
-- Sprint 6A: core application-shell, dashboard, page-normalization, and automated local UI regression slices are implemented; remaining UI work is visual browser smoke verification when browser automation is available.
+- Sprint 6A: core application-shell, dashboard, page-normalization, P1 UX improvements, P2 organizer review-table improvements, and automated local UI regression slices are implemented; remaining UI work is visual browser smoke verification when browser automation is available.
 
 ## Current Stack
 
@@ -72,7 +72,8 @@ Implemented Sprint 6A UI slices:
   confirmation before granting one-time replacement permission.
 - Upload page period open/closed/reopened state beside normal/late choices.
 - Normalized organizer review pages for submissions, submission details, and leaderboard.
-- Planned metric-table display improvement: show aggregate and per-query metrics as pivoted tables with metric names as columns.
+- Pivoted aggregate and per-query metric tables with metric names as columns.
+- P2 organizer review-table improvements: current/superseded state filters, filter-preserving bundle links, sticky identifying columns, leaderboard ranks, primary-metric emphasis, and a visible leaderboard last-updated timestamp.
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.

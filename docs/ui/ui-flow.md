@@ -8,11 +8,11 @@ The UI should be simple, operational, and fast to scan. It is not a marketing si
 
 ## Implementation Status
 
-The main UI flow is implemented. The P0 participant UX improvements are also
-implemented: explicit submission lifecycle states, clearer status language,
-pre-upload requirements guidance, grouped validation errors, and status links
-from the team dashboard. Use `../../HANDOFF.md` for the detailed current
-implementation checkpoint and remaining production-hardening work.
+The main UI flow is implemented. The P0, P1, and P2 UX improvements are also
+implemented, including participant lifecycle and upload guidance, organizer
+attention and replacement-history workflows, and leaderboard/review-table
+filtering and comparison improvements. Use `../../HANDOFF.md` for the detailed
+current implementation checkpoint and remaining production-hardening work.
 
 ## Application UI Redesign
 
@@ -601,6 +601,7 @@ Filters:
 - Subtask.
 - Submission period.
 - Status.
+- Current/superseded state.
 - Date range.
 
 Columns:
@@ -734,6 +735,8 @@ Filters:
 - Subtask.
 - Submission period: normal, late, or all.
 - Ground-truth version.
+- Current submissions only (historical/superseded submissions remain available
+  from organizer review history).
 
 Subtask A columns:
 
@@ -764,6 +767,7 @@ Actions:
 
 - Export CSV.
 - Download submission bundle for current filters.
+- Review ranks, highlighted official metrics, and the last-updated timestamp.
 
 Visibility:
 

@@ -156,9 +156,11 @@ def render_periods(
 def get_submission_bundle_filters(request: Request) -> dict[str, str]:
     requested_subtask = request.query_params.get("subtask", "").strip().upper()
     requested_period = request.query_params.get("period", "").strip().lower()
+    requested_state = request.query_params.get("state", "").strip().lower()
     return {
         "subtask": requested_subtask if requested_subtask in {"A", "B"} else "",
         "period": requested_period if requested_period in {"normal", "late"} else "",
+        "state": requested_state if requested_state in {"current", "superseded"} else "",
     }
 
 
@@ -229,9 +231,11 @@ def render_admin_submissions(request: Request, *, account) -> HTMLResponse:
         "subtask": request.query_params.get("subtask", "").strip().upper(),
         "period": request.query_params.get("period", "").strip().lower(),
         "status": request.query_params.get("status", "").strip(),
+        "state": request.query_params.get("state", "").strip().lower(),
     }
     subtask_filter = filters["subtask"] if filters["subtask"] in {"A", "B"} else ""
     period_filter = filters["period"] if filters["period"] in {"normal", "late"} else ""
+    state_filter = filters["state"] if filters["state"] in {"current", "superseded"} else ""
     with connect(app_settings.database_path) as connection:
         submissions = list_admin_submission_summaries(
             connection,
@@ -239,6 +243,7 @@ def render_admin_submissions(request: Request, *, account) -> HTMLResponse:
             subtask=subtask_filter or None,
             period_name=period_filter or None,
             status=filters["status"] or None,
+            state=state_filter or None,
         )
     return templates.TemplateResponse(
         request,
@@ -252,6 +257,7 @@ def render_admin_submissions(request: Request, *, account) -> HTMLResponse:
                 "subtask": subtask_filter,
                 "period": period_filter,
                 "status": filters["status"],
+                "state": state_filter,
             },
             "bundle_query": urlencode(
                 {
@@ -259,6 +265,7 @@ def render_admin_submissions(request: Request, *, account) -> HTMLResponse:
                     for key, value in {
                         "subtask": subtask_filter,
                         "period": period_filter,
+                        "state": state_filter,
                     }.items()
                     if value
                 }
@@ -388,6 +395,7 @@ def render_admin_leaderboard(request: Request, *, account) -> HTMLResponse:
             "rows": rows,
             "filters": filters,
             "export_query": urlencode({key: value for key, value in filters.items() if value}),
+            "last_updated_jst": datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S"),
         },
     )
 

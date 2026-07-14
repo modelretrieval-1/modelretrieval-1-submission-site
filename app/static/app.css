@@ -509,6 +509,22 @@ legend {
   overflow-x: auto;
 }
 
+.review-identifying {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--app-surface);
+}
+
+thead .review-identifying {
+  z-index: 2;
+  background: var(--app-surface);
+}
+
+.table tbody tr:hover .review-identifying {
+  background: var(--app-surface);
+}
+
 .table {
   margin-bottom: 0;
 }

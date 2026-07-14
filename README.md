@@ -28,7 +28,7 @@ All checks passed
 
 The app remains a FastAPI/Jinja2 server-rendered system. The UI now uses Bootstrap 5 for navigation, forms, tables, alerts, badges, and responsive layout, with `app/static/app.css` reserved for project-specific polish. React, Vue, and a separate frontend build pipeline are intentionally not part of this phase.
 
-The current UI slice is the implemented Sprint 6A application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, a clearer participant submission dashboard, and normalized organizer/participant workflow pages. Automated responsive/accessibility-oriented regression checks are in place; remaining UI work is visual browser smoke verification tracked in `HANDOFF.md`.
+The current UI slice includes the implemented Sprint 6A application-shell redesign and completed P0–P2 UX improvements: persistent role-aware navigation, participant lifecycle and upload guidance, organizer attention tools, replacement history, and faster leaderboard/review tables. Automated responsive/accessibility-oriented regression checks are in place; remaining UI work is visual browser smoke verification tracked in `HANDOFF.md`.
 
 The public home page is intentionally lightweight: it introduces the NTCIR-19 ModelRetrieval submission portal and directs registered users to sign in. The `/health` endpoint remains an operational check and is not presented as a normal user action.
 

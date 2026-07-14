@@ -46,7 +46,7 @@
     <div class="section-header">
       <div>
         <h2>Run Metrics</h2>
-        <p>Showing {{ rows|length }} evaluated run{% if rows|length != 1 %}s{% endif %}.</p>
+        <p>Showing {{ rows|length }} evaluated run{% if rows|length != 1 %}s{% endif %}. Last updated {{ last_updated_jst }} JST.</p>
       </div>
     </div>
 
@@ -54,21 +54,23 @@
       <table class="table table-sm table-hover align-middle">
         <thead class="table-light">
           <tr>
-            <th>Team</th>
+            <th class="review-identifying">Rank</th>
+            <th class="review-identifying">Team</th>
             <th>Subtask</th>
             <th>Period</th>
             <th>RunID</th>
             <th>nDCG@1</th>
-            <th>nDCG@3</th>
-            <th>nDCG@5</th>
-            <th>MRR</th>
+            <th class="metric-primary">nDCG@3</th>
+            <th class="metric-primary">nDCG@5</th>
+            <th class="metric-primary">MRR</th>
             <th>Submitted</th>
           </tr>
         </thead>
         <tbody>
           {% for row in rows %}
             <tr>
-              <td>{{ row.team_public_id }}<br>{{ row.team_display_name }}</td>
+              <td class="review-identifying">{{ loop.index }}</td>
+              <td class="review-identifying">{{ row.team_public_id }}<br>{{ row.team_display_name }}</td>
               <td><span class="badge text-bg-info">Subtask {{ row.subtask }}</span></td>
               <td>
                 <span class="badge text-bg-{% if row.period_name == 'normal' %}primary{% else %}info{% endif %}">

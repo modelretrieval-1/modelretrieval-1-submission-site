@@ -20,6 +20,14 @@
           <h2>Filters</h2>
           <p>Filter the retained submission history before review or bundle download.</p>
         </div>
+        <div>
+          <label class="form-label" for="filter_state">Submission state</label>
+          <select class="form-select" id="filter_state" name="state">
+            <option value="">All</option>
+            <option value="current" {% if filters.state == "current" %}selected{% endif %}>Current</option>
+            <option value="superseded" {% if filters.state == "superseded" %}selected{% endif %}>Superseded</option>
+          </select>
+        </div>
         <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Clear filters</a>
       </div>
       <form method="get" action="/admin/submissions" class="form-grid">
@@ -67,8 +75,8 @@
       <table class="table table-sm table-hover align-middle">
         <thead class="table-light">
           <tr>
-            <th>ID</th>
-            <th>Team</th>
+            <th class="review-identifying">ID</th>
+            <th class="review-identifying">Team</th>
             <th>Subtask</th>
             <th>Period</th>
             <th>Status</th>
@@ -82,8 +90,8 @@
         <tbody>
           {% for submission in submissions %}
             <tr>
-              <td>{{ submission.submission_id }}</td>
-              <td>{{ submission.team_public_id }}<br>{{ submission.team_display_name }}</td>
+              <td class="review-identifying">{{ submission.submission_id }}</td>
+              <td class="review-identifying">{{ submission.team_public_id }}<br>{{ submission.team_display_name }}</td>
               <td><span class="badge text-bg-info">Subtask {{ submission.subtask }}</span></td>
               <td>
                 <span class="badge text-bg-{% if submission.period_name == 'normal' %}primary{% else %}info{% endif %}">
