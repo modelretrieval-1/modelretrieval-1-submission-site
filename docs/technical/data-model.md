@@ -430,17 +430,19 @@ Suggested fields:
 - `metadata_json`
 - `created_at_jst`
 
-Useful event types:
+Implemented MVP event types:
 
-- `team_created`
-- `team_password_generated`
-- `organizer_created`
-- `organizer_password_changed`
-- `submission_uploaded`
-- `submission_rejected`
-- `submission_evaluated`
-- `ground_truth_uploaded`
-- `ground_truth_activated`
-- `period_reopened`
-- `leaderboard_exported`
-- `submission_bundle_downloaded`
+- Authentication: `login_succeeded`, `login_failed`, `logout`,
+  `password_changed`, `password_regenerated`.
+- Accounts/configuration: `team_created`, `organizer_created`,
+  `submission_period_changed`, `submission_period_reopened`.
+- Submissions: `submission_accepted`, `submission_validation_failed`,
+  `submission_evaluation_started`, `submission_evaluated`,
+  `submission_evaluation_failed`, `replacement_permission_granted`,
+  `submission_replaced`.
+- Protected data/exports: `ground_truth_uploaded`, `ground_truth_activated`,
+  `ground_truth_downloaded`, `leaderboard_exported`,
+  `submission_bundle_downloaded`.
+
+Events are append-only. Metadata is structured JSON and must not contain
+passwords, session cookies, or uploaded file contents.

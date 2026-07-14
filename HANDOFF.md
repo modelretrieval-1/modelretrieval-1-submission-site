@@ -517,3 +517,4 @@ Suggested remaining checks:
 16. `docs/product/decisions.md`
 17. `docs/product/user-stories.md`
 18. `docs/technical/architecture.md`
+19. `docs/planning/audit-logging-plan.md`

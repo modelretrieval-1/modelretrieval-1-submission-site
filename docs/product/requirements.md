@@ -229,6 +229,12 @@ The system should retain:
 - Submission timestamps in JST.
 - User/team identity for each action.
 
+The MVP audit trail records authentication, account changes, submission lifecycle
+transitions, replacement permissions, submission-period changes, ground-truth
+uploads/activation/downloads, and organizer exports/bundle downloads. Audit events
+are append-only and use the `audit_events` table; passwords, session cookies, and
+uploaded file contents must not be included in event metadata.
+
 ## Non-Functional Requirements
 
 - Deadline checks must be deterministic and based on server-side time.

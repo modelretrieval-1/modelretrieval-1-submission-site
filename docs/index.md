@@ -32,7 +32,7 @@ Document role: this file is only the documentation map. Keep current implementat
 - [UI/UX Improvement Plan](planning/ui-ux-improvement-plan.md): prioritized post-Sprint-6 workflow, accessibility, and organizer-efficiency improvements.
 - [Organizer-Approved Resubmission Plan](planning/resubmission-plan.md): implemented plan for organizer-approved replacement submissions while preserving organizer-only metric history.
 - [Asynchronous Evaluation Plan](planning/async-evaluation-plan.md): implemented background-worker evaluation design, including the queue states and participant status endpoints.
-- [MVP Audit Logging Plan](planning/audit-logging-plan.md): document-driven plan for the highest-priority user and system activity events.
+- [MVP Audit Logging Plan](planning/audit-logging-plan.md): implemented MVP event vocabulary, rollout plan, and acceptance criteria for user and system activity logging.
 - [Documentation Cleanup Plan](planning/documentation-cleanup-plan.md): pointer to the archived completed cleanup plan.
 
 ## Archive
