@@ -328,9 +328,11 @@ def render_admin_submission_detail(
 
 
 def get_leaderboard_filters(request: Request) -> dict[str, str]:
+    requested_team = request.query_params.get("team_id", "").strip()
     requested_subtask = request.query_params.get("subtask", "").strip().upper()
     requested_period = request.query_params.get("period", "").strip().lower()
     return {
+        "team_id": requested_team,
         "subtask": requested_subtask if requested_subtask in {"A", "B"} else "",
         "period": requested_period if requested_period in {"normal", "late"} else "",
     }
@@ -381,8 +383,10 @@ def render_admin_leaderboard(request: Request, *, account) -> HTMLResponse:
     app_settings: Settings = request.app.state.settings
     filters = get_leaderboard_filters(request)
     with connect(app_settings.database_path) as connection:
+        teams = list_teams(connection)
         rows = list_leaderboard_rows(
             connection,
+            team_id=filters["team_id"] or None,
             subtask=filters["subtask"] or None,
             period_name=filters["period"] or None,
         )
@@ -393,6 +397,7 @@ def render_admin_leaderboard(request: Request, *, account) -> HTMLResponse:
             "app_name": app_settings.app_name,
             "account": account,
             "rows": rows,
+            "teams": teams,
             "filters": filters,
             "export_query": urlencode({key: value for key, value in filters.items() if value}),
             "last_updated_jst": datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S"),
@@ -885,6 +890,7 @@ def admin_leaderboard_csv(request: Request) -> Response:
     with connect(app_settings.database_path) as connection:
         rows = list_leaderboard_rows(
             connection,
+            team_id=filters["team_id"] or None,
             subtask=filters["subtask"] or None,
             period_name=filters["period"] or None,
         )

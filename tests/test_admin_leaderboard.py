@@ -149,6 +149,7 @@ def test_organizer_can_view_private_leaderboard_with_subtask_metrics():
         assert "Leaderboard" in response.text
         assert "Private organizer view of evaluated run-level metrics." in response.text
         assert "Clear filters" in response.text
+        assert 'name="team_id"' in response.text
         assert "Showing 2 evaluated runs." in response.text
         assert "team-001" in response.text
         assert "run-a" in response.text
@@ -158,6 +159,10 @@ def test_organizer_can_view_private_leaderboard_with_subtask_metrics():
         assert "nDCG@5" in response.text
         assert "MRR" in response.text
         assert "1.000000" in response.text
+        assert 'id="leaderboardTable"' in response.text
+        assert 'class="leaderboard-sort"' in response.text
+        assert 'data-sort-type="number"' in response.text
+        assert 'aria-sort="none"' in response.text
 
 
 def test_organizer_can_filter_leaderboard_by_subtask_and_period():
@@ -177,6 +182,24 @@ def test_organizer_can_filter_leaderboard_by_subtask_and_period():
         assert "run-b" in response.text
         assert "run-a" not in response.text
         assert "late" in response.text
+
+
+def test_organizer_can_filter_leaderboard_by_team():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        activate_subtask_b_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        seed_evaluated_submissions(client, team.password)
+        login(client, "admin", organizer.password)
+
+        response = client.get("/admin/leaderboard?team_id=team-001")
+
+        assert response.status_code == 200
+        assert "Showing 2 evaluated runs." in response.text
+        assert "team-001" in response.text
+        assert "team_id=team-001" in response.text
 
 
 def test_team_cannot_access_private_leaderboard():

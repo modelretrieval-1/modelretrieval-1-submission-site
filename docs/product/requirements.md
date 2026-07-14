@@ -199,10 +199,12 @@ The leaderboard is private and visible only to organizers/admins.
 
 The leaderboard should support:
 
+- Filtering by team.
 - Filtering by subtask.
 - Filtering by submission turn.
 - Indicating whether each result is normal or late.
 - Sorting by official metric.
+- Sorting interactively by any displayed column.
 - Viewing team, run ID, submission time, and metric values.
 - CSV export.
 

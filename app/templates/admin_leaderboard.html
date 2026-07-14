@@ -24,6 +24,15 @@
       </div>
       <form method="get" action="/admin/leaderboard" class="form-grid">
         <div>
+          <label class="form-label" for="leaderboard_team">Team</label>
+          <select class="form-select" id="leaderboard_team" name="team_id">
+            <option value="">All</option>
+            {% for team in teams %}
+              <option value="{{ team.team_id }}" {% if filters.team_id == team.team_id %}selected{% endif %}>{{ team.team_id }} — {{ team.display_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
           <label class="form-label" for="leaderboard_subtask">Subtask</label>
           <select class="form-select" id="leaderboard_subtask" name="subtask">
             <option value="">All</option>
@@ -51,62 +60,105 @@
     </div>
 
     <div class="table-wrap">
-      <table class="table table-sm table-hover align-middle">
+      <table id="leaderboardTable" class="table table-sm table-hover align-middle">
         <thead class="table-light">
           <tr>
-            <th class="review-identifying">Rank</th>
-            <th class="review-identifying">Team</th>
-            <th>Subtask</th>
-            <th>Period</th>
-            <th>RunID</th>
-            <th>nDCG@1</th>
-            <th class="metric-primary">nDCG@3</th>
-            <th class="metric-primary">nDCG@5</th>
-            <th class="metric-primary">MRR</th>
-            <th>Submitted</th>
+            {% for column in (("Rank", "number", "review-identifying"), ("Team", "text", "review-identifying"), ("Subtask", "text", ""), ("Period", "text", ""), ("RunID", "text", ""), ("nDCG@1", "number", ""), ("nDCG@3", "number", "metric-primary"), ("nDCG@5", "number", "metric-primary"), ("MRR", "number", "metric-primary"), ("Submitted", "text", "")) %}
+              <th class="{{ column[2] }}" aria-sort="none">
+                <button class="leaderboard-sort" type="button" data-sort-column="{{ loop.index0 }}" data-sort-type="{{ column[1] }}">{{ column[0] }}<span class="leaderboard-sort-indicator" aria-hidden="true"></span></button>
+              </th>
+            {% endfor %}
           </tr>
         </thead>
         <tbody>
           {% for row in rows %}
             <tr>
-              <td class="review-identifying">{{ loop.index }}</td>
-              <td class="review-identifying">{{ row.team_public_id }}<br>{{ row.team_display_name }}</td>
-              <td><span class="badge text-bg-info">Subtask {{ row.subtask }}</span></td>
-              <td>
+              <td class="review-identifying" data-sort-value="{{ loop.index }}">{{ loop.index }}</td>
+              <td class="review-identifying" data-sort-value="{{ row.team_public_id }} {{ row.team_display_name }}">{{ row.team_public_id }}<br>{{ row.team_display_name }}</td>
+              <td data-sort-value="{{ row.subtask }}"><span class="badge text-bg-info">Subtask {{ row.subtask }}</span></td>
+              <td data-sort-value="{{ row.period_name }}">
+                <span>
                 <span class="badge text-bg-{% if row.period_name == 'normal' %}primary{% else %}info{% endif %}">
                   {{ row.period_name }}
                 </span>
+                </span>
               </td>
-              <td>{{ row.run_id }}</td>
-              <td class="metric-value">
+              <td data-sort-value="{{ row.run_id }}">{{ row.run_id }}</td>
+              <td class="metric-value" data-sort-value="{{ row.metric_values.get('ndcg@1', '') }}">
                 {% if row.metric_values.get("ndcg@1") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("ndcg@1")) }}
                 {% endif %}
               </td>
-              <td class="metric-value">
+              <td class="metric-value" data-sort-value="{{ row.metric_values.get('ndcg@3', '') }}">
                 {% if row.metric_values.get("ndcg@3") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("ndcg@3")) }}
                 {% endif %}
               </td>
-              <td class="metric-value">
+              <td class="metric-value" data-sort-value="{{ row.metric_values.get('ndcg@5', '') }}">
                 {% if row.metric_values.get("ndcg@5") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("ndcg@5")) }}
                 {% endif %}
               </td>
-              <td class="metric-value">
+              <td class="metric-value" data-sort-value="{{ row.metric_values.get('mrr', '') }}">
                 {% if row.metric_values.get("mrr") is not none %}
                   {{ "%.6f"|format(row.metric_values.get("mrr")) }}
                 {% endif %}
               </td>
-              <td>{{ row.submitted_at_jst }} JST</td>
+              <td data-sort-value="{{ row.submitted_at_jst }}">{{ row.submitted_at_jst }} JST</td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="9"><p class="empty-state">No evaluated submissions match these filters.</p></td>
+              <td colspan="10"><p class="empty-state">No evaluated submissions match these filters.</p></td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </section>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    (() => {
+      const table = document.getElementById("leaderboardTable");
+      if (!table) return;
+      const body = table.tBodies[0];
+      const buttons = table.querySelectorAll(".leaderboard-sort");
+      let activeColumn = null;
+      let direction = 1;
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const column = Number(button.dataset.sortColumn);
+          if (activeColumn === column) direction *= -1;
+          else { activeColumn = column; direction = 1; }
+          const type = button.dataset.sortType;
+          const rows = Array.from(body.rows).filter((row) => row.cells.length > column);
+          rows.sort((left, right) => {
+            const a = left.cells[column].dataset.sortValue || "";
+            const b = right.cells[column].dataset.sortValue || "";
+            if (type === "number") {
+              const aNumber = Number(a);
+              const bNumber = Number(b);
+              if (Number.isNaN(aNumber)) return 1;
+              if (Number.isNaN(bNumber)) return -1;
+              return (aNumber - bNumber) * direction;
+            }
+            return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }) * direction;
+          });
+          rows.forEach((row) => body.appendChild(row));
+          body.querySelectorAll("tr").forEach((row, index) => {
+            if (row.cells[0]) {
+              row.cells[0].textContent = index + 1;
+              row.cells[0].dataset.sortValue = index + 1;
+            }
+          });
+          buttons.forEach((item) => {
+            item.closest("th").setAttribute("aria-sort", item === button ? (direction === 1 ? "ascending" : "descending") : "none");
+            item.querySelector(".leaderboard-sort-indicator").textContent = item === button ? (direction === 1 ? " ▲" : " ▼") : "";
+          });
+        });
+      });
+    })();
+  </script>
 {% endblock %}

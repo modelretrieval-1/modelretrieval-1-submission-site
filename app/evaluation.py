@@ -635,6 +635,7 @@ def list_latest_team_submission_summaries(
 def list_leaderboard_rows(
     connection: sqlite3.Connection,
     *,
+    team_id: str | None = None,
     subtask: str | None = None,
     period_name: str | None = None,
 ) -> tuple[LeaderboardRow, ...]:
@@ -643,6 +644,9 @@ def list_leaderboard_rows(
     if subtask:
         where_clauses.append("submissions.subtask = ?")
         parameters.append(subtask)
+    if team_id:
+        where_clauses.append("teams.team_id = ?")
+        parameters.append(team_id)
     if period_name:
         where_clauses.append("submission_periods.name = ?")
         parameters.append(period_name)

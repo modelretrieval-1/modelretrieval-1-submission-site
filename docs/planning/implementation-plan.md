@@ -429,6 +429,7 @@ Milestone summary:
 - Sprint 6A application-shell and page-normalization slices are complete for the core planned pages: role-aware sidebar/topbar navigation, participant upload navigation, participant submission availability, organizer period state, organizer validation-failure panel, upload-page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
 - P1 UI/UX improvements are complete: organizer attention cards with filtered review links, and replacement-upload warnings, confirmation, and history messaging across participant and organizer workflows.
 - P2 UI/UX improvements are complete: organizer review tables support current/superseded filtering, filter-preserving bundle links, sticky identifying columns, leaderboard ranks, primary-metric emphasis, and visible update timestamps.
+- The admin leaderboard additionally supports team filtering and interactive sorting by every displayed column; participant score tables use consistent metric-column styling and evaluated lifecycle states are visually muted.
 - Sprint 6 deployment documentation and tooling are implemented; GitHub Actions staging deployment has been verified, and the next item is staging end-to-end operations verification.
 
 ### Sprint 0: Planning and Scaffolding

@@ -74,11 +74,13 @@ Implemented Sprint 6A UI slices:
 - Normalized organizer review pages for submissions, submission details, and leaderboard.
 - Pivoted aggregate and per-query metric tables with metric names as columns.
 - P2 organizer review-table improvements: current/superseded state filters, filter-preserving bundle links, sticky identifying columns, leaderboard ranks, primary-metric emphasis, and a visible leaderboard last-updated timestamp.
+- The admin leaderboard also supports team filtering, interactive sorting by every displayed column, and filter-preserving CSV export.
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.
 - Two-phase participant upload progress: determinate upload progress bar then indeterminate "Validating…" spinner, as a client-side progressive enhancement with a native no-JS fallback. After a valid upload, the request 303-redirects to the participant dashboard, where the latest submission state is shown.
 - P0 participant UX improvements: the submission status page shows an explicit lifecycle (`Uploaded` → `Validating` → `Queued` → `Evaluating` → `Evaluated`), uses participant-friendly terminal/in-flight labels, provides a manual refresh action, and the dashboard links each latest submission to its status page. The upload page includes a pre-upload requirements checklist and grouped validation errors with line and field context.
+- Evaluated submission lifecycles are visually muted as terminal states, and participant aggregate score tables use a consistent background across all metric columns.
 - Responsive app-shell guards for mobile navigation, visible labels, table wrappers, and compact row overflow.
 
 ## Current Refactor State

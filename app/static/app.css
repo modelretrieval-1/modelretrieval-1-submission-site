@@ -410,6 +410,17 @@ label {
   background: var(--app-accent-soft);
 }
 
+.submission-lifecycle.is-finished li.is-complete,
+.submission-lifecycle.is-finished li.is-current {
+  border-color: var(--app-border);
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.submission-lifecycle.is-finished li.is-current {
+  background: #f1f3f5;
+}
+
 @media (max-width: 640px) {
   .submission-lifecycle {
     display: grid;
@@ -535,6 +546,30 @@ thead .review-identifying {
   white-space: nowrap;
 }
 
+.leaderboard-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-align: inherit;
+}
+
+.leaderboard-sort:hover,
+.leaderboard-sort:focus-visible {
+  color: var(--app-accent);
+  text-decoration: underline;
+}
+
+.leaderboard-sort-indicator {
+  font-size: 0.7em;
+}
+
 .table td {
   vertical-align: middle;
 }
@@ -560,6 +595,7 @@ thead .review-identifying {
 
 .metric-table .metric-value {
   text-align: right;
+  background: var(--app-accent-soft);
 }
 
 .metric-table .metric-primary {

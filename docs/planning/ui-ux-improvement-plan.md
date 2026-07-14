@@ -183,6 +183,10 @@ Implementation status: **Complete**. Organizer review tables now support current
 and superseded state filters, preserve active filters in bundle links, keep
 identifying columns visible during horizontal scrolling, emphasize primary
 metrics, show leaderboard ranks, and display the leaderboard refresh timestamp.
+The leaderboard also supports team filtering and client-side sorting by every
+displayed column. Participant metric tables use a consistent background across
+all metric columns, and the evaluated lifecycle is visually muted as a terminal
+state.
 
 ## Recommended Delivery Sequence
 

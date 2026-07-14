@@ -232,6 +232,8 @@ P0 status UX:
 
 - The detailed submission page presents the lifecycle as `Uploaded`,
   `Validating`, `Queued`, `Evaluating`, and `Evaluated` where applicable.
+- Once evaluation is finished, the lifecycle is visually muted so the terminal
+  state is not confused with an active processing state.
 - `queued` and `processing` explain that evaluation is continuing and that the
   participant may leave and return later.
 - Terminal status pages provide a manual refresh action.
@@ -665,6 +667,7 @@ Metric display:
 - Right-align numeric metric values.
 - Prefer compact precision such as 4 decimal places in dense UI tables, while CSV export can retain 6 decimal places.
 - Highlight official primary metrics without hiding secondary metrics.
+- Use a consistent metric-cell background across all aggregate score columns.
 
 Example Subtask A aggregate layout:
 
@@ -768,6 +771,7 @@ Actions:
 - Export CSV.
 - Download submission bundle for current filters.
 - Review ranks, highlighted official metrics, and the last-updated timestamp.
+- Filter by team, subtask, or submission turn, and sort by any displayed column.
 
 Visibility:
 

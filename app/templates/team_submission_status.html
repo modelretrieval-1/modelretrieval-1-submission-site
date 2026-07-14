@@ -28,7 +28,7 @@
         </span>
       </p>
       {% if submission.status in ('queued', 'processing', 'evaluated') %}
-        <ol class="submission-lifecycle" aria-label="Submission progress">
+        <ol class="submission-lifecycle{% if submission.status == 'evaluated' %} is-finished{% endif %}" aria-label="Submission progress">
           {% for step in lifecycle %}
             <li class="{% if (submission.status == 'queued' and loop.index <= 3) or (submission.status == 'processing' and loop.index <= 4) or (submission.status == 'evaluated' and loop.index == 5) %}is-current{% elif (submission.status == 'processing' and loop.index < 4) or (submission.status == 'evaluated' and loop.index < 5) %}is-complete{% endif %}">{{ step }}</li>
           {% endfor %}
