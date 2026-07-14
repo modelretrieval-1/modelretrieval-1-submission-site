@@ -113,10 +113,11 @@ activation/download, leaderboard export, and bundle download.
 Add tests confirming organizer-only actions have organizer actors and that export
 filters/row counts are recorded without storing file contents.
 
-### Slice 5: Organizer audit viewer
+### Slice 5: Organizer audit viewer — implemented
 
-Add a paginated organizer-only `GET /admin/audit-events` page. This is the next
-planned implementation slice now that event recording is complete.
+The paginated organizer-only `GET /admin/audit-events` page is implemented. The
+following requirements describe the delivered behavior and remain the contract
+for future refinements.
 
 Viewer requirements:
 

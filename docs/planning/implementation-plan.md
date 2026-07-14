@@ -649,7 +649,8 @@ The MVP can defer:
 
 - Advanced export center.
 - Re-evaluation UI.
-- Detailed audit event browsing.
+- Detailed audit event browsing is implemented at `/admin/audit-events`; further
+  audit analytics and retention tooling remain out of scope.
 - Organizer user management polish.
 
 ## Quality Gates
