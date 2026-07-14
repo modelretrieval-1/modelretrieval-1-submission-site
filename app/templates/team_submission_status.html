@@ -21,15 +21,22 @@
       data-status="{{ submission.status }}"
       data-terminal="{{ 'true' if is_terminal else 'false' }}"
     >
-      <p>
-        Status:
+      {% set lifecycle = ("Uploaded", "Validating", "Queued", "Evaluating", "Evaluated") %}
+      <p class="mb-2"><strong>Current status:</strong>
         <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' or submission.status == 'evaluation_failed' %}danger{% elif submission.status == 'processing' %}info{% else %}secondary{% endif %}">
-          {{ submission.status }}
+          {% if submission.status == 'queued' %}Queued for evaluation{% elif submission.status == 'processing' %}Evaluating{% elif submission.status == 'evaluation_failed' %}Evaluation failed{% elif submission.status == 'rejected' %}Validation failed{% elif submission.status == 'evaluated' %}Evaluated{% else %}{{ submission.status }}{% endif %}
         </span>
       </p>
+      {% if submission.status in ('queued', 'processing', 'evaluated') %}
+        <ol class="submission-lifecycle" aria-label="Submission progress">
+          {% for step in lifecycle %}
+            <li class="{% if (submission.status == 'queued' and loop.index <= 3) or (submission.status == 'processing' and loop.index <= 4) or (submission.status == 'evaluated' and loop.index == 5) %}is-current{% elif (submission.status == 'processing' and loop.index < 4) or (submission.status == 'evaluated' and loop.index < 5) %}is-complete{% endif %}">{{ step }}</li>
+          {% endfor %}
+        </ol>
+      {% endif %}
 
       {% if submission.status == 'evaluated' %}
-        <div class="alert alert-success" role="status">Submission accepted and evaluated.</div>
+        <div class="alert alert-success" role="status">Submission accepted and evaluated. Your scores are shown below.</div>
       {% elif submission.status == 'evaluation_failed' %}
         <div class="alert alert-danger" role="alert">
           Evaluation failed. Please contact the organizers.
@@ -38,7 +45,7 @@
       {% elif submission.status == 'rejected' %}
         <div class="alert alert-danger" role="alert">Submission rejected.</div>
       {% else %}
-        <div class="alert alert-info d-flex align-items-center gap-2" role="status">
+        <div class="alert alert-info d-flex align-items-center gap-2" role="status" aria-live="polite">
           <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
           <span>
             {% if submission.status == 'processing' %}
@@ -50,6 +57,7 @@
           </span>
         </div>
       {% endif %}
+      {% if is_terminal %}<a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ submission.submission_id }}">Refresh status</a>{% endif %}
     </div>
 
     {% if metric_table.rows %}

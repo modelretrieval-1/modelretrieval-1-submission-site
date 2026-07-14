@@ -8,7 +8,11 @@ The UI should be simple, operational, and fast to scan. It is not a marketing si
 
 ## Implementation Status
 
-The main UI flow is implemented. Use `../../HANDOFF.md` for the detailed current implementation checkpoint and remaining production-hardening work.
+The main UI flow is implemented. The P0 participant UX improvements are also
+implemented: explicit submission lifecycle states, clearer status language,
+pre-upload requirements guidance, grouped validation errors, and status links
+from the team dashboard. Use `../../HANDOFF.md` for the detailed current
+implementation checkpoint and remaining production-hardening work.
 
 ## Application UI Redesign
 
@@ -224,6 +228,15 @@ Status labels:
 - Closed.
 - Reopened by organizer.
 
+P0 status UX:
+
+- The detailed submission page presents the lifecycle as `Uploaded`,
+  `Validating`, `Queued`, `Evaluating`, and `Evaluated` where applicable.
+- `queued` and `processing` explain that evaluation is continuing and that the
+  participant may leave and return later.
+- Terminal status pages provide a manual refresh action.
+- The dashboard provides a `View status` link for each latest submission.
+
 Actions:
 
 - Upload Subtask A submission.
@@ -256,8 +269,13 @@ Inputs:
 Rules shown near the form:
 
 - One file only.
-- Maximum file size: 50 MB.
+- The server enforces a 500 MB maximum file size; this limit is not displayed in participant-facing upload guidance.
 - Filename extension is not checked; the content must be valid TREC_EVAL text.
+- The form includes a pre-upload checklist covering six-field format, query and
+  candidate completeness, and the five-RunID limit.
+- Validation errors are grouped into file/format, field values, completeness,
+  ordering/duplicates, run limits, submission availability, and period issues
+  where applicable. Line numbers and field names remain visible.
 - Up to 5 `RunID` values.
 - TREC_EVAL format: `topicID Q0 docID Rank Score RunID`.
 - Every run must include all test queries.

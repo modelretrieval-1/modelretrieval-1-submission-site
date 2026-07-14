@@ -113,12 +113,13 @@
                 <td>Subtask {{ submission.subtask }}</td>
                 <td>
                   <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% elif submission.status == 'processing' %}info{% elif submission.status == 'queued' %}secondary{% else %}secondary{% endif %}">
-                    {{ submission.status }}
+                    {% if submission.status == 'queued' %}Queued{% elif submission.status == 'processing' %}Evaluating{% elif submission.status == 'evaluated' %}Evaluated <span class="visually-hidden">(evaluated)</span>{% elif submission.status == 'rejected' %}Validation failed <span class="visually-hidden">(rejected)</span>{% elif submission.status == 'evaluation_failed' %}Evaluation failed{% else %}{{ submission.status }}{% endif %}
                   </span>
                 </td>
                 <td>{{ submission.original_filename }}</td>
                 <td>{{ submission.submitted_at_jst }} JST</td>
                 <td>
+                  <a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ submission.submission_id }}">View status</a>
                   {% if submission.metric_table.rows %}
                     <div class="table-wrap">
                       <table class="table table-sm align-middle metric-table compact-metric-table">

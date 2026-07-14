@@ -362,6 +362,62 @@ label {
   margin-bottom: 0;
 }
 
+.validation-summary h2,
+.validation-error-group h3 {
+  margin-top: 0;
+}
+
+.validation-summary > p {
+  margin-bottom: 12px;
+}
+
+.validation-error-group {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgb(185 28 28 / 20%);
+}
+
+.validation-error-group h3 {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.submission-lifecycle {
+  display: flex;
+  gap: 0;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.submission-lifecycle li {
+  flex: 1;
+  padding: 8px 10px;
+  border-top: 3px solid var(--app-border);
+  color: var(--app-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.submission-lifecycle li.is-complete,
+.submission-lifecycle li.is-current {
+  border-color: var(--app-accent);
+  color: var(--app-text);
+  font-weight: 700;
+}
+
+.submission-lifecycle li.is-current {
+  background: var(--app-accent-soft);
+}
+
+@media (max-width: 640px) {
+  .submission-lifecycle {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+}
+
 .alert-success code,
 .notice-code {
   display: inline-block;

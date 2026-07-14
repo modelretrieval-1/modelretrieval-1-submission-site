@@ -19,16 +19,22 @@
     {% endif %}
 
     {% if errors %}
-      <div class="alert alert-danger" role="alert">
-        <strong>Submission rejected.</strong>
-        <ul>
-          {% for error in errors %}
-            <li>
-              {% if error.line_number %}Line {{ error.line_number }}: {% endif %}
-              {{ error.message }}
-            </li>
-          {% endfor %}
-        </ul>
+      <div class="alert alert-danger validation-summary" role="alert" aria-labelledby="validationSummaryTitle">
+        <h2 id="validationSummaryTitle" class="h5"><span>Submission rejected.</span></h2>
+        <p>Fix the issues below and upload the corrected file. {{ errors|length }} issue(s) found.</p>
+        {% for group in error_groups %}
+          <div class="validation-error-group">
+            <h3>{{ group.label }}</h3>
+            <ul>
+              {% for error in group.errors %}
+                <li>
+                  {% if error.line_number %}<strong>Line {{ error.line_number }}{% if error.field_name %}, {{ error.field_name }}{% endif %}:</strong> {% elif error.field_name %}<strong>{{ error.field_name }}:</strong> {% endif %}
+                  {{ error.message }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
       </div>
     {% endif %}
 
@@ -86,6 +92,15 @@
         <p>Choose normal or late submission, then upload the run file for Subtask {{ subtask }}.</p>
       </div>
     </div>
+    <div class="upload-guidance alert alert-light border" aria-labelledby="uploadRequirementsTitle">
+      <h2 id="uploadRequirementsTitle" class="h5">Before you upload</h2>
+      <ul class="mb-0">
+        <li>Use TREC_EVAL text with six fields per non-empty line: topicID, Q0, docID, Rank, Score, RunID.</li>
+        <li>Include every required query and candidate model for Subtask {{ subtask }}.</li>
+        <li>Use no more than 5 distinct RunID values.</li>
+        <li>Filename extensions are ignored; the file content is validated.</li>
+      </ul>
+    </div>
     <form id="uploadForm" class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
       <fieldset class="border rounded p-3">
         <legend>Submission period</legend>
@@ -123,7 +138,7 @@
       <div>
         <label class="form-label" for="submission_file">Submission file</label>
         <input class="form-control" id="submission_file" name="file" type="file" {% if not ns.can_submit_any %}disabled{% endif %} required>
-        <div class="form-text">Upload one TREC_EVAL-format file, maximum 50 MB and up to 5 RunID values. The filename extension is not checked.</div>
+        <div class="form-text">Upload one TREC_EVAL-format file with up to 5 RunID values. The filename extension is not checked.</div>
       </div>
       <div class="action-row">
         <button id="uploadSubmit" class="btn btn-primary" type="submit" {% if not ns.can_submit_any %}disabled{% endif %}>Upload</button>

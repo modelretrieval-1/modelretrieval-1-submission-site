@@ -40,6 +40,38 @@ from app.web import get_session_account, redirect, require_team, templates
 # Submission statuses that are still awaiting a terminal evaluation outcome.
 IN_FLIGHT_STATUSES = ("queued", "processing")
 
+
+def group_validation_errors(errors: tuple[SubmissionValidationError, ...]) -> tuple[dict, ...]:
+    """Build stable, participant-facing validation error groups for templates."""
+    labels = {
+        "file": "File and format",
+        "field_count": "File and format",
+        "invalid_encoding": "File and format",
+        "invalid_q0": "Field values",
+        "invalid_rank": "Field values",
+        "invalid_score": "Field values",
+        "invalid_topic": "Field values",
+        "invalid_doc": "Field values",
+        "duplicate": "Ordering and duplicates",
+        "rank_order": "Ordering and duplicates",
+        "score_order": "Ordering and duplicates",
+        "missing": "Completeness",
+        "unknown": "Completeness",
+        "run_limit": "Run limits",
+        "successful_submission_exists": "Submission availability",
+        "submission_period": "Submission period",
+    }
+    grouped: dict[str, list[SubmissionValidationError]] = {}
+    for error in errors:
+        category = next(
+            (label for code, label in labels.items() if code in error.error_code),
+            "Other validation issues",
+        )
+        grouped.setdefault(category, []).append(error)
+    return tuple(
+        {"label": label, "errors": tuple(items)} for label, items in grouped.items()
+    )
+
 router = APIRouter()
 
 
@@ -101,6 +133,7 @@ def render_submission_upload(
             "period_states": period_states,
             "selected_period": selected_period,
             "errors": errors,
+            "error_groups": group_validation_errors(errors),
             "metrics": metrics,
             "metric_table": pivot_evaluation_results(tuple(metrics)),
             "success": success,
