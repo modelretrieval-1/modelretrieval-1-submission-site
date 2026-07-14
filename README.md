@@ -8,7 +8,7 @@ Document role: this file is the short project overview and quick-start guide. Us
 
 The project is in **Sprint 6: Production Hardening**.
 
-The planned core app scope is implemented: participant upload, validation, evaluation, score display, organizer review, private leaderboard, exports, submission bundles, server-rendered Bootstrap UI, and the Sprint 6A application-shell redesign.
+The planned core app scope is implemented: participant upload, validation, evaluation, score display, organizer review, private leaderboard, exports, submission bundles, audit logging with an organizer-only audit viewer, server-rendered Bootstrap UI, and the Sprint 6A application-shell redesign.
 
 Staging has been tested successfully, and production was deployed successfully from immutable tag `v2026.07.14.0` with Nginx/Certbot HTTPS. The remaining focus is post-deploy operational verification, backup/restore readiness, and final browser/E2E regression coverage.
 
@@ -18,7 +18,7 @@ Current test status:
 
 ```text
 uv run --extra dev pytest
-169 passed
+172 passed
 
 uv run --extra dev ruff check .
 All checks passed

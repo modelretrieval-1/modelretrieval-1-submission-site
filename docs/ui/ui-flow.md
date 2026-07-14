@@ -185,6 +185,7 @@ The left navigation sidebar (on desktop) and the mobile offcanvas menu use the s
   - Periods (`/admin/periods`)
   - Submissions (`/admin/submissions`)
   - Leaderboard (`/admin/leaderboard`)
+  - Audit Log (`/admin/audit-events`)
   - Password (`/account/password`)
 
 - **Participant/Team Navigation**:
@@ -873,6 +874,7 @@ Organizer navigation:
 - Ground truth.
 - Submissions.
 - Leaderboard.
+- Audit log (read-only, organizer-only).
 - Exports.
 - Change password.
 - Logout.
@@ -891,6 +893,7 @@ The implemented MVP screen set includes:
 - Ground-truth upload.
 - Submissions table.
 - Private leaderboard.
+- Organizer audit log with filters and pagination.
 
 Later or extended workflow screens include:
 

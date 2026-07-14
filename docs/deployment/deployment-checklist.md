@@ -105,6 +105,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Existing submissions are visible.
 - [ ] Existing evaluation results are visible.
 - [ ] Private leaderboard loads.
+- [ ] Organizer audit log loads and remains inaccessible to team accounts.
 - [ ] Nginx error logs show no deployment-related errors.
 - [ ] Application logs show no startup errors.
 - [x] `deployment/scripts/smoke-check.sh` passes against production URL.
