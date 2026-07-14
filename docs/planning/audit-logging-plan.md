@@ -3,7 +3,7 @@
 Document role: implementation plan for the minimum viable audit trail. Keep
 current implementation status in `../../HANDOFF.md`.
 
-Status: **PLANNED**.
+Status: **MVP IMPLEMENTED (2026-07-15)**.
 
 ## Goal
 

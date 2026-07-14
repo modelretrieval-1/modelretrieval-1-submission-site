@@ -464,8 +464,8 @@ The activity logging implementation plan is documented in
 [`docs/planning/audit-logging-plan.md`](docs/planning/audit-logging-plan.md).
 It defines the MVP P0 audit events for authentication, submissions, organizer
 configuration, protected data access, and exports. The existing `audit_events`
-table now records authentication/account events and submission lifecycle events;
-organizer configuration and export events remain for a later slice.
+table now records authentication/account events, submission lifecycle events,
+organizer configuration changes, protected ground-truth access, and exports.
 
 Target behavior:
 

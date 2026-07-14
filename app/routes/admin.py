@@ -532,6 +532,15 @@ async def add_team(request: Request) -> Response:
                 subtasks=set(subtasks),  # type: ignore[arg-type]
                 created_by_organizer_id=account.id,
             )
+            record_audit_event(
+                connection,
+                actor_type="organizer",
+                actor_id=account.id,
+                event_type="team_created",
+                entity_type="team",
+                entity_id=generated.id,
+                metadata={"team_id": team_id, "subtasks": sorted(subtasks)},
+            )
     except ValueError as exc:
         return render_admin_teams(request, account=account, error=str(exc))
     except sqlite3.IntegrityError:
@@ -602,6 +611,15 @@ async def add_organizer(request: Request) -> Response:
                 connection,
                 username=username,
                 display_name=display_name,
+            )
+            record_audit_event(
+                connection,
+                actor_type="organizer",
+                actor_id=account.id,
+                event_type="organizer_created",
+                entity_type="organizer",
+                entity_id=generated.id,
+                metadata={"username": username},
             )
     except sqlite3.IntegrityError:
         return render_admin_users(
@@ -694,7 +712,7 @@ async def upload_ground_truth(
     )
 
     with connect(app_settings.database_path) as connection:
-        create_ground_truth_version(
+        version = create_ground_truth_version(
             connection,
             subtask=subtask,  # type: ignore[arg-type]
             version_label=version_label,
@@ -703,6 +721,15 @@ async def upload_ground_truth(
             uploaded_by_organizer_id=account.id,
             notes=notes or None,
             validation_status="validated",
+        )
+        record_audit_event(
+            connection,
+            actor_type="organizer",
+            actor_id=account.id,
+            event_type="ground_truth_uploaded",
+            entity_type="ground_truth_version",
+            entity_id=version.id,
+            metadata={"subtask": subtask, "checksum": file_sha256},
         )
 
     return render_ground_truth(
@@ -724,6 +751,15 @@ def download_ground_truth(request: Request, version_id: int) -> Response:
             (item for item in list_ground_truth_versions(connection) if item.id == version_id),
             None,
         )
+        if version is not None:
+            record_audit_event(
+                connection,
+                actor_type="organizer",
+                actor_id=account.id,
+                event_type="ground_truth_downloaded",
+                entity_type="ground_truth_version",
+                entity_id=version.id,
+            )
     if version is None:
         return Response("Ground-truth version not found.", status_code=404)
 
@@ -753,6 +789,15 @@ def activate_ground_truth(request: Request, version_id: int) -> Response:
 
     with connect(app_settings.database_path) as connection:
         activated = activate_ground_truth_version(connection, version_id)
+        if activated:
+            record_audit_event(
+                connection,
+                actor_type="organizer",
+                actor_id=account.id,
+                event_type="ground_truth_activated",
+                entity_type="ground_truth_version",
+                entity_id=version_id,
+            )
 
     if not activated:
         return render_ground_truth(
@@ -814,6 +859,24 @@ async def update_period(request: Request, period_name: str) -> Response:
             deadline_at_jst=deadline_at_jst,
             is_open_override=is_open_override,
         )
+        if updated:
+            record_audit_event(
+                connection,
+                actor_type="organizer",
+                actor_id=account.id,
+                event_type=(
+                    "submission_period_reopened"
+                    if is_open_override
+                    else "submission_period_changed"
+                ),
+                entity_type="submission_period",
+                metadata={
+                    "period": period_name,
+                    "starts_at_jst": starts_at_jst,
+                    "deadline_at_jst": deadline_at_jst,
+                    "is_open_override": is_open_override,
+                },
+            )
 
     if not updated:
         return render_periods(request, account=account, error="Submission period not found.")
@@ -842,6 +905,18 @@ def admin_submissions_bundle(request: Request) -> Response:
             connection,
             subtask=filters["subtask"] or None,
             period_name=filters["period"] or None,
+        )
+        record_audit_event(
+            connection,
+            actor_type="organizer",
+            actor_id=_account.id,
+            event_type="submission_bundle_downloaded",
+            entity_type="submission_bundle",
+            metadata={
+                "subtask": filters["subtask"] or None,
+                "period": filters["period"] or None,
+                "row_count": len(entries),
+            },
         )
     return Response(
         content=submission_bundle_content(entries),
@@ -936,6 +1011,19 @@ def admin_leaderboard_csv(request: Request) -> Response:
             team_id=filters["team_id"] or None,
             subtask=filters["subtask"] or None,
             period_name=filters["period"] or None,
+        )
+        record_audit_event(
+            connection,
+            actor_type="organizer",
+            actor_id=_account.id,
+            event_type="leaderboard_exported",
+            entity_type="leaderboard",
+            metadata={
+                "team_id": filters["team_id"] or None,
+                "subtask": filters["subtask"] or None,
+                "period": filters["period"] or None,
+                "row_count": len(rows),
+            },
         )
     return Response(
         content=leaderboard_csv_content(rows),
