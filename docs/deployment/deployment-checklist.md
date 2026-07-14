@@ -67,7 +67,7 @@ This checklist is used before launch and before each production deployment.
 - [x] Staging `APP_IMAGE` was updated in remote `.env`.
 - [x] `https://submission-staging.modelretrieval-1.happysocial.net/health` returns success.
 - [x] Login page loads over HTTPS.
-- [ ] Upload-size behavior is not blocked by Nginx before the app's 50 MB validation rule.
+- [ ] Upload-size behavior is not blocked by Nginx before the app's 500 MB validation rule.
 - [ ] Organizer login works.
 - [ ] Organizer can create a team.
 - [ ] Team login works.

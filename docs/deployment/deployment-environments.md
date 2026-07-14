@@ -31,7 +31,7 @@ APP_ENV=development
 DATABASE_PATH=var/app.sqlite3
 STORAGE_ROOT=var/storage
 SECRET_KEY=change-me-before-production
-MAX_UPLOAD_BYTES=52428800
+MAX_UPLOAD_BYTES=524288000
 ```
 
 Development can use the default paths from `app/config.py`.
@@ -61,7 +61,7 @@ APP_ENV=staging
 DATABASE_PATH=/data/app.sqlite3
 STORAGE_ROOT=/data/storage
 SECRET_KEY=<unique-staging-secret>
-MAX_UPLOAD_BYTES=52428800
+MAX_UPLOAD_BYTES=524288000
 ```
 
 Template:
@@ -111,7 +111,7 @@ APP_ENV=production
 DATABASE_PATH=/data/app.sqlite3
 STORAGE_ROOT=/data/storage
 SECRET_KEY=<unique-production-secret>
-MAX_UPLOAD_BYTES=52428800
+MAX_UPLOAD_BYTES=524288000
 ```
 
 Template:
@@ -145,7 +145,7 @@ Recommended local upstream:
 | `DATABASE_PATH` | Yes outside local dev | SQLite database path inside the app container or local process. |
 | `STORAGE_ROOT` | Yes outside local dev | Directory for submissions, ground truth, bundles, and exports. |
 | `SECRET_KEY` | Yes | Session signing secret. Must be unique per environment. |
-| `MAX_UPLOAD_BYTES` | No | Upload size limit. Default is 50 MB. |
+| `MAX_UPLOAD_BYTES` | No | Upload size limit. Default is 500 MB. |
 
 ## Secret Rules
 

@@ -19,7 +19,7 @@ For the latest implementation status, use `../../HANDOFF.md`. This document shou
 - Participants upload one file containing up to 5 runs.
 - Subtask A and Subtask B are uploaded separately.
 - Filename extensions are not used to accept or reject submissions; validation is based on file content.
-- Maximum upload size is 50 MB.
+- Maximum upload size is 500 MB. This limit is enforced server-side and is not displayed as participant-facing upload guidance.
 
 ## Format Strictness
 

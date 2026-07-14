@@ -12,7 +12,7 @@ class SettingsTests(unittest.TestCase):
             settings = load_settings()
 
         self.assertEqual(settings.environment, "development")
-        self.assertEqual(settings.max_upload_bytes, 50 * 1024 * 1024)
+        self.assertEqual(settings.max_upload_bytes, 500 * 1024 * 1024)
         self.assertTrue(settings.database_path.name.endswith(".sqlite3"))
         self.assertEqual(settings.submissions_dir, settings.storage_root / "submissions")
 
@@ -38,4 +38,3 @@ class SettingsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

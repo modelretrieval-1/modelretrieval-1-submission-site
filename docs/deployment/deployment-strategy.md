@@ -189,7 +189,7 @@ submit.example.jp  -> 127.0.0.1:8002
 
 Use Certbot with the Nginx plugin or an equivalent Let's Encrypt workflow.
 
-Nginx should preserve forwarded headers, allow uploads larger than the app's 50 MB limit, and keep staging and production upstreams bound to localhost only.
+Nginx should preserve forwarded headers, allow uploads up to the app's 500 MB limit, and keep staging and production upstreams bound to localhost only.
 
 ## Release Flow
 

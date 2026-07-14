@@ -12,7 +12,7 @@ Each subtask has its own submission limit of up to 5 runs per team per submissio
 Each upload must be a single file. Filename extensions are not used to accept or reject submissions.
 Files with any extension, or no extension, are accepted when their content is valid TREC_EVAL text.
 
-Maximum upload size: 50 MB.
+Maximum upload size: 500 MB. The limit is enforced server-side and is not shown in participant-facing upload guidance.
 
 ## Implementation Status
 
@@ -169,7 +169,7 @@ Required validation rules:
 
 ## Validation Performance Target
 
-Format validation is synchronous (running within the upload request loop to provide immediate feedback to participants). For large files (up to the 50 MB / ~320k lines limit), validation must be highly efficient:
+Format validation is synchronous (running within the upload request loop to provide immediate feedback to participants). For large files (up to the 500 MB limit), validation must be highly efficient:
 
 - **Linear complexity**: Completeness checks must run in $O(L)$ linear time relative to the number of lines $L$ in the submission file, avoiding nested $O(T \times L)$ loops where $T$ is the number of required topic IDs.
 - **Normalization caching**: Normalization operations (such as `.png` suffix stripping and left zero-padding removal) must be cached per-request to avoid redundant string operations on millions of topic and document ID references.
