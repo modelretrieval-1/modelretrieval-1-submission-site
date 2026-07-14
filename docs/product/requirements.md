@@ -27,7 +27,7 @@ Participant teams can:
 - Change their shared team account password after signing in.
 - Upload run files for registered subtasks.
 - See validation results immediately.
-- See evaluation scores immediately after a successful submission.
+- See evaluation state after a valid upload and scores after asynchronous evaluation completes.
 - View their own successful submissions and scores.
 
 ### Organizer/Admin
@@ -165,7 +165,8 @@ Subtask B:
 - Query image IDs match ground truth with an optional `.png` suffix ignored on either side.
 - Numeric model IDs match ground truth with left zero-padding ignored on either side.
 
-Participants should see their scores immediately after a successful submission.
+Participants should see the submission state after a valid upload and their scores
+as soon as asynchronous evaluation completes.
 Participant-visible scores must remain run-level aggregate scores only.
 
 The system should also retain per-query metric details for organizer diagnostics:

@@ -52,7 +52,7 @@ sequenceDiagram
     else Validation succeeds
       App->>Storage: Store submitted file
       App->>DB: Persist queued submission and runs (reserve slot)
-      App-->>Team: Redirect (303) to submission status page
+      App-->>Team: Redirect (303) to participant dashboard
 
       Note over Worker,DB: Evaluation runs asynchronously
       Worker->>DB: Claim next queued submission (mark processing)
@@ -66,16 +66,16 @@ sequenceDiagram
       else Evaluation fails
         Worker->>DB: Mark submission evaluation_failed
       end
-      Team->>App: Poll status page / status JSON
-      App-->>Team: Show queued/processing, then run-level scores or failure
+      Team->>App: Reload dashboard later
+      App-->>Team: Show latest state and any run-level scores
     end
   end
 ```
 
 Validation is synchronous, so format and slot errors are shown immediately on the
 upload request. Evaluation is asynchronous: a valid upload is stored as `queued`
-and the participant is redirected to a submission status page that shows
-`queued` → `processing` → `evaluated` / `evaluation_failed` and refreshes itself.
+and the participant is redirected to the dashboard, which shows the latest
+`queued` → `processing` → `evaluated` / `evaluation_failed` state.
 An in-process worker thread drains the SQLite-backed queue one submission at a
 time and re-parses the preserved file so scoring stays reproducible. In the
 `eager` evaluation mode (used by tests and single-shot runs) the queue is drained

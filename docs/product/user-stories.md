@@ -133,7 +133,8 @@ Acceptance criteria:
 
 ### See My Scores
 
-As a participant team, I want to see my evaluation score immediately after a successful submission so that I can confirm my result.
+As a participant team, I want to see my submission state after a valid upload and my
+evaluation score when processing completes so that I can confirm my result.
 
 Acceptance criteria:
 

@@ -291,7 +291,7 @@ def test_submission_with_non_txt_extension_is_accepted_when_content_is_valid():
         )
 
         assert response.status_code == 200
-        assert "Submission accepted and evaluated." in response.text
+        assert "Team Dashboard" in response.text
 
         with connect(settings.database_path) as connection:
             submission = connection.execute(
@@ -392,8 +392,7 @@ def test_valid_subtask_a_submission_is_evaluated_and_results_are_persisted():
         )
 
         assert response.status_code == 200
-        assert "Submission accepted and evaluated." in response.text
-        assert "Run-level metrics persisted for this accepted submission." in response.text
+        assert "Team Dashboard" in response.text
         assert "nDCG@1" in response.text
         assert "nDCG@3" in response.text
         assert "nDCG@5" in response.text
@@ -489,7 +488,7 @@ def test_valid_subtask_b_submission_is_evaluated_and_results_are_persisted():
         )
 
         assert response.status_code == 200
-        assert "Submission accepted and evaluated." in response.text
+        assert "Team Dashboard" in response.text
         assert "MRR" in response.text
         assert "1.0000" in response.text
 
@@ -552,7 +551,7 @@ def test_rejected_upload_can_be_followed_by_valid_upload():
         assert rejected_response.status_code == 200
         assert "Submission rejected." in rejected_response.text
         assert valid_response.status_code == 200
-        assert "Submission accepted and evaluated." in valid_response.text
+        assert "Team Dashboard" in valid_response.text
 
         with connect(settings.database_path) as connection:
             statuses = [
@@ -585,7 +584,7 @@ def test_second_successful_upload_for_same_subtask_period_shows_friendly_error()
         )
 
         assert first_response.status_code == 200
-        assert "Submission accepted and evaluated." in first_response.text
+        assert "Team Dashboard" in first_response.text
         assert second_response.status_code == 200
         assert "A successful submission already exists for this subtask and period." in (
             second_response.text
@@ -620,7 +619,7 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
             files={"file": ("first.txt", valid_submission_content(), "text/plain")},
         )
         assert first_response.status_code == 200
-        assert "Submission accepted and evaluated." in first_response.text
+        assert "Team Dashboard" in first_response.text
 
         with connect(settings.database_path) as connection:
             first_submission_id = connection.execute(
@@ -678,7 +677,7 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
         )
 
         assert replacement_response.status_code == 200
-        assert "Submission accepted and evaluated." in replacement_response.text
+        assert "Team Dashboard" in replacement_response.text
         assert "run2" in replacement_response.text
 
         dashboard_after_replacement = client.get("/team")
@@ -739,7 +738,7 @@ def test_team_can_submit_to_selected_late_period_when_late_is_open():
         )
 
         assert response.status_code == 200
-        assert "Submission accepted and evaluated." in response.text
+        assert "Team Dashboard" in response.text
 
         with connect(settings.database_path) as connection:
             period = connection.execute(
@@ -876,7 +875,7 @@ def test_when_both_periods_are_reopened_selected_period_is_used():
         )
 
         assert response.status_code == 200
-        assert "Submission accepted and evaluated." in response.text
+        assert "Team Dashboard" in response.text
 
         with connect(settings.database_path) as connection:
             period = connection.execute(

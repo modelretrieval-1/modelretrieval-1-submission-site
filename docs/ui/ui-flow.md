@@ -246,7 +246,7 @@ Submit behavior:
 - Upload file.
 - Validate immediately (synchronous).
 - If validation fails, show validation errors on the upload page.
-- If validation passes, reserve the submission slot as `queued` and redirect (303) to the submission status page. Evaluation runs asynchronously.
+- If validation passes, reserve the submission slot as `queued` and redirect (303) to the participant dashboard. Evaluation runs asynchronously and its latest state appears in the dashboard submission summary.
 
 Submission status page (`/team/submissions/{id}`):
 
@@ -260,8 +260,8 @@ Progress feedback:
 
 - While the file transfers, show a determinate upload progress bar with a percentage.
 - Once the upload completes, show an indeterminate "Validating…" spinner while the server validates the submission synchronously.
-- The upload request then redirects to the status page, where the asynchronous "processing/evaluating" state now lives. The upload-page phases remain a client-side progressive enhancement.
-- If JavaScript is unavailable, the form submits normally and the browser follows the redirect to the status page, which still polls and refreshes on its own.
+- The upload request then redirects to the participant dashboard. The upload-page phases remain a client-side progressive enhancement.
+- If JavaScript is unavailable, the form submits normally and the browser follows the redirect to the participant dashboard.
 
 Required states:
 

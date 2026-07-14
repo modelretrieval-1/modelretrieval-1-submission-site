@@ -6,7 +6,7 @@ Document role: this is the primary current-state handoff for future Codex or dev
 
 NTCIR-19 ModelRetrieval submission and evaluation system.
 
-The app accepts registered team submissions, validates uploaded files by TREC_EVAL content, evaluates internally, shows participant scores immediately, and gives organizers private administration and leaderboard views.
+The app accepts registered team submissions, validates uploaded files by TREC_EVAL content, evaluates internally, shows participant scores when asynchronous evaluation completes, and gives organizers private administration and leaderboard views.
 
 ## Current Phase
 
@@ -72,7 +72,7 @@ Implemented Sprint 6A UI slices:
 - Normalized organizer account pages for teams and users.
 - Normalized organizer operations pages for ground-truth versions and submission periods.
 - Normalized participant form pages for submission upload and password change.
-- Two-phase participant upload progress: determinate upload progress bar then indeterminate "Validating…" spinner, as a client-side progressive enhancement with a native no-JS fallback. The upload request now 303-redirects to a submission status page where the asynchronous evaluation state (`queued` → `processing` → `evaluated`/`evaluation_failed`) is shown and polled.
+- Two-phase participant upload progress: determinate upload progress bar then indeterminate "Validating…" spinner, as a client-side progressive enhancement with a native no-JS fallback. After a valid upload, the request 303-redirects to the participant dashboard, where the latest submission state is shown.
 - Responsive app-shell guards for mobile navigation, visible labels, table wrappers, and compact row overflow.
 
 ## Current Refactor State
@@ -172,7 +172,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-164 passed
+165 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -215,7 +215,7 @@ Foundation:
 - `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation (with `.png`-tolerant image_id and zero-padding-tolerant model_id matching), ground-truth metric loading, evaluation result persistence, leaderboard query helpers, and evaluation status helpers.
 - `app/submissions.py`: also includes async-evaluation helpers `mark_submission_status`, `claim_next_queued_submission`, `requeue_processing_submissions`, and ownership-scoped `get_team_submission_status`, plus the `queued`/`processing` statuses in `SUCCESSFUL_SUBMISSION_STATUSES`.
 - `app/processing.py`: asynchronous evaluation — `process_submission` (re-reads and re-parses the stored file, then evaluates), `EvaluationWorker` thread, `recover_orphaned_submissions`, `run_pending_evaluations` (eager/test drain), and `start/stop_evaluation_worker`.
-- `app/routes/team.py`: also includes the participant submission status page (`GET /team/submissions/{id}`) and status JSON endpoint (`GET /team/submissions/{id}/status`); valid uploads are enqueued as `queued` and 303-redirect to the status page.
+- `app/routes/team.py`: also includes the participant submission status page (`GET /team/submissions/{id}`) and status JSON endpoint (`GET /team/submissions/{id}/status`); valid uploads are enqueued as `queued` and 303-redirect to the participant dashboard.
 
 Accounts and sessions:
 
@@ -415,7 +415,7 @@ worker, with a participant-checkable status page.
   worker in `worker` mode.
 - `upload_submission` now stores a valid upload as `queued`, reserves the slot
   (supersede + consume replacement permission at enqueue time), and 303-redirects to
-  `GET /team/submissions/{id}`. `GET /team/submissions/{id}/status` returns status JSON.
+  `GET /team`. The ownership-checked submission status page and JSON endpoint remain available.
 - `app/templates/team_submission_status.html` renders the state badge, spinner + poll
   for in-flight states, and the metric table when evaluated.
 

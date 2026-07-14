@@ -1,9 +1,8 @@
 # Asynchronous Submission Evaluation Plan
 
-Document role: approved-but-not-yet-implemented plan for making submission
-evaluation asynchronous with a participant-checkable status. This is the
-authoritative spec for the feature; execute it in a fresh session. Keep current
-implementation status in `../../HANDOFF.md`.
+Document role: implemented design record for asynchronous evaluation and its
+participant-checkable status. Keep current implementation status in
+`../../HANDOFF.md`.
 
 Status: **IMPLEMENTED (2026-07-08).** The async evaluation worker, `queued`/
 `processing` statuses, migration `20260708_0003`, the participant status page and
@@ -12,17 +11,18 @@ status JSON endpoint, and the `EVALUATION_MODE` setting are all in place. See
 
 ## Context
 
-Evaluation (nDCG / MRR over many queries × runs) can take a long time for large
-files, but today it runs **inside** the upload POST
-(`app/routes/team.py`, `upload_submission`): the request validates, stores,
-evaluates, and only then responds. On a slow evaluation the participant's browser
-hangs, and a very long request risks proxy/gateway timeouts.
+Before this feature was implemented, evaluation (nDCG / MRR over many queries ×
+runs) ran **inside** the upload POST (`app/routes/team.py`, `upload_submission`):
+the request validated, stored, evaluated, and only then responded. On a slow
+evaluation the participant's browser could hang, and a very long request risked
+proxy/gateway timeouts.
 
 Goal (confirmed with the product owner): make **evaluation asynchronous** while
 keeping **validation synchronous** so format errors still appear immediately. After a
-valid upload the participant is sent to a **submission status page** that shows the
-state (`queued` → `processing` → `evaluated` / `evaluation_failed`) and updates
-itself, so they can also leave and return later to check.
+valid upload the participant is sent to the **participant dashboard**, where the
+latest submission state (`queued` → `processing` → `evaluated` /
+`evaluation_failed`) is shown. An ownership-checked status page and JSON endpoint
+remain available for detailed progress checks.
 
 ## Confirmed decisions
 
@@ -36,7 +36,8 @@ itself, so they can also leave and return later to check.
   `evaluation_failed`) — no "percent of queries evaluated".
 
 This supersedes the shipped "UI-only spinner" upload progress only in emphasis: the
-two-phase upload bar stays, but the "evaluating" phase now lives on the status page.
+two-phase upload bar stays, while evaluation continues after the redirect to the
+dashboard.
 
 ## Status model
 
@@ -107,8 +108,8 @@ Submission `status` (free-text TEXT column) gains two in-flight values:
   the submission as `status="queued"`, store the file, persist runs, and
   `activate_current_submission` (reserve the slot / supersede + consume replacement
   permission at enqueue time). Then: if eager, call `process_submission` inline.
-  Finally **redirect (303) to `/team/submissions/{id}`** (Post/Redirect/Get). The
-  validation-failure path stays as today (re-render the upload page with errors —
+  Finally **redirect (303) to `/team`** (Post/Redirect/Get). The
+  validation-failure path re-renders the upload page with errors —
   immediate feedback).
 - Move the current inline evaluation block into `process_submission`.
 - New routes:
@@ -121,7 +122,7 @@ Submission `status` (free-text TEXT column) gains two in-flight values:
   show a `.spinner-border` and a `{% block scripts %}` that polls the `/status` JSON
   every ~2s and reloads on a terminal state.
 - `app/templates/team_submission_upload.html` — relabel the existing processing phase
-  to "Validating…"; the XHR follows the 303 and renders the status page (the existing
+  to "Validating…"; the XHR follows the 303 and renders the dashboard (the existing
   `document.write` path is unchanged).
 - `app/templates/team_dashboard.html` — extend the status-badge mapping to color
   `queued`/`processing`.
@@ -129,36 +130,35 @@ Submission `status` (free-text TEXT column) gains two in-flight values:
 ## Tests
 
 - Tests set `evaluation_mode="eager"` in `make_settings` so upload→metrics flows stay
-  deterministic. Upload now 303-redirects; `TestClient` follows redirects by default,
-  so assertions move to the status page (update the "accepted and evaluated" strings
-  and metric markers in `tests/test_team_submissions.py`). Admin/leaderboard tests
+  deterministic. Upload now 303-redirects to the dashboard; `TestClient` follows
+  redirects by default, so assertions use the dashboard and its metric markers in
+  `tests/test_team_submissions.py`. Admin/leaderboard tests
   still see `evaluated` rows because eager completes inline.
 - New tests: worker mode leaves status `queued`, then `run_pending_evaluations` yields
   `evaluated` + metrics; `/status` JSON returns the transitions; recovery re-queues a
   `processing` row; status page/endpoint reject another team (ownership).
 
-## Docs to sync when implementing
+## Documentation synchronized during implementation
 
-- `HANDOFF.md` — stack (background worker), async flow, product decisions, move this
-  from "planned" to "implemented".
+- `HANDOFF.md` — stack (background worker), async flow, product decisions, and
+  implemented status.
 - `docs/technical/architecture.md` — in-process evaluation worker.
 - `docs/technical/submission-spec.md` — async submit behavior + status values; update
   the submission sequence diagram.
 - `docs/technical/evaluation-spec.md` — evaluation runs asynchronously via the worker;
   reproducible re-parse from the stored file.
-- `docs/ui/ui-flow.md` — new submission status page and its states; revise the
-  "Upload Submission" progress-feedback note, which currently states processing is
-  synchronous and NOT split into a background step (true today) — flip it to describe
-  the async worker flow once implemented.
+- `docs/ui/ui-flow.md` — submission status page and its states, plus the asynchronous
+  worker flow and dashboard redirect.
 - `docs/technical/data-model.md` — enumerate the new `status` values.
 
 ## Verification
 
 1. `uv run --extra dev pytest` and `uv run --extra dev ruff check .` — all green.
 2. Run the app (`uv run uvicorn app.main:app --reload`, worker mode): upload a valid
-   file → land on the status page showing **Processing**, which auto-updates to
-   **Evaluated** with scores; upload an invalid file → **immediate** validation errors
-   on the upload page; confirm the team dashboard shows the in-flight badge.
+   file → land on the participant dashboard showing the latest queued/processing
+   state; reload later to confirm **Evaluated** with scores. Upload an invalid file →
+   **immediate** validation errors on the upload page. The detailed status page may
+   also be opened directly to verify its polling behavior.
 3. Restart the app while a submission is `processing` → it is re-queued on startup and
    completes. Hit `GET /team/submissions/{id}/status` and observe the JSON state.
 

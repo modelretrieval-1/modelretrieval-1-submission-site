@@ -98,6 +98,7 @@ def upload_valid(client: TestClient, team_id: str, password: str) -> str:
         follow_redirects=False,
     )
     assert response.status_code == 303
+    assert response.headers["location"] == "/team"
     return response.headers["location"]
 
 
@@ -108,20 +109,22 @@ def test_worker_mode_leaves_submission_queued_until_drained():
         activate_subtask_a_ground_truth(settings, organizer.id)
         client = TestClient(create_app(settings))
 
-        location = upload_valid(client, "team-001", team.password)
+        upload_valid(client, "team-001", team.password)
 
         # Validation passed synchronously, but scoring is deferred: the slot is
         # reserved as queued and no worker is running in this test.
         with connect(settings.database_path) as connection:
-            status = connection.execute("SELECT status FROM submissions").fetchone()["status"]
+            submission = connection.execute("SELECT id, status FROM submissions").fetchone()
+            status = submission["status"]
+            status_location = f"/team/submissions/{submission['id']}"
         assert status == "queued"
 
-        status_page = client.get(location)
+        status_page = client.get(status_location)
         assert status_page.status_code == 200
         assert "Queued for evaluation…" in status_page.text
         assert "Submission accepted and evaluated." not in status_page.text
 
-        queued_json = client.get(f"{location}/status")
+        queued_json = client.get(f"{status_location}/status")
         assert queued_json.status_code == 200
         assert queued_json.json()["status"] == "queued"
 
@@ -129,10 +132,10 @@ def test_worker_mode_leaves_submission_queued_until_drained():
         processed = run_pending_evaluations(settings)
         assert processed == 1
 
-        evaluated_json = client.get(f"{location}/status")
+        evaluated_json = client.get(f"{status_location}/status")
         assert evaluated_json.json()["status"] == "evaluated"
 
-        evaluated_page = client.get(location)
+        evaluated_page = client.get(status_location)
         assert "Submission accepted and evaluated." in evaluated_page.text
         assert "nDCG@5" in evaluated_page.text
         assert "1.0000" in evaluated_page.text
@@ -182,14 +185,18 @@ def test_status_page_and_endpoint_reject_other_team():
         activate_subtask_a_ground_truth(settings, organizer.id)
         client = TestClient(create_app(settings))
 
-        location = upload_valid(client, "team-001", team.password)
+        upload_valid(client, "team-001", team.password)
+
+        with connect(settings.database_path) as connection:
+            submission_id = connection.execute("SELECT id FROM submissions").fetchone()["id"]
+        status_location = f"/team/submissions/{submission_id}"
 
         client.get("/logout")
         login(client, "team-002", other_team.password)
 
-        page = client.get(location, follow_redirects=False)
+        page = client.get(status_location, follow_redirects=False)
         assert page.status_code == 303
         assert page.headers["location"] == "/team"
 
-        status_json = client.get(f"{location}/status")
+        status_json = client.get(f"{status_location}/status")
         assert status_json.status_code == 404

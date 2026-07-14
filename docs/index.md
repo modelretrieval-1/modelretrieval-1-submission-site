@@ -30,7 +30,7 @@ Document role: this file is only the documentation map. Keep current implementat
 
 - [Implementation Plan](planning/implementation-plan.md): Scrum plan, epics, testing strategy, and sprint plan.
 - [Organizer-Approved Resubmission Plan](planning/resubmission-plan.md): implemented plan for organizer-approved replacement submissions while preserving organizer-only metric history.
-- [Asynchronous Evaluation Plan](planning/async-evaluation-plan.md): approved-but-not-yet-implemented plan to move submission evaluation to a background worker with a participant-checkable status page.
+- [Asynchronous Evaluation Plan](planning/async-evaluation-plan.md): implemented background-worker evaluation design, including the queue states and participant status endpoints.
 - [Documentation Cleanup Plan](planning/documentation-cleanup-plan.md): pointer to the archived completed cleanup plan.
 
 ## Archive

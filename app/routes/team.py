@@ -407,11 +407,12 @@ async def upload_submission(
     # Evaluation is asynchronous. Eager mode drains the queue inline for
     # deterministic flows (tests, single-shot runs); worker mode leaves the
     # submission queued for the background thread. Either way, Post/Redirect/Get
-    # sends the participant to the status page.
+    # sends the participant back to the dashboard, where the queued or completed
+    # submission is included in the latest-submissions summary.
     if app_settings.evaluation_mode == "eager":
         process_submission(app_settings, submission_id)
 
-    return redirect(f"/team/submissions/{submission_id}")
+    return redirect("/team")
 
 
 @router.get("/team/submissions/{submission_id}", response_class=HTMLResponse)

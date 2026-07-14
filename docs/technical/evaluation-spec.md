@@ -4,7 +4,9 @@
 
 The system evaluates successful submissions internally after validation.
 
-Participants see their own current aggregate run-level scores immediately. Organizers see current and superseded aggregate scores, organizer-only per-query diagnostics, and a private leaderboard.
+Participants see their own current aggregate run-level scores after asynchronous
+evaluation completes. Organizers see current and superseded aggregate scores,
+organizer-only per-query diagnostics, and a private leaderboard.
 
 Ground truth is uploaded or configured by organizers and must not be accessible to participants.
 
