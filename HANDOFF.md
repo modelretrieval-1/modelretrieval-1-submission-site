@@ -386,7 +386,7 @@ Current deployment notes captured in docs:
 - The same SSH key may be used for staging and production, although separate keys give cleaner rotation.
 - Bind-mounted `data/` ownership must match the app container UID/GID to avoid `/data/storage` permission errors.
 - Long hostnames may require `server_names_hash_bucket_size 128;` in Nginx.
-- Home page startup copy was changed from the old Sprint 0 placeholder to task-specific NTCIR-19 ModelRetrieval copy.
+- Public home page was polished into a focused submission-portal entry point: it establishes the NTCIR-19 ModelRetrieval context, provides one `Sign in to continue` action, and does not expose the operational `/health` endpoint as a user-facing button. The visual treatment remains aligned with the shared Bootstrap application design.
 
 ## Completed Implementation History
 

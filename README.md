@@ -30,6 +30,8 @@ The app remains a FastAPI/Jinja2 server-rendered system. The UI now uses Bootstr
 
 The current UI slice is the implemented Sprint 6A application-shell redesign: persistent role-aware navigation, a richer organizer operations dashboard, a clearer participant submission dashboard, and normalized organizer/participant workflow pages. Automated responsive/accessibility-oriented regression checks are in place; remaining UI work is visual browser smoke verification tracked in `HANDOFF.md`.
 
+The public home page is intentionally lightweight: it introduces the NTCIR-19 ModelRetrieval submission portal and directs registered users to sign in. The `/health` endpoint remains an operational check and is not presented as a normal user action.
+
 ## Development Setup
 
 Create the virtual environment and install dependencies with `uv`:

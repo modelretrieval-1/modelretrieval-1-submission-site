@@ -4,7 +4,7 @@
 
 This document defines the NTCIR-19 ModelRetrieval submission system interface.
 
-The UI should be simple, operational, and fast to scan. It is not a marketing site. The first screen should help users sign in and submit or administer runs.
+The UI should be simple, operational, and fast to scan. It is not a marketing site. The public home page should establish the task context and provide one clear path into the system; authenticated screens then help users submit or administer runs.
 
 ## Implementation Status
 
@@ -78,6 +78,31 @@ The system has two user-facing roles:
 Each role has a separate dashboard after login.
 
 ## Shared Pages
+
+### Public Home
+
+URL:
+
+- `/`
+
+Purpose:
+
+- Establish the NTCIR-19 ModelRetrieval submission context.
+- Give registered participant teams and organizers one clear path to sign in.
+
+Content:
+
+- Public navigation with the application name and a `Sign In` action.
+- A centered welcome panel labeled `NTCIR-19 · ModelRetrieval`.
+- The heading `Submission portal`.
+- Supporting copy explaining that users can upload and track model retrieval submissions.
+- One primary action: `Sign in to continue`.
+
+Design rules:
+
+- Do not expose the operational `/health` endpoint as a public call-to-action.
+- Avoid repeating the full application name in the welcome panel when it is already present in the public navigation.
+- Use the same Bootstrap, panel, typography, spacing, border, and accent conventions as the authenticated application shell.
 
 ### Login
 

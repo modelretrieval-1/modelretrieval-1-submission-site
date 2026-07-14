@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <section class="panel auth-panel">
-    <h1>{{ app_name }}</h1>
-    <p class="text-muted">Submission and evaluation system for NTCIR-19 ModelRetrieval.</p>
-    <div class="action-row">
-      <a class="btn btn-primary" href="/login">Sign In</a>
-      <a class="btn btn-outline-secondary" href="/health">Health check</a>
+  <section class="panel home-panel">
+    <div class="eyebrow">NTCIR-19 · ModelRetrieval</div>
+    <h1>Submission portal</h1>
+    <p class="home-lead">Upload and track your model retrieval submissions in one place.</p>
+    <p class="home-supporting">For registered participant teams and organizers.</p>
+    <div class="action-row home-actions">
+      <a class="btn btn-primary" href="/login">Sign in to continue</a>
     </div>
   </section>
 {% endblock %}

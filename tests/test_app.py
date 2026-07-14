@@ -18,4 +18,4 @@ def test_home_page_renders():
     response = client.get("/")
 
     assert response.status_code == 200
-    assert "Submission and evaluation system for NTCIR-19 ModelRetrieval." in response.text
+    assert "Upload and track your model retrieval submissions in one place." in response.text
