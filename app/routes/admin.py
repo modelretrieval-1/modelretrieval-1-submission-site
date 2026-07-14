@@ -440,6 +440,12 @@ def admin_dashboard(request: Request) -> Response:
     recent_validation_failures = [
         submission for submission in submissions if submission.status == "rejected"
     ][:5]
+    attention_counts = {
+        "queued": status_counts.get("queued", 0),
+        "processing": status_counts.get("processing", 0),
+        "evaluation_failed": status_counts.get("evaluation_failed", 0),
+        "rejected": status_counts.get("rejected", 0),
+    }
 
     return templates.TemplateResponse(
         request,
@@ -457,6 +463,7 @@ def admin_dashboard(request: Request) -> Response:
             "recent_submissions": submissions[:6],
             "recent_validation_failures": recent_validation_failures,
             "subtask_counts": subtask_counts,
+            "attention_counts": attention_counts,
         },
     )
 

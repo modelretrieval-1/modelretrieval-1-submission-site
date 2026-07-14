@@ -635,6 +635,7 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
         assert grant_response.status_code == 200
         assert "Replacement upload permission granted." in grant_response.text
         assert "pending" in grant_response.text
+        assert "One-time replacement permission" in grant_response.text
 
         client.get("/logout")
         login(client, "team-001", team.password)
@@ -643,6 +644,7 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
 
         assert dashboard_after_grant.status_code == 200
         assert "Upload replacement" in dashboard_after_grant.text
+        assert "Replacement upload approved." in dashboard_after_grant.text
         assert "run1 ndcg@5" not in dashboard_after_grant.text
 
         invalid_replacement = client.post(
@@ -653,6 +655,7 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
 
         assert invalid_replacement.status_code == 200
         assert "Field 2 must be Q0." in invalid_replacement.text
+        assert "This is a replacement upload." in invalid_replacement.text
 
         with connect(settings.database_path) as connection:
             permission = connection.execute(

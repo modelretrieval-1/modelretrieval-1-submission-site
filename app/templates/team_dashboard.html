@@ -47,6 +47,14 @@
     </div>
   </section>
 
+  {% if submission_slots|selectattr("resubmission_allowed")|list %}
+    <div class="alert alert-warning" role="alert">
+      <strong>Replacement upload approved.</strong>
+      Your previous scores are temporarily hidden while you submit a replacement. The permission is used only after a valid replacement is accepted; failed validation does not consume it.
+      <a href="/team/submissions/new" class="alert-link">Upload replacement</a>
+    </div>
+  {% endif %}
+
   <section class="panel">
     <div class="section-header">
       <div>

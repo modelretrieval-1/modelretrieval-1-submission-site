@@ -416,6 +416,10 @@ UI modernization notes:
 
 ### Organizer Dashboard
 
+The organizer dashboard includes a live “Needs attention” section with counts
+and direct filtered links for queued evaluations, processing evaluations,
+evaluation failures, and validation failures.
+
 URL:
 
 - `/admin`
@@ -619,6 +623,12 @@ Actions:
 - View scores.
 
 ### Submission Detail
+
+When a current successful submission is eligible for replacement, the page
+explains the one-time permission policy and asks for confirmation before the
+organizer grants it. Once permission is pending, it states that previous
+participant-visible scores are hidden until replacement completes. The history
+section links current and superseded submissions and shows permission usage.
 
 URL:
 

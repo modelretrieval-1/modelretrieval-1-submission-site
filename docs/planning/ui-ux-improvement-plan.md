@@ -4,9 +4,9 @@ Document role: prioritized implementation plan for improving the participant
 and organizer experience while preserving the current FastAPI/Jinja2/
 Bootstrap architecture.
 
-Status: **PLANNED**. The current application shell and responsive UI remain the
-baseline. This plan focuses on workflow clarity, operational feedback, and
-accessibility rather than a frontend rewrite.
+Status: **P1 IMPLEMENTED**. The current application shell and responsive UI remain
+the baseline. P1 organizer attention and replacement-workflow improvements are
+implemented; this plan continues to track later accessibility and table work.
 
 Source documents:
 
@@ -100,6 +100,11 @@ Acceptance criteria:
 Likely files: `app/routes/admin.py`, `app/templates/admin_dashboard.html`,
 domain query helpers, and organizer integration tests.
 
+Implementation status: **Complete**. The dashboard now exposes live queued,
+processing, evaluation-failure, and validation-failure counts, each linking to
+the corresponding filtered submission view, alongside the existing recent
+failure panel.
+
 ### P1-2: Clarify replacement uploads and submission history
 
 Goal: prevent accidental misunderstanding of the one-time replacement policy.
@@ -122,6 +127,11 @@ Acceptance criteria:
 
 Likely files: upload/dashboard/status templates, organizer submission detail
 templates, and resubmission-related tests.
+
+Implementation status: **Complete**. Participant and organizer pages now explain
+the one-time replacement policy, hide the previous participant-visible result
+while permission is pending, provide a confirmation before granting permission,
+and expose current/superseded history and permission usage to organizers.
 
 ### P1-3: Accessibility and responsive interaction refinements
 

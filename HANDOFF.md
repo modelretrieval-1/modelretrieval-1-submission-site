@@ -66,6 +66,10 @@ Implemented Sprint 6A UI slices:
 - Organizer-approved one-time replacement uploads with participant-hidden superseded metrics and organizer-visible metric history.
 - Organizer dashboard period open/closed/reopened state.
 - Organizer dashboard recent validation-failure panel.
+- Organizer dashboard attention cards for queued, processing, evaluation-failed,
+  and validation-failed submissions with filtered review links.
+- Replacement workflow warnings for participants and organizers, plus organizer
+  confirmation before granting one-time replacement permission.
 - Upload page period open/closed/reopened state beside normal/late choices.
 - Normalized organizer review pages for submissions, submission details, and leaderboard.
 - Planned metric-table display improvement: show aggregate and per-query metrics as pivoted tables with metric names as columns.

@@ -153,6 +153,9 @@ def test_admin_dashboard_highlights_recent_validation_failures():
 
         assert response.status_code == 200
         assert "Recent Validation Failures" in response.text
+        assert "Needs attention" in response.text
+        assert 'href="/admin/submissions?status=queued"' in response.text
+        assert 'href="/admin/submissions?status=evaluation_failed"' in response.text
         assert 'href="/admin/submissions?status=rejected"' in response.text
         assert "bad.txt" in response.text
         assert "1 validation error(s)." in response.text

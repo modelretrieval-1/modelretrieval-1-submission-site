@@ -40,6 +40,37 @@
     </div>
   </section>
 
+  <section class="panel" aria-labelledby="attentionHeading">
+    <div class="section-header">
+      <div>
+        <h2 id="attentionHeading">Needs attention</h2>
+        <p>Live operational items with a direct review action.</p>
+      </div>
+    </div>
+    <div class="dashboard-grid">
+      <a class="mini-card text-decoration-none" href="/admin/submissions?status=queued">
+        <span class="small-muted">Queued evaluations</span>
+        <strong>{{ attention_counts.queued }}</strong>
+        <span class="small-muted">Waiting to run</span>
+      </a>
+      <a class="mini-card text-decoration-none" href="/admin/submissions?status=processing">
+        <span class="small-muted">Evaluating</span>
+        <strong>{{ attention_counts.processing }}</strong>
+        <span class="small-muted">Currently processing</span>
+      </a>
+      <a class="mini-card text-decoration-none" href="/admin/submissions?status=evaluation_failed">
+        <span class="small-muted">Evaluation failures</span>
+        <strong>{{ attention_counts.evaluation_failed }}</strong>
+        <span class="small-muted">Requires investigation</span>
+      </a>
+      <a class="mini-card text-decoration-none" href="/admin/submissions?status=rejected">
+        <span class="small-muted">Validation failures</span>
+        <strong>{{ attention_counts.rejected }}</strong>
+        <span class="small-muted">Participant-facing errors</span>
+      </a>
+    </div>
+  </section>
+
   <div class="workspace-grid">
     <section class="panel">
       <div class="section-header">

@@ -427,6 +427,7 @@ Milestone summary:
 - Submission bundle download is complete.
 - Sprint 5 UI modernization is complete.
 - Sprint 6A application-shell and page-normalization slices are complete for the core planned pages: role-aware sidebar/topbar navigation, participant upload navigation, participant submission availability, organizer period state, organizer validation-failure panel, upload-page period state, normalized organizer review/account/operations pages, and normalized participant form pages.
+- P1 UI/UX improvements are complete: organizer attention cards with filtered review links, and replacement-upload warnings, confirmation, and history messaging across participant and organizer workflows.
 - Sprint 6 deployment documentation and tooling are implemented; GitHub Actions staging deployment has been verified, and the next item is staging end-to-end operations verification.
 
 ### Sprint 0: Planning and Scaffolding

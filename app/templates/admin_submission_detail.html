@@ -80,10 +80,13 @@
     {% set pending_permission = resubmission_permissions|selectattr("is_used", "equalto", false)|first %}
     {% if pending_permission %}
       <p class="alert alert-info">
-        Replacement upload is already allowed. Granted by {{ pending_permission.granted_by_display_name }} at {{ pending_permission.granted_at_jst }} JST.
+        One-time replacement permission is already pending. Previous participant-visible scores are hidden until the replacement is completed. Granted by {{ pending_permission.granted_by_display_name }} at {{ pending_permission.granted_at_jst }} JST.
       </p>
     {% elif submission.is_current and submission.status in ("accepted", "evaluated", "evaluation_failed") %}
-      <form method="post" action="/admin/submissions/{{ submission.submission_id }}/resubmission" class="stacked-form">
+      <div class="alert alert-warning" role="alert">
+        This is a one-time replacement permission. Once granted, the participant’s previous scores are hidden while they prepare a replacement. A failed validation does not consume the permission; a successful replacement supersedes this submission.
+      </div>
+      <form method="post" action="/admin/submissions/{{ submission.submission_id }}/resubmission" class="stacked-form" onsubmit="return window.confirm('Grant one replacement upload for this team, subtask, and period? Their previous scores will be hidden while the replacement is pending.');">
         <div>
           <label class="form-label" for="resubmission_reason">Reason</label>
           <textarea class="form-control" id="resubmission_reason" name="reason" rows="2" placeholder="Optional organizer note"></textarea>
