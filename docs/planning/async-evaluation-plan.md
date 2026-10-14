@@ -9,6 +9,17 @@ Status: **IMPLEMENTED (2026-07-08).** The async evaluation worker, `queued`/
 status JSON endpoint, and the `EVALUATION_MODE` setting are all in place. See
 `../../HANDOFF.md` for the current implementation checkpoint.
 
+Amendment (2026-10-14, release `v2026.10.14.0`): a production incident showed two
+defects in the original design. (1) The upload committed the row as `queued`
+before persisting its runs, so the worker could claim it first. (2) The worker left
+its `submission_evaluation_started` audit insert uncommitted, holding the SQLite
+write lock for the whole scoring run, so the concurrent upload failed with
+`database is locked` and the worker later failed with "Missing run rows". Valid
+uploads are now inserted as `accepted` and moved to `queued` only after runs and
+activation are committed; the worker commits before parsing/scoring; and
+connections use a 30-second SQLite busy timeout. The plan text below describes the
+original design.
+
 ## Context
 
 Before this feature was implemented, evaluation (nDCG / MRR over many queries ×

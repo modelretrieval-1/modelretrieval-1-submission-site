@@ -126,6 +126,7 @@ The repository-level `deployment/` directory is reserved for runtime deployment 
 - Staging deploys automatically from `main`.
 - Production deploys from immutable `v*` tags.
 - Production deployment from immutable tag `v2026.07.14.0` completed successfully on July 14, 2026.
+- Current production image: `v2026.10.14.0` (deployed 2026-10-14; upload-limit and SQLite-lock incident fix, see "Production Incident (2026-10-14)").
 - Production HTTPS is active at `submission.modelretrieval-1.happysocial.net` using host Nginx and a Certbot-issued certificate.
 - The VPS deploy user should be passwordless and use SSH key authentication.
 - Staging and production may use the same SSH deploy key, but they must not share `.env`, `SECRET_KEY`, database, storage directory, or Compose project name.
@@ -184,9 +185,9 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-169 passed
+181 passed   (2026-10-14)
 
-uv run --extra dev ruff check .
+uv run --extra dev ruff check app tests
 All checks passed
 
 uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
@@ -227,7 +228,7 @@ Foundation:
 - `app/evaluation.py`: pure nDCG, MRR, Subtask A evaluation, Subtask B evaluation (with `.png`-tolerant image_id and zero-padding-tolerant model_id matching), ground-truth metric loading, evaluation result persistence, leaderboard query helpers, and evaluation status helpers.
 - `app/submissions.py`: also includes async-evaluation helpers `mark_submission_status`, `claim_next_queued_submission`, `requeue_processing_submissions`, and ownership-scoped `get_team_submission_status`, plus the `queued`/`processing` statuses in `SUCCESSFUL_SUBMISSION_STATUSES`.
 - `app/processing.py`: asynchronous evaluation — `process_submission` (re-reads and re-parses the stored file, then evaluates), `EvaluationWorker` thread, `recover_orphaned_submissions`, `run_pending_evaluations` (eager/test drain), and `start/stop_evaluation_worker`.
-- `app/routes/team.py`: also includes the participant submission status page (`GET /team/submissions/{id}`) and status JSON endpoint (`GET /team/submissions/{id}/status`); valid uploads are enqueued as `queued` and 303-redirect to the participant dashboard.
+- `app/routes/team.py`: also includes the participant submission status page (`GET /team/submissions/{id}`) and status JSON endpoint (`GET /team/submissions/{id}/status`); valid uploads are inserted as `accepted`, have their runs persisted and slot activated, are then marked `queued`, and 303-redirect to the participant dashboard.
 
 Accounts and sessions:
 
@@ -360,7 +361,7 @@ Nginx templates added:
 - `deployment/nginx/staging.conf.example`
 - `deployment/nginx/production.conf.example`
 
-The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 500m`, proxy timeouts, forwarded headers, and localhost upstreams for staging and production.
+The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 500m`, proxy timeouts (`proxy_read_timeout`/`proxy_send_timeout 600s`), forwarded headers, and localhost upstreams for staging and production. The bootstrap templates carry the same body-size and timeout settings, because Certbot may convert a bootstrap config in place (this is how production was set up).
 
 ## Backup Deployment Files
 
@@ -425,11 +426,47 @@ worker, with a participant-checkable status page.
   `eager` drains the queue inline in the request (used by tests).
 - `app/main.py` lifespan recovers orphaned `processing` rows and starts/stops the
   worker in `worker` mode.
-- `upload_submission` now stores a valid upload as `queued`, reserves the slot
-  (supersede + consume replacement permission at enqueue time), and 303-redirects to
-  `GET /team`. The ownership-checked submission status page and JSON endpoint remain available.
+- `upload_submission` stores a valid upload as `accepted`, persists its runs, reserves
+  the slot (supersede + consume replacement permission), and only then marks it
+  `queued` (changed 2026-10-14 so the worker cannot claim a submission without runs),
+  then 303-redirects to `GET /team`. The ownership-checked submission status page and JSON endpoint remain available.
 - `app/templates/team_submission_status.html` renders the state badge, spinner + poll
   for in-flight states, and the metric table when evaluated.
+
+## Production Incident (2026-10-14)
+
+During the late submission period, team 3 could not submit a ~100 MB Subtask B file.
+
+Causes found:
+
+- The production server `.env` still had `MAX_UPLOAD_BYTES=52428800` (created from the
+  pre-2026-07-14 example), and `compose.*.yml` defaulted to the same 50 MB value.
+  Fixed on the server (`524288000`) and in the repository defaults.
+- Production Nginx was a Certbot-converted bootstrap config without proxy timeouts,
+  so requests over 60 s returned 504. The operator added `proxy_connect_timeout 60s`
+  and `proxy_send_timeout`/`proxy_read_timeout 600s`; templates now match.
+- The evaluation worker held an uncommitted audit insert (SQLite write lock) for the
+  whole scoring run, and uploads were committed as `queued` before their runs existed.
+  The worker claimed submission 18 within a second, the upload then failed with
+  `database is locked`, and evaluation failed with "Missing run rows". Fixed in
+  `1651e4d` (released as `v2026.10.14.0`).
+
+Operational notes:
+
+- The VPS has ~1 GB RAM and swaps heavily. Parsing needs roughly 6–7 MB RAM per MB of
+  submission file; a ~100 MB file took ~1.5 min to validate and ~11 min to evaluate
+  (a 40 MB file evaluated in 7 s). Files around 200 MB are expected to be very slow.
+- The upload route validates synchronously inside an `async` handler, so the whole app
+  is unresponsive while a large file is validated.
+- Rejected/failed rows 16–18 for team 3 remain as history; none is current.
+
+Follow-up candidates (after the late deadline):
+
+- Reduce parse memory (lighter line objects, parse once, single grouping pass for
+  run and query metrics) and move validation off the event loop.
+- Consider a larger VPS (2–4 GB RAM).
+- An upload request that crashes between insert and queueing leaves an `accepted`
+  row that is never evaluated; check the admin submissions page if that happens.
 
 ## Session Handoff State (2026-07-08)
 

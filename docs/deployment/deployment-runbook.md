@@ -260,11 +260,13 @@ sudo systemctl reload nginx
 
 If `128` is still too small, use `256`.
 
+If Certbot converted a bootstrap config in place instead of it being replaced with the HTTPS example (this is the case for the current production server), confirm the converted file still contains the settings below; the 2026-10-14 incident was caused by missing proxy timeouts and an old `MAX_UPLOAD_BYTES=52428800` in the server `.env`.
+
 Keep these settings in both final configs:
 
 - `client_max_body_size 500m`
 - proxy headers
-- proxy timeouts
+- proxy timeouts (`proxy_connect_timeout 60s`, `proxy_send_timeout 600s`, `proxy_read_timeout 600s`)
 - upstream ports `8001` and `8002`
 
 ## Staging Deployment

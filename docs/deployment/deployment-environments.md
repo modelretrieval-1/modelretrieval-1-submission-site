@@ -145,7 +145,7 @@ Recommended local upstream:
 | `DATABASE_PATH` | Yes outside local dev | SQLite database path inside the app container or local process. |
 | `STORAGE_ROOT` | Yes outside local dev | Directory for submissions, ground truth, bundles, and exports. |
 | `SECRET_KEY` | Yes | Session signing secret. Must be unique per environment. |
-| `MAX_UPLOAD_BYTES` | No | Upload size limit. Default is 500 MB. |
+| `MAX_UPLOAD_BYTES` | No | Upload size limit. Default is 500 MB. Server `.env` files created before 2026-07-14 may still set `52428800` (50 MB) and override the default; set `524288000` explicitly. |
 
 ## Secret Rules
 

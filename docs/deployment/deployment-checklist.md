@@ -35,6 +35,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Staging Nginx config has real hostname and proxies to `127.0.0.1:8001`.
 - [x] Production Nginx config has real hostname and proxies to `127.0.0.1:8002`.
 - [ ] Nginx config includes `client_max_body_size 500m` or larger.
+- [ ] Nginx config sets `proxy_read_timeout` and `proxy_send_timeout` to `600s` (the 60 s default returns 504 while a large upload is validated). Check this even when Certbot converted a bootstrap config in place.
 - [ ] Server `.env` sets `MAX_UPLOAD_BYTES=524288000` (an older `.env` copied before 2026-07-14 may still say `52428800`).
 - [ ] Nginx `server_names_hash_bucket_size` is increased if long hostnames make `nginx -t` fail.
 - [x] `sudo nginx -t` passes for the production HTTPS configuration.
@@ -48,7 +49,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Staging `.env` exists and is not committed.
 - [x] Production `.env` exists and is not committed.
 - [ ] Staging `APP_IMAGE` points to an existing GHCR image.
-- [x] Production `APP_IMAGE` points to immutable image tag `v2026.07.14.0`.
+- [x] Production `APP_IMAGE` points to an immutable image tag (currently `v2026.10.14.0`, deployed 2026-10-14).
 - [ ] Docker Compose user can pull `APP_IMAGE` from GHCR.
 - [ ] Staging and production use different `SECRET_KEY` values.
 - [ ] Staging and production use separate data directories.
@@ -68,7 +69,7 @@ This checklist is used before launch and before each production deployment.
 - [x] Staging `APP_IMAGE` was updated in remote `.env`.
 - [x] `https://submission-staging.modelretrieval-1.happysocial.net/health` returns success.
 - [x] Login page loads over HTTPS.
-- [ ] Upload-size behavior is not blocked by Nginx before the app's 500 MB validation rule.
+- [x] Upload-size behavior is not blocked by Nginx before the app's 500 MB validation rule (verified in production 2026-10-14 with a ~100 MB file).
 - [ ] Organizer login works.
 - [ ] Organizer can create a team.
 - [ ] Team login works.

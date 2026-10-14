@@ -303,13 +303,13 @@ Submit behavior:
 - Upload file.
 - Validate immediately (synchronous).
 - If validation fails, show validation errors on the upload page.
-- If validation passes, reserve the submission slot as `queued` and redirect (303) to the participant dashboard. Evaluation runs asynchronously and its latest state appears in the dashboard submission summary.
+- If validation passes, reserve the submission slot (briefly `accepted` while runs are stored, then `queued`) and redirect (303) to the participant dashboard. Evaluation runs asynchronously and its latest state appears in the dashboard submission summary.
 
 Submission status page (`/team/submissions/{id}`):
 
 - Ownership-checked; a team can only view its own submissions.
 - Shows a state badge: `queued` → `processing` → `evaluated` / `evaluation_failed`.
-- While `queued`/`processing`, shows a spinner and polls `/team/submissions/{id}/status` (JSON) every ~2 seconds, reloading when a terminal state is reached.
+- While `accepted`/`queued`/`processing`, shows a spinner and polls `/team/submissions/{id}/status` (JSON) every ~2 seconds, reloading when a terminal state is reached.
 - When `evaluated`, shows the run-level metric table.
 - Participants can leave and return later to check progress.
 

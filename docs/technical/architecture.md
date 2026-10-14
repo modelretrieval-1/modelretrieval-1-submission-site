@@ -11,7 +11,7 @@ The implemented stack matches this recommendation. Use `../../HANDOFF.md` for th
 Recommended stack:
 
 - FastAPI for the backend.
-- An in-process background worker thread for asynchronous submission evaluation, backed by a SQLite-managed queue (no external broker or extra service). Validation stays synchronous inside the upload request; only the slow scoring is deferred. Interrupted jobs are re-queued on startup, and an `eager` mode drains the queue inline for tests.
+- An in-process background worker thread for asynchronous submission evaluation, backed by a SQLite-managed queue (no external broker or extra service). Validation stays synchronous inside the upload request; only the slow scoring is deferred. Interrupted jobs are re-queued on startup, and an `eager` mode drains the queue inline for tests. The worker must not hold a SQLite write transaction while scoring (it commits before parsing), and connections use a 30-second busy timeout. Parsing keeps every line in memory (roughly 6–7 MB of RAM per MB of submission file), so on the current 1 GB VPS a ~100 MB file takes ~1.5 minutes to validate and ~10 minutes to evaluate because of swapping.
 - Jinja2 templates for server-rendered pages.
 - Bootstrap 5 for UI components and layout.
 - Local project CSS for task-specific visual polish.

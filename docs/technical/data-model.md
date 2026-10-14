@@ -27,15 +27,20 @@ Participant upload attempts use:
 - `rejected` for failed validation attempts.
 - `queued` for valid submissions awaiting asynchronous evaluation (slot reserved).
 - `processing` while the evaluation worker is scoring the submission.
-- `accepted` retained as a legacy value; new uploads move directly to `queued`.
+- `accepted` as a short-lived, non-claimable state while a valid upload's runs and
+  current-slot activation are being committed; the upload request then moves it to
+  `queued`. (Older rows may also carry `accepted` as a legacy value.)
 - `evaluated` for valid submissions with persisted metric rows.
 - `evaluation_failed` when a valid stored submission cannot be evaluated.
 
 Validation stays synchronous, so `rejected` is still returned on the upload
-request. Evaluation is asynchronous: a valid upload is stored as `queued`, then a
-background worker moves it `queued` → `processing` → `evaluated` /
-`evaluation_failed`. The `queued` and `processing` states reserve the current
-submission slot so a team cannot enqueue several files at once.
+request. Evaluation is asynchronous: a valid upload is inserted as `accepted`, its
+runs are persisted and it is activated as the current submission, and only then is
+it moved to `queued`. A background worker moves it `queued` → `processing` →
+`evaluated` / `evaluation_failed`. Queuing last guarantees the worker never claims a
+submission whose runs are not yet stored. The `accepted`, `queued`, and
+`processing` states reserve the current submission slot so a team cannot enqueue
+several files at once.
 
 Submissions store the selected `submission_period_id`, and the partial unique index enforces one current successful submission per team, subtask, and selected period. Older successful submissions can be retained as superseded history after an organizer-approved replacement upload.
 
