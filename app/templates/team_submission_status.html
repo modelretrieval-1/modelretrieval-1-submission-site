@@ -110,7 +110,7 @@
             .then(function (response) { return response.ok ? response.json() : null; })
             .then(function (data) {
               if (!data) { return; }
-              if (data.status !== "queued" && data.status !== "processing") {
+              if (data.status !== "accepted" && data.status !== "queued" && data.status !== "processing") {
                 window.clearInterval(timer);
                 window.location.reload();
               }

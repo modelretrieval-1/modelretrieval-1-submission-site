@@ -30,6 +30,7 @@ from app.submissions import (
     has_unused_resubmission_permission,
     is_submission_period_open,
     list_submission_periods,
+    mark_submission_status,
     persist_submission_runs,
     persist_validation_errors,
     store_submission_file,
@@ -39,7 +40,7 @@ from app.submissions import (
 from app.web import get_session_account, redirect, require_team, templates
 
 # Submission statuses that are still awaiting a terminal evaluation outcome.
-IN_FLIGHT_STATUSES = ("queued", "processing")
+IN_FLIGHT_STATUSES = ("accepted", "queued", "processing")
 
 
 def group_validation_errors(errors: tuple[SubmissionValidationError, ...]) -> tuple[dict, ...]:
@@ -407,20 +408,19 @@ async def upload_submission(
                 },
             )
         else:
-            # Validation passed. Reserve the slot as ``queued`` and defer the
-            # slow scoring to the evaluation worker; the file, runs, supersession,
-            # and replacement-permission consumption are all committed now.
+            # Keep the attempt non-claimable until its runs and current slot
+            # (including any replacement permission) have been committed.
             submission_id = create_submission_attempt(
                 connection,
                 internal_team_id=account.id,
                 subtask=subtask,
                 submission_period_id=period.id,
-                status="queued",
+                status="accepted",
                 original_filename=filename or "submission.txt",
                 file_size_bytes=len(content),
                 stored_file_path=stored_file.path if stored_file is not None else None,
                 file_sha256=stored_file.sha256 if stored_file is not None else None,
-                validation_summary="Queued for evaluation.",
+                validation_summary="Preparing for evaluation.",
                 ground_truth_version_id=validation_result.ground_truth_version_id,
             )
             persist_submission_runs(
@@ -443,6 +443,12 @@ async def upload_submission(
                 resubmission_permission_id=resubmission_permission_id,
                 organizer_id=permission.granted_by_organizer_id if permission else None,
                 reason=permission.reason if permission else None,
+            )
+            mark_submission_status(
+                connection,
+                submission_id=submission_id,
+                status="queued",
+                validation_summary="Queued for evaluation.",
             )
             record_audit_event(
                 connection,

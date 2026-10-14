@@ -42,6 +42,8 @@ def seed_accounts(settings: Settings, *, subtasks: set[str] | None = None):
             subtasks=subtasks or {"A"},
             created_by_organizer_id=organizer.id,
         )
+        # Keep upload tests independent of the real competition deadlines.
+        connection.execute("UPDATE submission_periods SET deadline_at_jst = '2099-12-31 23:59:00'")
     return organizer, team
 
 

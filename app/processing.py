@@ -60,6 +60,8 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
             entity_type="submission",
             entity_id=submission_id,
         )
+        # Release the audit write transaction before slow file parsing/scoring.
+        connection.commit()
 
         try:
             if not detail.stored_file_path:
@@ -89,6 +91,7 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
                     entity_id=submission_id,
                     metadata={"reason": "ground_truth_unavailable"},
                 )
+                connection.commit()
                 return
 
             metrics = evaluate_submission(
@@ -120,6 +123,7 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
                     "ground_truth_version_id": ground_truth_version.id,
                 },
             )
+            connection.commit()
         except Exception as exc:  # noqa: BLE001 - any failure must land the submission in a terminal state
             logger.exception("Evaluation failed for submission %s", submission_id)
             mark_submission_status(
@@ -137,6 +141,7 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
                 entity_id=submission_id,
                 metadata={"reason": type(exc).__name__},
             )
+            connection.commit()
 
 
 class EvaluationWorker(threading.Thread):
