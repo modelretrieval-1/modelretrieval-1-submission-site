@@ -10,7 +10,7 @@ The project is in **Sprint 6: Production Hardening**.
 
 The planned core app scope is implemented: participant upload, validation, evaluation, score display, organizer review, private leaderboard, exports, submission bundles, audit logging with an organizer-only audit viewer, server-rendered Bootstrap UI, and the Sprint 6A application-shell redesign.
 
-Staging has been tested successfully, and production was deployed successfully from immutable tag `v2026.07.14.0` with Nginx/Certbot HTTPS. The current production release is `v2026.10.14.0`. The remaining focus is post-deploy operational verification, backup/restore readiness, and final browser/E2E regression coverage.
+Staging has been tested successfully, and production was deployed successfully from immutable tag `v2026.07.14.0` with Nginx/Certbot HTTPS. The current production release is `v2026.10.14.1` (UI redesign). The remaining focus is post-deploy operational verification, backup/restore readiness, and final browser/E2E regression coverage.
 
 Use [HANDOFF.md](HANDOFF.md) for the detailed implementation inventory and latest continuation notes.
 
@@ -18,7 +18,7 @@ Current test status:
 
 ```text
 uv run --extra dev pytest
-181 passed
+188 passed
 
 uv run --extra dev ruff check .
 All checks passed
@@ -68,6 +68,14 @@ Run the standard-library Sprint 0 tests without installing dependencies:
 
 ```bash
 uv run python -m unittest discover -s tests
+```
+
+Preview every page with demo data and capture desktop/tablet/mobile screenshots (see `tools/ui_preview/README.md`):
+
+```bash
+uv run --extra dev python tools/ui_preview/seed_demo.py
+uv run --extra dev python tools/ui_preview/serve.py
+uv run --extra dev python tools/ui_preview/screenshots.py --label current
 ```
 
 Lock dependencies:

@@ -126,7 +126,8 @@ The repository-level `deployment/` directory is reserved for runtime deployment 
 - Staging deploys automatically from `main`.
 - Production deploys from immutable `v*` tags.
 - Production deployment from immutable tag `v2026.07.14.0` completed successfully on July 14, 2026.
-- Current production image: `v2026.10.14.0` (deployed 2026-10-14; upload-limit and SQLite-lock incident fix, see "Production Incident (2026-10-14)").
+- Current production image: `v2026.10.14.1` (deployed 2026-10-14 23:46 JST): UI redesign (`docs/ui/ui-redesign-2026-10.md`), lifecycle-summary fix, and migration `20261014_0004`. The previous release `v2026.10.14.0` carried the upload-limit and SQLite-lock incident fix (see "Production Incident (2026-10-14)").
+- Rolling back below `v2026.10.14.1` requires `alembic downgrade 20260708_0003` (run with the current image) before redeploying the older tag, because older images refuse to start on a newer schema revision.
 - Production HTTPS is active at `submission.modelretrieval-1.happysocial.net` using host Nginx and a Certbot-issued certificate.
 - The VPS deploy user should be passwordless and use SSH key authentication.
 - Staging and production may use the same SSH deploy key, but they must not share `.env`, `SECRET_KEY`, database, storage directory, or Compose project name.
@@ -185,7 +186,7 @@ Latest verified commands:
 
 ```text
 uv run --extra dev pytest
-181 passed   (2026-10-14)
+188 passed   (2026-10-14)
 
 uv run --extra dev ruff check app tests
 All checks passed

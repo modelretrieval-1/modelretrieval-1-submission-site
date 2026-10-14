@@ -49,7 +49,7 @@ This checklist is used before launch and before each production deployment.
 - [ ] Staging `.env` exists and is not committed.
 - [x] Production `.env` exists and is not committed.
 - [ ] Staging `APP_IMAGE` points to an existing GHCR image.
-- [x] Production `APP_IMAGE` points to an immutable image tag (currently `v2026.10.14.0`, deployed 2026-10-14).
+- [x] Production `APP_IMAGE` points to an immutable image tag (currently `v2026.10.14.1`, deployed 2026-10-14).
 - [ ] Docker Compose user can pull `APP_IMAGE` from GHCR.
 - [ ] Staging and production use different `SECRET_KEY` values.
 - [ ] Staging and production use separate data directories.
