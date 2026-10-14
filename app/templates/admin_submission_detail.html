@@ -1,332 +1,306 @@
 {% extends "base.html" %}
-
+{% from "_ui.html" import notice, status_badge, page_header, section_card, subtask_tag, period_tag, state_tag, tag, severity_badge %}
+{% set page_title = "Submission " ~ submission.submission_id %}
 {% block title %}Submission {{ submission.submission_id }} - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    {% if success %}
-      <div class="alert alert-success" role="status">{{ success }}</div>
-    {% endif %}
-    {% if error %}
-      <div class="alert alert-danger" role="alert">{{ error }}</div>
-    {% endif %}
+  {% if success %}
+    {% call notice("success", "status") %}{{ success }}{% endcall %}
+  {% endif %}
+  {% if error %}
+    {% call notice("danger", "alert") %}{{ error }}{% endcall %}
+  {% endif %}
 
-    <div class="page-header">
-      <div>
-        <h1>Submission {{ submission.submission_id }}</h1>
-        <p>{{ submission.team_display_name }} ({{ submission.team_public_id }}) / Subtask {{ submission.subtask }} / {{ submission.period_name|capitalize }}</p>
-      </div>
-      <div class="header-actions">
-        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Back to submissions</a>
-      </div>
-    </div>
+  {% call page_header("Submission " ~ submission.submission_id, submission.team_display_name ~ " (" ~ submission.team_public_id ~ ")", eyebrow="Submission detail") %}
+    <a class="btn btn-outline-secondary" href="/admin/submissions">Back to submissions</a>
+  {% endcall %}
 
-    <div class="section-header">
-      <div>
-        <h2>Submission Metadata</h2>
-        <p>Stored file, selected period, status, and evaluation context.</p>
-      </div>
-    </div>
-    <dl class="detail-list">
-      <dt>Subtask</dt>
-      <dd><span class="badge text-bg-info">Subtask {{ submission.subtask }}</span></dd>
-      <dt>Period</dt>
-      <dd><span class="badge text-bg-{% if submission.period_name == 'normal' %}primary{% else %}info{% endif %}">{{ submission.period_name }}</span></dd>
-      <dt>Status</dt>
-      <dd>
-        <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
-          {{ submission.status }}
-        </span>
-        {% if submission.is_current %}
-          <span class="badge text-bg-primary">current</span>
-        {% elif submission.superseded_at_jst %}
-          <span class="badge text-bg-secondary">superseded</span>
-        {% endif %}
-      </dd>
+  {% call section_card("Submission Metadata", "Stored file, selected period, status, and evaluation context.", id="metadataCard") %}
+    <dl class="def-grid">
+      <div class="def"><dt>Subtask</dt><dd>Subtask {{ submission.subtask }}</dd></div>
+      <div class="def"><dt>Period</dt><dd>{{ submission.period_name|capitalize }}</dd></div>
+      <div class="def"><dt>Status</dt><dd class="def-badges">{{ status_badge(submission.status) }} {{ state_tag(submission) }}</dd></div>
+      <div class="def"><dt>Submitted</dt><dd class="num">{{ submission.submitted_at_jst }} JST</dd></div>
+      <div class="def def-wide"><dt>File</dt><dd class="break">{{ submission.original_filename }}</dd></div>
+      <div class="def"><dt>Size</dt><dd class="num">{{ submission.file_size_bytes }} bytes</dd></div>
+      <div class="def"><dt>Ground Truth Version</dt><dd>{{ submission.ground_truth_version_id or "None" }}</dd></div>
       {% if submission.superseded_at_jst %}
-        <dt>Superseded</dt>
-        <dd>
-          {{ submission.superseded_at_jst }} JST
-          {% if submission.superseded_by_submission_id %}
-            by submission {{ submission.superseded_by_submission_id }}
-          {% endif %}
-          {% if submission.superseded_reason %}
-            <span class="small-muted d-block">{{ submission.superseded_reason }}</span>
-          {% endif %}
-        </dd>
+        <div class="def def-wide">
+          <dt>Superseded</dt>
+          <dd>
+            <span class="num">{{ submission.superseded_at_jst }} JST</span>
+            {% if submission.superseded_by_submission_id %}
+              by submission {{ submission.superseded_by_submission_id }}
+            {% endif %}
+            {% if submission.superseded_reason %}
+              <span class="small-muted d-block">{{ submission.superseded_reason }}</span>
+            {% endif %}
+          </dd>
+        </div>
       {% endif %}
-      <dt>File</dt>
-      <dd>{{ submission.original_filename }}</dd>
-      <dt>Submitted</dt>
-      <dd>{{ submission.submitted_at_jst }} JST</dd>
-      <dt>Size</dt>
-      <dd>{{ submission.file_size_bytes }} bytes</dd>
-      <dt>SHA-256</dt>
-      <dd>{{ submission.file_sha256 or "Not stored" }}</dd>
-      <dt>Stored Path</dt>
-      <dd>{{ submission.stored_file_path or "Not stored" }}</dd>
-      <dt>Ground Truth Version</dt>
-      <dd>{{ submission.ground_truth_version_id or "None" }}</dd>
-      <dt>Summary</dt>
-      <dd>{{ submission.validation_summary or "" }}</dd>
+      <div class="def def-full"><dt>SHA-256</dt><dd><code class="hash" title="{{ submission.file_sha256 or 'Not stored' }}">{{ submission.file_sha256 or "Not stored" }}</code></dd></div>
+      <div class="def def-full"><dt>Stored Path</dt><dd><code class="hash" title="{{ submission.stored_file_path or 'Not stored' }}">{{ submission.stored_file_path or "Not stored" }}</code></dd></div>
+      <div class="def def-full"><dt>Summary</dt><dd>{{ submission.validation_summary or "" }}</dd></div>
     </dl>
+  {% endcall %}
 
-    <div class="section-header detail-section-header">
+  <section class="ui-card" aria-labelledby="runsHeading">
+    <div class="ui-card-head">
       <div>
-        <h2>Replacement Upload</h2>
-        <p>Grant a one-time permission for this team, subtask, and period.</p>
+        <h2 id="runsHeading">Runs</h2>
+        <p>RunID metadata recorded for accepted submissions.</p>
       </div>
     </div>
+    <div class="ui-card-body flush">
+      {% if runs %}
+        <div class="table-wrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">RunID</th>
+                <th scope="col" class="num-col">Lines</th>
+                <th scope="col" class="num-col">Queries</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for run in runs %}
+                <tr>
+                  <th scope="row" class="review-identifying">{{ run.run_id }}</th>
+                  <td class="num-col num">{{ run.line_count }}</td>
+                  <td class="num-col num">{{ run.query_count }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state card-empty">No run metadata recorded.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="ui-card" aria-labelledby="metricsHeading">
+    <div class="ui-card-head">
+      <div>
+        <h2 id="metricsHeading">Metrics</h2>
+        <p>Persisted run-level evaluation results.</p>
+      </div>
+    </div>
+    <div class="ui-card-body flush">
+      {% if metric_table.rows %}
+        <div class="table-wrap">
+          <table class="table table-hover metric-table">
+            <thead>
+              <tr>
+                <th scope="col" class="review-identifying">RunID</th>
+                {% for column in metric_table.columns %}
+                  <th scope="col" class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in metric_table.rows %}
+                <tr>
+                  <th scope="row" class="review-identifying">{{ row.run_id }}</th>
+                  {% for column in metric_table.columns %}
+                    {% set value = row.metric_values.get(column.key) %}
+                    <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state card-empty">No metrics recorded.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="ui-card" aria-labelledby="queryMetricsHeading">
+    <div class="ui-card-head">
+      <div>
+        <h2 id="queryMetricsHeading">Per-Query Metrics</h2>
+        <p>Organizer-only diagnostic metric details by run and query.</p>
+      </div>
+    </div>
+    <div class="ui-card-body flush">
+      {% if query_metric_table.rows %}
+        <div class="table-wrap metric-table-scroll">
+          <table class="table table-hover metric-table">
+            <thead>
+              <tr>
+                <th scope="col" class="review-identifying">RunID</th>
+                <th scope="col">Query</th>
+                {% for column in query_metric_table.columns %}
+                  <th scope="col" class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in query_metric_table.rows %}
+                <tr>
+                  <th scope="row" class="review-identifying">{{ row.run_id }}</th>
+                  <td>{{ row.topic_id }}</td>
+                  {% for column in query_metric_table.columns %}
+                    {% set value = row.metric_values.get(column.key) %}
+                    <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state card-empty">No per-query metrics recorded.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="ui-card" aria-labelledby="errorsHeading">
+    <div class="ui-card-head">
+      <div>
+        <h2 id="errorsHeading">Validation Errors</h2>
+        <p>Line-level validation errors for rejected attempts.</p>
+      </div>
+    </div>
+    <div class="ui-card-body flush">
+      {% if validation_errors %}
+        <div class="table-wrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col" class="num-col">Line</th>
+                <th scope="col">Field</th>
+                <th scope="col">Code</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for error in validation_errors %}
+                <tr>
+                  <td class="num-col num">{{ error.line_number or "" }}</td>
+                  <td>{{ error.field_name or "" }}</td>
+                  <td><code>{{ error.error_code }}</code></td>
+                  <td>{{ severity_badge(error.severity) }}</td>
+                  <td>{{ error.message }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state card-empty">No validation errors recorded.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="ui-card" aria-labelledby="historyHeading">
+    <div class="ui-card-head">
+      <div>
+        <h2 id="historyHeading">Submission History</h2>
+        <p>Current and superseded attempts for this team, subtask, and period.</p>
+      </div>
+    </div>
+    <div class="ui-card-body flush">
+      {% if history %}
+        <div class="table-wrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Status</th>
+                <th scope="col">State</th>
+                <th scope="col">File</th>
+                <th scope="col">Submitted</th>
+                <th scope="col"><span class="visually-hidden">Detail</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in history %}
+                <tr{% if item.submission_id == submission.submission_id %} class="is-self" aria-current="true"{% endif %}>
+                  <td class="num">{{ item.submission_id }}</td>
+                  <td>{{ status_badge(item.status) }}</td>
+                  <td>{{ state_tag(item) }}</td>
+                  <td class="break">{{ item.original_filename }}</td>
+                  <td class="num nowrap">{{ item.submitted_at_jst }} JST</td>
+                  <td><a class="btn btn-outline-secondary btn-sm" href="/admin/submissions/{{ item.submission_id }}" aria-label="Open submission {{ item.submission_id }}">Open</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-state card-empty">No related submission history recorded.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if resubmission_permissions %}
+    <section class="ui-card" aria-labelledby="permissionsHeading">
+      <div class="ui-card-head">
+        <div>
+          <h2 id="permissionsHeading">Replacement Permissions</h2>
+          <p>Organizer grants and their usage for this team, subtask, and period.</p>
+        </div>
+      </div>
+      <div class="ui-card-body flush">
+        <div class="table-wrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Granted</th>
+                <th scope="col">By</th>
+                <th scope="col">Status</th>
+                <th scope="col">Used By</th>
+                <th scope="col">Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for permission in resubmission_permissions %}
+                <tr>
+                  <td class="num nowrap">{{ permission.granted_at_jst }} JST</td>
+                  <td>{{ permission.granted_by_display_name }}</td>
+                  <td>{% if permission.is_used %}{{ tag("Used") }}{% else %}{{ tag("Pending", "info") }}{% endif %}</td>
+                  <td>
+                    {% if permission.used_by_submission_id %}
+                      <a href="/admin/submissions/{{ permission.used_by_submission_id }}">Submission {{ permission.used_by_submission_id }}</a>
+                    {% else %}
+                      Not used
+                    {% endif %}
+                  </td>
+                  <td>{{ permission.reason or "" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+  {% call section_card("Replacement Upload", "Grant a one-time permission for this team, subtask, and period.", id="replacementCard", extra_class="action-card") %}
     {% set pending_permission = resubmission_permissions|selectattr("is_used", "equalto", false)|first %}
     {% if pending_permission %}
-      <p class="alert alert-info">
+      {% call notice("info", "status") %}
         One-time replacement permission is already pending. Previous participant-visible scores are hidden until the replacement is completed. Granted by {{ pending_permission.granted_by_display_name }} at {{ pending_permission.granted_at_jst }} JST.
-      </p>
+      {% endcall %}
     {% elif submission.is_current and submission.status in ("accepted", "evaluated", "evaluation_failed") %}
-      <div class="alert alert-warning" role="alert">
+      {% call notice("warning", "alert") %}
         This is a one-time replacement permission. Once granted, the participant’s previous scores are hidden while they prepare a replacement. A failed validation does not consume the permission; a successful replacement supersedes this submission.
-      </div>
+      {% endcall %}
       <form method="post" action="/admin/submissions/{{ submission.submission_id }}/resubmission" class="stacked-form" onsubmit="return window.confirm('Grant one replacement upload for this team, subtask, and period? Their previous scores will be hidden while the replacement is pending.');">
         <div>
           <label class="form-label" for="resubmission_reason">Reason</label>
           <textarea class="form-control" id="resubmission_reason" name="reason" rows="2" placeholder="Optional organizer note"></textarea>
         </div>
-        <button class="btn btn-outline-primary btn-sm" type="submit">Allow replacement upload</button>
+        <div>
+          <button class="btn btn-outline-danger" type="submit">Allow replacement upload</button>
+        </div>
       </form>
     {% else %}
-      <p class="empty-state">Replacement upload can only be granted for a current successful submission.</p>
+      <p class="empty-state mb-0">Replacement upload can only be granted for a current successful submission.</p>
     {% endif %}
-
-    <div class="section-header detail-section-header">
-      <div>
-        <h2>Submission History</h2>
-        <p>Current and superseded attempts for this team, subtask, and period.</p>
-      </div>
-    </div>
-    {% if history %}
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>ID</th>
-              <th>Status</th>
-              <th>State</th>
-              <th>File</th>
-              <th>Submitted</th>
-              <th>Detail</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in history %}
-              <tr>
-                <td>{{ item.submission_id }}</td>
-                <td>{{ item.status }}</td>
-                <td>
-                  {% if item.is_current %}
-                    <span class="badge text-bg-primary">current</span>
-                  {% elif item.superseded_at_jst %}
-                    <span class="badge text-bg-secondary">superseded</span>
-                  {% else %}
-                    <span class="badge text-bg-light text-dark">attempt</span>
-                  {% endif %}
-                </td>
-                <td>{{ item.original_filename }}</td>
-                <td>{{ item.submitted_at_jst }} JST</td>
-                <td><a class="btn btn-outline-primary btn-sm" href="/admin/submissions/{{ item.submission_id }}">Open</a></td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="empty-state">No related submission history recorded.</p>
-    {% endif %}
-
-    {% if resubmission_permissions %}
-      <div class="section-header detail-section-header">
-        <div>
-          <h2>Replacement Permissions</h2>
-          <p>Organizer grants and their usage for this team, subtask, and period.</p>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Granted</th>
-              <th>By</th>
-              <th>Status</th>
-              <th>Used By</th>
-              <th>Reason</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for permission in resubmission_permissions %}
-              <tr>
-                <td>{{ permission.granted_at_jst }} JST</td>
-                <td>{{ permission.granted_by_display_name }}</td>
-                <td>
-                  <span class="badge text-bg-{% if permission.is_used %}secondary{% else %}info{% endif %}">
-                    {% if permission.is_used %}used{% else %}pending{% endif %}
-                  </span>
-                </td>
-                <td>
-                  {% if permission.used_by_submission_id %}
-                    <a href="/admin/submissions/{{ permission.used_by_submission_id }}">Submission {{ permission.used_by_submission_id }}</a>
-                  {% else %}
-                    Not used
-                  {% endif %}
-                </td>
-                <td>{{ permission.reason or "" }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% endif %}
-
-    <div class="section-header detail-section-header">
-      <div>
-        <h2>Runs</h2>
-        <p>RunID metadata recorded for accepted submissions.</p>
-      </div>
-    </div>
-    {% if runs %}
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>RunID</th>
-              <th>Lines</th>
-              <th>Queries</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for run in runs %}
-              <tr>
-                <td>{{ run.run_id }}</td>
-                <td>{{ run.line_count }}</td>
-                <td>{{ run.query_count }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="empty-state">No run metadata recorded.</p>
-    {% endif %}
-
-    <div class="section-header detail-section-header">
-      <div>
-        <h2>Metrics</h2>
-        <p>Persisted run-level evaluation results.</p>
-      </div>
-    </div>
-    {% if metric_table.rows %}
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle metric-table">
-          <thead class="table-light">
-            <tr>
-              <th>RunID</th>
-              {% for column in metric_table.columns %}
-                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in metric_table.rows %}
-              <tr>
-                <td>{{ row.run_id }}</td>
-                {% for column in metric_table.columns %}
-                  {% set value = row.metric_values.get(column.key) %}
-                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
-                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
-                  </td>
-                {% endfor %}
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="empty-state">No metrics recorded.</p>
-    {% endif %}
-
-    <div class="section-header detail-section-header">
-      <div>
-        <h2>Per-Query Metrics</h2>
-        <p>Organizer-only diagnostic metric details by run and query.</p>
-      </div>
-    </div>
-    {% if query_metric_table.rows %}
-      <div class="table-wrap metric-table-scroll">
-        <table class="table table-sm table-hover align-middle metric-table">
-          <thead class="table-light">
-            <tr>
-              <th>RunID</th>
-              <th>Query</th>
-              {% for column in query_metric_table.columns %}
-                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in query_metric_table.rows %}
-              <tr>
-                <td>{{ row.run_id }}</td>
-                <td>{{ row.topic_id }}</td>
-                {% for column in query_metric_table.columns %}
-                  {% set value = row.metric_values.get(column.key) %}
-                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
-                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
-                  </td>
-                {% endfor %}
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="empty-state">No per-query metrics recorded.</p>
-    {% endif %}
-
-    <div class="section-header detail-section-header">
-      <div>
-        <h2>Validation Errors</h2>
-        <p>Line-level validation errors for rejected attempts.</p>
-      </div>
-    </div>
-    {% if validation_errors %}
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Line</th>
-              <th>Field</th>
-              <th>Code</th>
-              <th>Severity</th>
-              <th>Message</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for error in validation_errors %}
-              <tr>
-                <td>{{ error.line_number or "" }}</td>
-                <td>{{ error.field_name or "" }}</td>
-                <td>{{ error.error_code }}</td>
-                <td>
-                  <span class="badge text-bg-{% if error.severity == 'warning' %}warning{% else %}danger{% endif %}">
-                    {{ error.severity }}
-                  </span>
-                </td>
-                <td>{{ error.message }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="empty-state">No validation errors recorded.</p>
-    {% endif %}
-  </section>
+  {% endcall %}
 {% endblock %}

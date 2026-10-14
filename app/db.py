@@ -243,12 +243,13 @@ def _column_names(connection: sqlite3.Connection, table_name: str) -> set[str]:
 
 def _schema_revision_for_unversioned_database(
     connection: sqlite3.Connection,
-    config: Config,
 ) -> str:
     table_names = _table_names(connection)
     submission_columns = _column_names(connection, "submissions")
     if "resubmission_permissions" in table_names and "is_current" in submission_columns:
-        return _head_revision(config)
+        # These tables/columns establish revision 0002, not completion of later
+        # index or data migrations. Run those migrations rather than skip them.
+        return "20260706_0002"
     return "20260706_0001"
 
 
@@ -274,7 +275,7 @@ def _stamp_existing_baseline_if_needed(database_path: Path, config: Config) -> N
         current_revision = _current_revision(connection)
         if current_revision is not None:
             return
-        stamp_revision = _schema_revision_for_unversioned_database(connection, config)
+        stamp_revision = _schema_revision_for_unversioned_database(connection)
 
     command.stamp(config, stamp_revision, purge=True)
 

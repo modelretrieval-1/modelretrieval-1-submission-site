@@ -110,7 +110,7 @@ def upload_valid(client: TestClient, team_id: str, password: str) -> str:
     return response.headers["location"]
 
 
-def test_worker_mode_leaves_submission_queued_until_drained():
+def test_worker_mode_updates_summary_through_evaluation():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp, evaluation_mode="worker")
         organizer, team, _other = seed_accounts(settings)
@@ -122,10 +122,13 @@ def test_worker_mode_leaves_submission_queued_until_drained():
         # Validation passed synchronously, but scoring is deferred: the slot is
         # reserved as queued and no worker is running in this test.
         with connect(settings.database_path) as connection:
-            submission = connection.execute("SELECT id, status FROM submissions").fetchone()
+            submission = connection.execute(
+                "SELECT id, status, validation_summary FROM submissions"
+            ).fetchone()
             status = submission["status"]
             status_location = f"/team/submissions/{submission['id']}"
         assert status == "queued"
+        assert submission["validation_summary"] == "Queued for evaluation."
 
         status_page = client.get(status_location)
         assert status_page.status_code == 200
@@ -136,9 +139,17 @@ def test_worker_mode_leaves_submission_queued_until_drained():
         assert queued_json.status_code == 200
         assert queued_json.json()["status"] == "queued"
 
-        # Draining the queue evaluates the submission to a terminal state.
-        processed = run_pending_evaluations(settings)
-        assert processed == 1
+        with connect(settings.database_path) as connection:
+            assert claim_next_queued_submission(connection) == submission["id"]
+        with connect(settings.database_path) as connection:
+            claimed = connection.execute(
+                "SELECT status, validation_summary FROM submissions"
+            ).fetchone()
+            assert tuple(claimed) == ("processing", "Evaluating.")
+            assert claim_next_queued_submission(connection) is None
+
+        processing.process_submission(settings, submission["id"])
+        assert run_pending_evaluations(settings) == 0
 
         evaluated_json = client.get(f"{status_location}/status")
         assert evaluated_json.json()["status"] == "evaluated"
@@ -149,6 +160,10 @@ def test_worker_mode_leaves_submission_queued_until_drained():
         assert "1.0000" in evaluated_page.text
 
         with connect(settings.database_path) as connection:
+            evaluated = connection.execute(
+                "SELECT status, validation_summary FROM submissions"
+            ).fetchone()
+            assert tuple(evaluated) == ("evaluated", "Evaluated.")
             metric_count = connection.execute(
                 "SELECT COUNT(*) FROM evaluation_results"
             ).fetchone()[0]
@@ -227,6 +242,9 @@ def test_processing_allows_other_writers_during_parsing_and_scoring(monkeypatch,
                     "SELECT COUNT(*) FROM audit_events "
                     "WHERE event_type = 'submission_evaluation_started'"
                 ).fetchone()[0] == 1
+                assert writer.execute(
+                    "SELECT status, validation_summary FROM submissions"
+                ).fetchone() == ("processing", "Evaluating.")
                 record_audit_event(
                     writer, actor_type="system", actor_id=None, event_type="concurrent_write"
                 )
@@ -270,9 +288,20 @@ def test_processing_commits_terminal_audit_before_context_exit(monkeypatch, outc
             def __exit__(self, *args):
                 assert not self.in_transaction
                 with connect(settings.database_path) as observer:
-                    status = observer.execute("SELECT status FROM submissions").fetchone()[0]
+                    row = observer.execute(
+                        "SELECT status, validation_summary FROM submissions"
+                    ).fetchone()
+                    status = row["status"]
                     expected = "evaluated" if outcome == "evaluated" else "evaluation_failed"
                     assert status == expected
+                    summaries = {
+                        "evaluated": "Evaluated.",
+                        "scoring_failure": "Evaluation failed: Scoring failed",
+                        "ground_truth_unavailable": (
+                            "Evaluation failed: ground truth version is unavailable."
+                        ),
+                    }
+                    assert row["validation_summary"] == summaries[outcome]
                     assert observer.execute(
                         "SELECT event_type FROM audit_events ORDER BY id DESC LIMIT 1"
                     ).fetchone()[0] == f"submission_{status}"
@@ -328,16 +357,17 @@ def test_recovery_requeues_interrupted_processing_submissions():
         with connect(settings.database_path) as connection:
             submission_id = connection.execute("SELECT id FROM submissions").fetchone()["id"]
             # Simulate a worker that claimed the row and then crashed.
-            mark_submission_status(connection, submission_id=submission_id, status="processing")
+            assert claim_next_queued_submission(connection) == submission_id
 
         requeued = recover_orphaned_submissions(settings)
         assert requeued == 1
 
         with connect(settings.database_path) as connection:
-            status = connection.execute(
-                "SELECT status FROM submissions WHERE id = ?", (submission_id,)
-            ).fetchone()["status"]
-        assert status == "queued"
+            row = connection.execute(
+                "SELECT status, validation_summary FROM submissions WHERE id = ?", (submission_id,)
+            ).fetchone()
+        assert tuple(row) == ("queued", "Queued for evaluation.")
+        assert recover_orphaned_submissions(settings) == 0
 
         assert run_pending_evaluations(settings) == 1
         with connect(settings.database_path) as connection:

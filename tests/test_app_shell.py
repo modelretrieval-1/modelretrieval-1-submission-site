@@ -1,3 +1,4 @@
+import re
 import tempfile
 from pathlib import Path
 
@@ -254,12 +255,26 @@ def test_team_dashboard_upload_button_lets_team_choose_subtask():
                 subtasks={"A", "B"},
                 created_by_organizer_id=organizer.id,
             )
+            connection.execute(
+                "UPDATE submission_periods SET deadline_at_jst = '2099-12-31 23:59:00'"
+            )
         client = TestClient(create_app(settings))
         login(client, "team-002", team.password)
 
         response = client.get("/team")
 
         assert response.status_code == 200
-        assert 'class="btn btn-primary dropdown-toggle"' in response.text
-        assert 'href="/team/submissions/A/new">Subtask A</a>' in response.text
-        assert 'href="/team/submissions/B/new">Subtask B</a>' in response.text
+        sidebar = response.text.split('<aside class="app-sidebar"', 1)[1].split('</aside>', 1)[0]
+        for subtask in ("A", "B"):
+            assert f'href="/team/submissions/{subtask}/new">Subtask {subtask}</a>' in sidebar
+            card = re.search(
+                rf'<section[^>]*data-subtask="{subtask}">(.*?)</section>',
+                response.text,
+                re.DOTALL,
+            )
+            assert card is not None
+            assert (
+                f'class="btn btn-primary btn-sm" href="/team/submissions/{subtask}/new">'
+                'Upload</a>'
+            ) in card.group(1)
+        assert 'class="btn btn-primary dropdown-toggle"' not in response.text

@@ -1,34 +1,25 @@
 {% extends "base.html" %}
+{% from "_ui.html" import notice, page_header, section_card, subtask_tag, active_badge %}
 
+{% set page_title = "Teams" %}
 {% block title %}Teams - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    <div class="page-header">
-      <div>
-        <h1>Teams</h1>
-        <p>Register participant teams, assign eligible subtasks, and rotate team passwords.</p>
-      </div>
+  {{ page_header("Teams", "Register participant teams, assign eligible subtasks, and rotate team passwords.") }}
+
+  {% if error %}
+    {% call notice("danger", "alert") %}{{ error }}{% endcall %}
+  {% endif %}
+
+  {% if generated_password %}
+    <div class="alert alert-success secret-alert" role="status">
+      <h2>Generated Password</h2>
+      <p>Team: <strong>{{ generated_team_id }}</strong>. Copy it now; it is shown only once.</p>
+      <code>{{ generated_password }}</code>
     </div>
+  {% endif %}
 
-    {% if error %}
-      <div class="alert alert-danger" role="alert">{{ error }}</div>
-    {% endif %}
-
-    {% if generated_password %}
-      <div class="alert alert-success" role="status">
-        <h2>Generated Password</h2>
-        <p>Team: <strong>{{ generated_team_id }}</strong></p>
-        <code>{{ generated_password }}</code>
-      </div>
-    {% endif %}
-
-    <div class="section-header">
-      <div>
-        <h2>Add Team</h2>
-        <p>Create a registered participant account and show its generated password once.</p>
-      </div>
-    </div>
+  {% call section_card("Add Team", "Create a registered participant account and show its generated password once.", id="addTeam") %}
     <form method="post" action="/admin/teams" class="form-grid">
       <div>
         <label class="form-label" for="team_id">Team ID</label>
@@ -38,75 +29,67 @@
         <label class="form-label" for="display_name">Display Name</label>
         <input class="form-control" id="display_name" type="text" name="display_name" required>
       </div>
-      <fieldset class="border rounded p-3">
+      <fieldset class="choice-group">
         <legend>Registered Subtasks</legend>
         <label class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" name="subtasks" value="A">
-          <span class="form-check-label">
-          Subtask A
-          </span>
+          <span class="form-check-label">Subtask A</span>
         </label>
         <label class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" name="subtasks" value="B">
-          <span class="form-check-label">
-          Subtask B
-          </span>
+          <span class="form-check-label">Subtask B</span>
         </label>
       </fieldset>
-      <button class="btn btn-primary" type="submit">Add Team</button>
+      <div class="form-submit">
+        <button class="btn btn-primary" type="submit">Add team</button>
+      </div>
     </form>
-  </section>
+  {% endcall %}
 
-  <section class="panel">
-    <div class="section-header">
+  <section class="ui-card" aria-labelledby="teamsHeading">
+    <div class="ui-card-head">
       <div>
-        <h2>Registered Teams</h2>
+        <h2 id="teamsHeading">Registered Teams</h2>
         <p>Showing {{ teams|length }} team{% if teams|length != 1 %}s{% endif %}.</p>
       </div>
     </div>
-    <div class="table-wrap">
-      <table class="table table-sm table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Team ID</th>
-            <th>Name</th>
-            <th>Subtasks</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Last Login</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for team in teams %}
+    <div class="ui-card-body flush">
+      <div class="table-wrap">
+        <table class="table table-hover">
+          <thead>
             <tr>
-              <td>{{ team.team_id }}</td>
-              <td>{{ team.display_name }}</td>
-              <td>
-                {% for subtask in team.subtasks %}
-                  <span class="badge text-bg-info tag">Subtask {{ subtask }}</span>
-                {% endfor %}
-              </td>
-              <td>
-                <span class="badge status-badge text-bg-{% if team.is_active %}success{% else %}secondary{% endif %}">
-                  {{ "Active" if team.is_active else "Disabled" }}
-                </span>
-              </td>
-              <td>{{ team.created_at }}</td>
-              <td>{{ team.last_login_at or "Never" }}</td>
-              <td>
-                <form method="post" action="/admin/teams/{{ team.team_id }}/password">
-                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate password</button>
-                </form>
-              </td>
+              <th scope="col" class="review-identifying">Team ID</th>
+              <th scope="col">Name</th>
+              <th scope="col">Subtasks</th>
+              <th scope="col">Status</th>
+              <th scope="col">Created</th>
+              <th scope="col">Last Login</th>
+              <th scope="col">Actions</th>
             </tr>
-          {% else %}
-            <tr>
-              <td colspan="7"><p class="empty-state">No teams yet.</p></td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for team in teams %}
+              <tr>
+                <td class="review-identifying"><strong>{{ team.team_id }}</strong></td>
+                <td>{{ team.display_name }}</td>
+                <td class="nowrap">{% for subtask in team.subtasks %}{{ subtask_tag(subtask) }} {% endfor %}</td>
+                <td>{{ active_badge(team.is_active) }}</td>
+                <td class="num nowrap">{{ team.created_at }}</td>
+                <td class="num nowrap">{{ team.last_login_at or "Never" }}</td>
+                <td>
+                  <form method="post" action="/admin/teams/{{ team.team_id }}/password">
+                    <button class="btn btn-outline-danger btn-sm" type="submit" aria-label="Generate new password for {{ team.team_id }}">Generate password</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7"><p class="empty-state">No teams yet.</p></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 {% endblock %}

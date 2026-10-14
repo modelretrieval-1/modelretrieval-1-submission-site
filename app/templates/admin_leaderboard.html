@@ -1,118 +1,90 @@
 {% extends "base.html" %}
+{% from "_ui.html" import page_header, subtask_tag, period_tag %}
 
+{% set page_title = "Leaderboard" %}
 {% block title %}Leaderboard - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    <div class="page-header">
+  {% call page_header("Leaderboard", "Private organizer view of evaluated run-level metrics.") %}
+    <a class="btn btn-outline-secondary" href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
+  {% endcall %}
+
+  <form method="get" action="/admin/leaderboard" class="toolbar" aria-label="Filter leaderboard">
+    <div class="toolbar-field toolbar-wide">
+      <label class="form-label" for="leaderboard_team">Team</label>
+      <select class="form-select" id="leaderboard_team" name="team_id">
+        <option value="">All</option>
+        {% for team in teams %}
+          <option value="{{ team.team_id }}" {% if filters.team_id == team.team_id %}selected{% endif %}>{{ team.team_id }} — {{ team.display_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="toolbar-field">
+      <label class="form-label" for="leaderboard_subtask">Subtask</label>
+      <select class="form-select" id="leaderboard_subtask" name="subtask">
+        <option value="">All</option>
+        <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
+        <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
+      </select>
+    </div>
+    <div class="toolbar-field">
+      <label class="form-label" for="leaderboard_period">Period</label>
+      <select class="form-select" id="leaderboard_period" name="period">
+        <option value="">All</option>
+        <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>Normal</option>
+        <option value="late" {% if filters.period == "late" %}selected{% endif %}>Late</option>
+      </select>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" type="submit">Filter</button>
+      <a class="btn btn-outline-secondary" href="/admin/leaderboard">Clear filters</a>
+    </div>
+  </form>
+
+  <section class="ui-card" aria-labelledby="runMetricsHeading">
+    <div class="ui-card-head">
       <div>
-        <h1>Leaderboard</h1>
-        <p>Private organizer view of evaluated run-level metrics.</p>
-      </div>
-      <div class="header-actions">
-        <a class="btn btn-outline-primary btn-sm" href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
+        <h2 id="runMetricsHeading">Run Metrics</h2>
+        <p>Showing {{ rows|length }} evaluated run{% if rows|length != 1 %}s{% endif %}. Last updated <span class="num">{{ last_updated_jst }} JST</span>. Select a column heading to sort.</p>
       </div>
     </div>
-
-    <div class="filter-panel">
-      <div class="section-header compact-section-header">
-        <div>
-          <h2>Filters</h2>
-          <p>Filter the private leaderboard before review or CSV export.</p>
-        </div>
-        <a class="btn btn-outline-secondary btn-sm" href="/admin/leaderboard">Clear filters</a>
-      </div>
-      <form method="get" action="/admin/leaderboard" class="form-grid">
-        <div>
-          <label class="form-label" for="leaderboard_team">Team</label>
-          <select class="form-select" id="leaderboard_team" name="team_id">
-            <option value="">All</option>
-            {% for team in teams %}
-              <option value="{{ team.team_id }}" {% if filters.team_id == team.team_id %}selected{% endif %}>{{ team.team_id }} — {{ team.display_name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div>
-          <label class="form-label" for="leaderboard_subtask">Subtask</label>
-          <select class="form-select" id="leaderboard_subtask" name="subtask">
-            <option value="">All</option>
-            <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
-            <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label" for="leaderboard_period">Period</label>
-          <select class="form-select" id="leaderboard_period" name="period">
-            <option value="">All</option>
-            <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
-            <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" type="submit">Filter</button>
-      </form>
-    </div>
-
-    <div class="section-header">
-      <div>
-        <h2>Run Metrics</h2>
-        <p>Showing {{ rows|length }} evaluated run{% if rows|length != 1 %}s{% endif %}. Last updated {{ last_updated_jst }} JST.</p>
-      </div>
-    </div>
-
-    <div class="table-wrap">
-      <table id="leaderboardTable" class="table table-sm table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            {% for column in (("Rank", "number", "review-identifying"), ("Team", "text", "review-identifying"), ("Subtask", "text", ""), ("Period", "text", ""), ("RunID", "text", ""), ("nDCG@1", "number", ""), ("nDCG@3", "number", "metric-primary"), ("nDCG@5", "number", "metric-primary"), ("MRR", "number", "metric-primary"), ("Submitted", "text", "")) %}
-              <th class="{{ column[2] }}" aria-sort="none">
-                <button class="leaderboard-sort" type="button" data-sort-column="{{ loop.index0 }}" data-sort-type="{{ column[1] }}">{{ column[0] }}<span class="leaderboard-sort-indicator" aria-hidden="true"></span></button>
-              </th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in rows %}
+    <div class="ui-card-body flush">
+      <div class="table-wrap">
+        <table id="leaderboardTable" class="table table-hover">
+          <thead>
             <tr>
-              <td class="review-identifying" data-sort-value="{{ loop.index }}">{{ loop.index }}</td>
-              <td class="review-identifying" data-sort-value="{{ row.team_public_id }} {{ row.team_display_name }}">{{ row.team_public_id }}<br>{{ row.team_display_name }}</td>
-              <td data-sort-value="{{ row.subtask }}"><span class="badge text-bg-info">Subtask {{ row.subtask }}</span></td>
-              <td data-sort-value="{{ row.period_name }}">
-                <span>
-                <span class="badge text-bg-{% if row.period_name == 'normal' %}primary{% else %}info{% endif %}">
-                  {{ row.period_name }}
-                </span>
-                </span>
-              </td>
-              <td data-sort-value="{{ row.run_id }}">{{ row.run_id }}</td>
-              <td class="metric-value" data-sort-value="{{ row.metric_values.get('ndcg@1', '') }}">
-                {% if row.metric_values.get("ndcg@1") is not none %}
-                  {{ "%.6f"|format(row.metric_values.get("ndcg@1")) }}
-                {% endif %}
-              </td>
-              <td class="metric-value" data-sort-value="{{ row.metric_values.get('ndcg@3', '') }}">
-                {% if row.metric_values.get("ndcg@3") is not none %}
-                  {{ "%.6f"|format(row.metric_values.get("ndcg@3")) }}
-                {% endif %}
-              </td>
-              <td class="metric-value" data-sort-value="{{ row.metric_values.get('ndcg@5', '') }}">
-                {% if row.metric_values.get("ndcg@5") is not none %}
-                  {{ "%.6f"|format(row.metric_values.get("ndcg@5")) }}
-                {% endif %}
-              </td>
-              <td class="metric-value" data-sort-value="{{ row.metric_values.get('mrr', '') }}">
-                {% if row.metric_values.get("mrr") is not none %}
-                  {{ "%.6f"|format(row.metric_values.get("mrr")) }}
-                {% endif %}
-              </td>
-              <td data-sort-value="{{ row.submitted_at_jst }}">{{ row.submitted_at_jst }} JST</td>
+              {% for column in (("Rank", "number", "num-col"), ("Team", "text", "review-identifying"), ("Subtask", "text", ""), ("Period", "text", ""), ("RunID", "text", ""), ("nDCG@1", "number", "num-col"), ("nDCG@3", "number", "num-col metric-primary"), ("nDCG@5", "number", "num-col metric-primary"), ("MRR", "number", "num-col metric-primary"), ("Submitted", "text", "")) %}
+                <th class="{{ column[2] }}" aria-sort="none" scope="col">
+                  <button class="leaderboard-sort" type="button" data-sort-column="{{ loop.index0 }}" data-sort-type="{{ column[1] }}">{{ column[0] }}<span class="leaderboard-sort-indicator" aria-hidden="true"></span></button>
+                </th>
+              {% endfor %}
             </tr>
-          {% else %}
-            <tr>
-              <td colspan="10"><p class="empty-state">No evaluated submissions match these filters.</p></td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td class="num-col num" data-sort-value="{{ loop.index }}">{{ loop.index }}</td>
+                <td class="review-identifying" data-sort-value="{{ row.team_public_id }} {{ row.team_display_name }}"><strong>{{ row.team_public_id }}</strong><span class="small-muted d-block">{{ row.team_display_name }}</span></td>
+                <td data-sort-value="{{ row.subtask }}">{{ subtask_tag(row.subtask) }}</td>
+                <td data-sort-value="{{ row.period_name }}">{{ period_tag(row.period_name) }}</td>
+                <td data-sort-value="{{ row.run_id }}" class="break run-id">{{ row.run_id }}</td>
+                {% for key, primary in (("ndcg@1", false), ("ndcg@3", true), ("ndcg@5", true), ("mrr", true)) %}
+                  <td class="metric-value num-col{% if primary %} metric-primary{% endif %}" data-sort-value="{{ row.metric_values.get(key, '') }}">
+                    {% if row.metric_values.get(key) is not none %}
+                      {{ "%.6f"|format(row.metric_values.get(key)) }}
+                    {% endif %}
+                  </td>
+                {% endfor %}
+                <td class="num nowrap" data-sort-value="{{ row.submitted_at_jst }}">{{ row.submitted_at_jst }} JST</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="10"><p class="empty-state">No evaluated submissions match these filters.</p></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 {% endblock %}

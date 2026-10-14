@@ -61,8 +61,9 @@ def list_audit_events(
         clauses.append("created_at_jst >= ?")
         params.append(f"{date_from} 00:00:00")
     if date_to:
-        clauses.append("created_at_jst <= ?")
-        params.append(f"{date_to} 23:59:59")
+        # Include the final second even when the stored value has a +09:00 suffix.
+        clauses.append("created_at_jst < date(?, '+1 day') || ' 00:00:00'")
+        params.append(date_to)
     where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
     total = connection.execute(f"SELECT COUNT(*) FROM audit_events {where}", params).fetchone()[0]
     offset = max(page - 1, 0) * page_size

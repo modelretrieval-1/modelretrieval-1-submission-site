@@ -51,6 +51,7 @@ def process_submission(app_settings: Settings, submission_id: int) -> None:
             connection,
             submission_id=submission_id,
             status="processing",
+            validation_summary="Evaluating.",
         )
         record_audit_event(
             connection,

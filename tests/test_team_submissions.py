@@ -1,3 +1,4 @@
+import re
 import tempfile
 from pathlib import Path
 
@@ -144,6 +145,14 @@ def set_periods(
         connection.commit()
 
 
+def dashboard_slot_rows(html: str) -> dict[str, str]:
+    return dict(
+        re.findall(
+            r'<li class="slot-row[^>]*data-period="([^"]+)"(.*?)</li>', html, re.DOTALL
+        )
+    )
+
+
 def test_team_dashboard_links_to_submission_upload():
     with tempfile.TemporaryDirectory() as tmp:
         settings = make_settings(tmp)
@@ -172,14 +181,14 @@ def test_team_dashboard_shows_closed_submission_slots_without_upload_actions():
         response = client.get("/team")
 
         assert response.status_code == 200
-        assert "Available submissions" in response.text
-        assert '<strong class="stat-value">0</strong>' in response.text
-        assert "closed" in response.text
-        assert (
-            'class="btn btn-primary btn-sm" href="/team/submissions/A/new">Upload</a>'
-            not in response.text
-        )
-        assert 'href="/team/submissions/new">Upload submission</a>' not in response.text
+        slots = dashboard_slot_rows(response.text)
+        assert set(slots) == {"normal", "late"}
+        for row in slots.values():
+            assert 'data-state="closed"' in row
+            assert "Closed</span>" in row
+            assert "Deadline passed" in row
+            assert 'href="/team/submissions/' not in row
+            assert "<button" not in row
 
 
 def test_team_dashboard_marks_successful_period_as_submitted():
@@ -200,9 +209,190 @@ def test_team_dashboard_marks_successful_period_as_submitted():
         response = client.get("/team")
 
         assert response.status_code == 200
-        assert "submitted" in response.text
-        assert '<strong class="stat-value">1</strong>' in response.text
-        assert 'href="/team/submissions/A/new">Upload</a>' in response.text
+        submission_id = response.context["slot_submissions"][("A", "normal")]["id"]
+        slots = dashboard_slot_rows(response.text)
+        assert f'class="slot-status-link" href="/team/submissions/{submission_id}"' in slots[
+            "normal"
+        ]
+        assert 'data-status="evaluated"' in slots["normal"]
+        assert "Evaluated</span>" in slots["normal"]
+        assert 'href="/team/submissions/A/new"' not in slots["normal"]
+        assert 'href="/team/submissions/A/new">Upload</a>' in slots["late"]
+
+
+def test_dashboard_identifies_latest_period_and_links_each_current_slot():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings, subtasks={"A", "B"})
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+
+        for period in ("normal", "late"):
+            upload = client.post(
+                "/team/submissions/A/new",
+                data={"submission_period": period},
+                files={"file": (f"{period}.txt", valid_submission_content(), "text/plain")},
+            )
+            assert upload.status_code == 200
+            assert f"Latest result · {period.capitalize()} period" in upload.text
+
+        # A later rejection must not replace either current successful slot.
+        rejected = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "late"},
+            files={"file": ("rejected.txt", b"invalid", "text/plain")},
+        )
+        assert "Submission rejected." in rejected.text
+
+        with connect(settings.database_path) as connection:
+            other_team = create_team(
+                connection,
+                team_id="team-002",
+                display_name="Other team",
+                subtasks={"A"},
+                created_by_organizer_id=organizer.id,
+            )
+            expected = connection.execute(
+                """
+                SELECT submissions.id, submission_periods.name, submissions.status,
+                       submissions.submitted_at_jst, submissions.original_filename
+                FROM submissions
+                JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+                WHERE submissions.team_id = ? AND submissions.is_current = 1
+                """,
+                (team.id,),
+            ).fetchall()
+
+        other_client = TestClient(client.app)
+        login(other_client, "team-002", other_team.password)
+        other_upload = other_client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": ("other-team.txt", valid_submission_content(), "text/plain")},
+        )
+        assert other_upload.status_code == 200
+        other_id = other_upload.context["slot_submissions"][("A", "normal")]["id"]
+
+        dashboard = client.get("/team")
+        assert dashboard.status_code == 200
+        assert dashboard.context["slot_submissions"] == {
+            ("A", row["name"]): {
+                "id": row["id"],
+                "status": row["status"],
+                "submitted_at_jst": row["submitted_at_jst"],
+                "original_filename": row["original_filename"],
+            }
+            for row in expected
+        }
+        summaries = dashboard.context["submission_summaries"]
+        assert len(summaries) == 1
+        assert summaries[0].period_name == "late"
+        card = re.search(
+            r'<section[^>]*data-subtask="A">(.*?)</section>', dashboard.text, re.DOTALL
+        )
+        assert card is not None
+        assert "Latest result · Late period" in card.group(1)
+        slots = dashboard_slot_rows(card.group(1))
+        assert set(slots) == {"normal", "late"}
+        assert len(expected) == 2
+        for row in expected:
+            assert f'class="slot-status-link" href="/team/submissions/{row["id"]}"' in slots[
+                row["name"]
+            ]
+            assert 'data-status="evaluated"' in slots[row["name"]]
+            assert "Evaluated</span>" in slots[row["name"]]
+        assert "rejected.txt" not in dashboard.text
+        assert "other-team.txt" not in dashboard.text
+        assert f'href="/team/submissions/{other_id}"' not in dashboard.text
+
+
+def test_rejected_status_page_shows_grouped_validation_errors_and_count():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+        upload = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": (
+                "rejected.txt",
+                b"broken\nq1 BAD m1 1 2.0 run1\nq2 Q0 m1 0 bad run1\n",
+                "text/plain",
+            )},
+        )
+        assert upload.status_code == 200
+        with connect(settings.database_path) as connection:
+            submission_id = connection.execute("SELECT id FROM submissions").fetchone()["id"]
+
+        page = client.get(f"/team/submissions/{submission_id}")
+        assert page.status_code == 200
+        assert "Rejected — 4 issues</h2>" in page.text
+        assert page.context["error_count"] == len(page.context["errors"]) == 4
+        group_counts = [
+            (group["label"], len(group["errors"])) for group in page.context["error_groups"]
+        ]
+        assert group_counts == [("File and format", 1), ("Field values", 3)]
+        assert 'class="error-summary" role="alert" aria-labelledby="validationSummaryTitle"' in (
+            page.text
+        )
+        upload_groups = re.findall(r'<div class="error-group">(.*?)</div>', upload.text, re.DOTALL)
+        status_groups = re.findall(r'<div class="error-group">(.*?)</div>', page.text, re.DOTALL)
+        assert len(status_groups) == 2
+        assert status_groups == upload_groups
+        for line in (1, 2, 3):
+            assert f'class="error-loc">Line {line}</span>' in page.text
+        for field, message in (
+            ("Q0", "Field 2 must be Q0."),
+            ("Rank", "Rank must be a positive integer."),
+            ("Score", "Score must be numeric."),
+        ):
+            assert f"<strong>{field}:</strong> {message}" in page.text
+        assert "Expected 6 fields, found 1." in page.text
+        assert 'data-terminal="true"' in page.text
+        assert "window.setInterval" not in page.text
+
+
+def test_another_team_cannot_see_rejected_submission_errors():
+    with tempfile.TemporaryDirectory() as tmp:
+        settings = make_settings(tmp)
+        organizer, team = seed_accounts(settings)
+        activate_subtask_a_ground_truth(settings, organizer.id)
+        with connect(settings.database_path) as connection:
+            other_team = create_team(
+                connection,
+                team_id="team-002",
+                display_name="Other team",
+                subtasks={"A"},
+                created_by_organizer_id=organizer.id,
+            )
+        client = TestClient(create_app(settings))
+        login(client, "team-001", team.password)
+        upload = client.post(
+            "/team/submissions/A/new",
+            data={"submission_period": "normal"},
+            files={"file": ("private-rejected.txt", b"q1 BAD m1 1 2.0 run1\n", "text/plain")},
+        )
+        assert "Field 2 must be Q0." in upload.text
+        with connect(settings.database_path) as connection:
+            submission_id = connection.execute("SELECT id FROM submissions").fetchone()["id"]
+
+        client.get("/logout")
+        login(client, "team-002", other_team.password)
+        location = f"/team/submissions/{submission_id}"
+        denied = client.get(location, follow_redirects=False)
+        assert denied.status_code == 303
+        assert denied.headers["location"] == "/team"
+        page = client.get(location)
+        assert page.status_code == 200
+        assert "private-rejected.txt" not in page.text
+        assert "Field 2 must be Q0." not in page.text
+        assert 'class="error-summary"' not in page.text
+        status_json = client.get(f"{location}/status")
+        assert status_json.status_code == 404
+        assert status_json.json() == {"error": "not_found"}
 
 
 def test_team_can_open_upload_page_for_eligible_subtask():
@@ -220,8 +410,8 @@ def test_team_can_open_upload_page_for_eligible_subtask():
             "Select a submission period and upload one TREC_EVAL-format file for evaluation."
             in response.text
         )
-        assert "Submission File" in response.text
-        assert "Submission period" in response.text
+        assert "Choose submission period</legend>" in response.text
+        assert 'for="submission_file">Choose submission file</label>' in response.text
         assert 'value="normal"' in response.text
         assert 'value="late"' in response.text
         assert "open" in response.text
@@ -647,7 +837,15 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
         assert dashboard_after_grant.status_code == 200
         assert "Upload replacement" in dashboard_after_grant.text
         assert "Replacement upload approved." in dashboard_after_grant.text
-        assert "run1 ndcg@5" not in dashboard_after_grant.text
+        assert "run1" not in dashboard_after_grant.text
+        assert "nDCG@5" not in dashboard_after_grant.text
+        assert not dashboard_after_grant.context["submission_summaries"]
+        assert dashboard_after_grant.context["slot_submissions"][("A", "normal")]["id"] == (
+            first_submission_id
+        )
+        assert f'class="slot-status-link" href="/team/submissions/{first_submission_id}"' in (
+            dashboard_slot_rows(dashboard_after_grant.text)["normal"]
+        )
 
         invalid_replacement = client.post(
             "/team/submissions/A/new",
@@ -712,6 +910,12 @@ def test_organizer_permission_allows_replacement_upload_and_hides_previous_team_
         assert rows[0]["is_current"] == 0
         assert rows[0]["superseded_by_submission_id"] == rows[1]["id"]
         assert rows[1]["is_current"] == 1
+        assert dashboard_after_replacement.context["slot_submissions"][("A", "normal")]["id"] == (
+            rows[1]["id"]
+        )
+        assert f'href="/team/submissions/{first_submission_id}"' not in (
+            dashboard_slot_rows(dashboard_after_replacement.text)["normal"]
+        )
         assert permission["is_used"] == 1
         assert permission["used_by_submission_id"] == rows[1]["id"]
 

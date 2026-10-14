@@ -1,91 +1,75 @@
 {% extends "base.html" %}
+{% from "_ui.html" import notice, page_header, period_badge, period_tag %}
 
+{% set page_title = "Periods" %}
 {% block title %}Submission Periods - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    <div class="page-header">
-      <div>
-        <h1>Submission Periods</h1>
-        <p>Configure JST start times, deadlines, and organizer reopen overrides.</p>
-      </div>
-    </div>
+  {{ page_header("Submission Periods", "Configure JST start times, deadlines, and organizer reopen overrides.") }}
 
-    {% if error %}
-      <div class="alert alert-danger" role="alert">{{ error }}</div>
-    {% endif %}
+  {% if error %}
+    {% call notice("danger", "alert") %}{{ error }}{% endcall %}
+  {% endif %}
 
-    {% if success %}
-      <div class="alert alert-success" role="status">{{ success }}</div>
-    {% endif %}
+  {% if success %}
+    {% call notice("success", "status") %}{{ success }}{% endcall %}
+  {% endif %}
 
-    <div class="section-header">
-      <div>
-        <h2>Period Schedule</h2>
-        <p>Showing {{ periods|length }} submission period{% if periods|length != 1 %}s{% endif %}.</p>
-      </div>
-    </div>
+  <div class="section-intro">
+    <h2>Period Schedule</h2>
+    <p>Showing {{ periods|length }} submission period{% if periods|length != 1 %}s{% endif %}. Times are in JST (<span class="num">YYYY-MM-DD HH:MM:SS</span>).</p>
+  </div>
 
-    <div class="table-wrap">
-      <table class="table table-sm align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Period</th>
-            <th>Start JST</th>
-            <th>Deadline JST</th>
-            <th>Reopen Override</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for period in periods %}
-            <tr>
-              <td>
-                <span class="badge text-bg-{% if period.name == 'normal' %}primary{% else %}info{% endif %}">
-                  {{ period.name }}
-                </span>
-              </td>
-              <td colspan="4">
-                <form method="post" action="/admin/periods/{{ period.name }}" class="form-grid">
-                  <div>
-                    <label class="form-label" for="{{ period.name }}_starts_at_jst">Start JST</label>
-                    <input
-                      class="form-control"
-                      id="{{ period.name }}_starts_at_jst"
-                      type="text"
-                      name="starts_at_jst"
-                      value="{{ period.starts_at_jst or '' }}"
-                      placeholder="YYYY-MM-DD HH:MM:SS"
-                    >
-                  </div>
-                  <div>
-                    <label class="form-label" for="{{ period.name }}_deadline_at_jst">Deadline JST</label>
-                    <input
-                      class="form-control"
-                      id="{{ period.name }}_deadline_at_jst"
-                      type="text"
-                      name="deadline_at_jst"
-                      value="{{ period.deadline_at_jst }}"
-                      placeholder="YYYY-MM-DD HH:MM:SS"
-                      required
-                    >
-                  </div>
-                  <label class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      name="is_open_override"
-                      {% if period.is_open_override %}checked{% endif %}
-                    >
-                    <span class="form-check-label">Reopen</span>
-                  </label>
-                  <button class="btn btn-primary" type="submit">Save</button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
+  <div class="period-forms">
+    {% for period in periods %}
+      <section class="ui-card mb-0" aria-labelledby="period-{{ period.name }}-title">
+        <div class="ui-card-head">
+          <h3 id="period-{{ period.name }}-title">{{ period.name|capitalize }} Period</h3>
+          {% if period.is_open_override %}{{ period_badge("reopened") }}{% endif %}
+        </div>
+        <div class="ui-card-body">
+          <form method="post" action="/admin/periods/{{ period.name }}" class="form-stack">
+            <div>
+              <label class="form-label" for="{{ period.name }}_starts_at_jst">Start JST</label>
+              <input
+                class="form-control num"
+                id="{{ period.name }}_starts_at_jst"
+                type="text"
+                name="starts_at_jst"
+                value="{{ period.starts_at_jst or '' }}"
+                placeholder="YYYY-MM-DD HH:MM:SS"
+              >
+            </div>
+            <div>
+              <label class="form-label" for="{{ period.name }}_deadline_at_jst">Deadline JST</label>
+              <input
+                class="form-control num"
+                id="{{ period.name }}_deadline_at_jst"
+                type="text"
+                name="deadline_at_jst"
+                value="{{ period.deadline_at_jst }}"
+                placeholder="YYYY-MM-DD HH:MM:SS"
+                required
+              >
+            </div>
+            <div class="override-box">
+              <label class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="is_open_override"
+                  {% if period.is_open_override %}checked{% endif %}
+                >
+                <span class="form-check-label">Reopen</span>
+              </label>
+              <p class="small-muted mb-0">Organizer override: keeps this period open past its deadline until unchecked.</p>
+            </div>
+            <div class="form-submit">
+              <button class="btn btn-primary" type="submit">Save</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    {% endfor %}
+  </div>
 {% endblock %}

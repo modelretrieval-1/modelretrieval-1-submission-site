@@ -1,34 +1,25 @@
 {% extends "base.html" %}
+{% from "_ui.html" import notice, page_header, section_card, active_badge %}
 
+{% set page_title = "Users" %}
 {% block title %}Organizer Users - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    <div class="page-header">
-      <div>
-        <h1>Organizer Users</h1>
-        <p>Create organizer accounts and rotate organizer passwords.</p>
-      </div>
+  {{ page_header("Organizer Users", "Create organizer accounts and rotate organizer passwords.") }}
+
+  {% if error %}
+    {% call notice("danger", "alert") %}{{ error }}{% endcall %}
+  {% endif %}
+
+  {% if generated_password %}
+    <div class="alert alert-success secret-alert" role="status">
+      <h2>Generated Password</h2>
+      <p>Organizer: <strong>{{ generated_username }}</strong>. Copy it now; it is shown only once.</p>
+      <code>{{ generated_password }}</code>
     </div>
+  {% endif %}
 
-    {% if error %}
-      <div class="alert alert-danger" role="alert">{{ error }}</div>
-    {% endif %}
-
-    {% if generated_password %}
-      <div class="alert alert-success" role="status">
-        <h2>Generated Password</h2>
-        <p>Organizer: <strong>{{ generated_username }}</strong></p>
-        <code>{{ generated_password }}</code>
-      </div>
-    {% endif %}
-
-    <div class="section-header">
-      <div>
-        <h2>Add Organizer</h2>
-        <p>Create an organizer account and show its generated password once.</p>
-      </div>
-    </div>
+  {% call section_card("Add Organizer", "Create an organizer account and show its generated password once.", id="addOrganizer") %}
     <form method="post" action="/admin/users" class="form-grid">
       <div>
         <label class="form-label" for="username">Username</label>
@@ -38,54 +29,54 @@
         <label class="form-label" for="organizer_display_name">Display Name</label>
         <input class="form-control" id="organizer_display_name" type="text" name="display_name" required>
       </div>
-      <button class="btn btn-primary" type="submit">Add Organizer</button>
+      <div class="form-submit">
+        <button class="btn btn-primary" type="submit">Add organizer</button>
+      </div>
     </form>
-  </section>
+  {% endcall %}
 
-  <section class="panel">
-    <div class="section-header">
+  <section class="ui-card" aria-labelledby="organizersHeading">
+    <div class="ui-card-head">
       <div>
-        <h2>Organizers</h2>
+        <h2 id="organizersHeading">Organizers</h2>
         <p>Showing {{ organizers|length }} organizer{% if organizers|length != 1 %}s{% endif %}.</p>
       </div>
     </div>
-    <div class="table-wrap">
-      <table class="table table-sm table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Username</th>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Last Login</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for organizer in organizers %}
+    <div class="ui-card-body flush">
+      <div class="table-wrap">
+        <table class="table table-hover">
+          <thead>
             <tr>
-              <td>{{ organizer.username }}</td>
-              <td>{{ organizer.display_name }}</td>
-              <td>
-                <span class="badge status-badge text-bg-{% if organizer.is_active %}success{% else %}secondary{% endif %}">
-                  {{ "Active" if organizer.is_active else "Disabled" }}
-                </span>
-              </td>
-              <td>{{ organizer.created_at }}</td>
-              <td>{{ organizer.last_login_at or "Never" }}</td>
-              <td>
-                <form method="post" action="/admin/users/{{ organizer.username }}/password">
-                  <button class="btn btn-outline-primary btn-sm" type="submit">Generate password</button>
-                </form>
-              </td>
+              <th scope="col" class="review-identifying">Username</th>
+              <th scope="col">Name</th>
+              <th scope="col">Status</th>
+              <th scope="col">Created</th>
+              <th scope="col">Last Login</th>
+              <th scope="col">Actions</th>
             </tr>
-          {% else %}
-            <tr>
-              <td colspan="6"><p class="empty-state">No organizers yet.</p></td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for organizer in organizers %}
+              <tr>
+                <td class="review-identifying"><strong>{{ organizer.username }}</strong></td>
+                <td>{{ organizer.display_name }}</td>
+                <td>{{ active_badge(organizer.is_active) }}</td>
+                <td class="num nowrap">{{ organizer.created_at }}</td>
+                <td class="num nowrap">{{ organizer.last_login_at or "Never" }}</td>
+                <td>
+                  <form method="post" action="/admin/users/{{ organizer.username }}/password">
+                    <button class="btn btn-outline-danger btn-sm" type="submit" aria-label="Generate new password for {{ organizer.username }}">Generate password</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6"><p class="empty-state">No organizers yet.</p></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 {% endblock %}

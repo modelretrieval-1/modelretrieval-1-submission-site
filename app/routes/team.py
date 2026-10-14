@@ -29,7 +29,9 @@ from app.submissions import (
     has_successful_submission,
     has_unused_resubmission_permission,
     is_submission_period_open,
+    list_current_team_slot_submissions,
     list_submission_periods,
+    list_submission_validation_errors,
     mark_submission_status,
     persist_submission_runs,
     persist_validation_errors,
@@ -185,6 +187,10 @@ def team_dashboard(request: Request) -> Response:
             connection,
             internal_team_id=account.id,
         )
+        slot_submissions = list_current_team_slot_submissions(
+            connection,
+            internal_team_id=account.id,
+        )
 
     return templates.TemplateResponse(
         request,
@@ -195,6 +201,7 @@ def team_dashboard(request: Request) -> Response:
             "subtasks": subtasks,
             "periods": periods,
             "submission_slots": submission_slots,
+            "slot_submissions": slot_submissions,
             "available_submission_slots": sum(1 for slot in submission_slots if slot["can_submit"]),
             "available_subtasks": sorted(
                 {slot["subtask"] for slot in submission_slots if slot["can_submit"]}
@@ -515,6 +522,11 @@ def submission_status_page(request: Request, submission_id: int) -> Response:
         if submission is None:
             return redirect("/team")
         metrics = list_submission_results(connection, submission_id=submission_id)
+        errors = (
+            list_submission_validation_errors(connection, submission_id=submission_id)
+            if submission.status == "rejected"
+            else ()
+        )
 
     is_terminal = submission.status not in IN_FLIGHT_STATUSES
     return templates.TemplateResponse(
@@ -527,6 +539,9 @@ def submission_status_page(request: Request, submission_id: int) -> Response:
             "metrics": metrics,
             "metric_table": pivot_evaluation_results(tuple(metrics)),
             "is_terminal": is_terminal,
+            "errors": errors,
+            "error_groups": group_validation_errors(errors),
+            "error_count": len(errors),
         },
     )
 

@@ -1,178 +1,215 @@
 {% extends "base.html" %}
+{% from "_ui.html" import notice, icon, status_badge, period_badge, page_header, empty_state, score_table, requirements_list %}
 
+{% set page_title = "Upload Subtask " ~ subtask %}
 {% block title %}Upload Subtask {{ subtask }} Submission - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    <div class="page-header">
-      <div>
-        <h1>Upload Subtask {{ subtask }} Submission</h1>
-        <p>Select a submission period and upload one TREC_EVAL-format file for evaluation.</p>
-      </div>
-      <div class="header-actions">
-        <a class="btn btn-outline-secondary btn-sm" href="/team">Team dashboard</a>
-      </div>
-    </div>
-
-    {% if success %}
-      <div class="alert alert-success" role="status">{{ success }}</div>
+  {% set ns = namespace(can_submit_any=false, first_open="") %}
+  {% for period_state in period_states %}
+    {% if period_state.can_submit %}
+      {% set ns.can_submit_any = true %}
+      {% if not ns.first_open %}{% set ns.first_open = period_state.period.name %}{% endif %}
     {% endif %}
+  {% endfor %}
+  {#- Keep the chosen period if it can be used; otherwise pre-select the first available one. -#}
+  {% set ns2 = namespace(selected=selected_period) %}
+  {% for period_state in period_states %}
+    {% if period_state.period.name == selected_period and not period_state.can_submit %}
+      {% set ns2.selected = ns.first_open %}
+    {% endif %}
+  {% endfor %}
 
-    {% if errors %}
-      <div class="alert alert-danger validation-summary" role="alert" aria-labelledby="validationSummaryTitle">
-        <h2 id="validationSummaryTitle" class="h5"><span>Submission rejected.</span></h2>
-        <p>Fix the issues below and upload the corrected file. {{ errors|length }} issue(s) found.</p>
-        {% for group in error_groups %}
-          <div class="validation-error-group">
-            <h3>{{ group.label }}</h3>
-            <ul>
-              {% for error in group.errors %}
-                <li>
-                  {% if error.line_number %}<strong>Line {{ error.line_number }}{% if error.field_name %}, {{ error.field_name }}{% endif %}:</strong> {% elif error.field_name %}<strong>{{ error.field_name }}:</strong> {% endif %}
-                  {{ error.message }}
+  {% call page_header("Upload Subtask " ~ subtask ~ " Submission", "Select a submission period and upload one TREC_EVAL-format file for evaluation.") %}
+    {% if ns.can_submit_any %}<a class="btn btn-outline-secondary" href="/team">Back to dashboard</a>{% endif %}
+  {% endcall %}
+
+  {% if success %}
+    {% call notice("success", "status") %}{{ success }}{% endcall %}
+  {% endif %}
+
+  {% if errors %}
+    <div class="error-summary" role="alert" aria-labelledby="validationSummaryTitle">
+      <div class="error-summary-head">
+        {{ icon("circle-x") }}
+        <div>
+          <h2 id="validationSummaryTitle">Submission rejected.</h2>
+          <p>Fix the issues below and upload the corrected file. {{ errors|length }} issue(s) found.</p>
+        </div>
+      </div>
+      {% for group in error_groups %}
+        <div class="error-group">
+          <h3>{{ group.label }} <span class="num">({{ group.errors|length }})</span></h3>
+          <ul>
+            {% for error in group.errors %}
+              <li>
+                {% if error.line_number %}<span class="error-loc">Line {{ error.line_number }}</span>{% endif %}
+                <span>{% if error.field_name %}<strong>{{ error.field_name }}:</strong> {% endif %}{{ error.message }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if metric_table.rows %}
+    <section class="ui-card" aria-labelledby="scores-title">
+      <div class="ui-card-head">
+        <div>
+          <h2 id="scores-title">Scores</h2>
+          <p>Run-level metrics persisted for this accepted submission.</p>
+        </div>
+      </div>
+      <div class="ui-card-body">{{ score_table(metric_table) }}</div>
+    </section>
+  {% endif %}
+
+  {% if period_states|selectattr("resubmission_allowed")|list %}
+    {% call notice("warning", "alert") %}
+      <strong>This is a replacement upload.</strong>
+      Your previous participant-visible scores are hidden while this permission is pending. A valid replacement becomes the current result; failed validation does not use the permission.
+    {% endcall %}
+  {% endif %}
+
+  <div class="upload-layout">
+    <div class="upload-main">
+      <details class="requirements requirements-mobile">
+        <summary>Before you upload: file requirements</summary>
+        {{ requirements_list(subtask) }}
+      </details>
+
+      {% if not ns.can_submit_any %}
+        <section class="ui-card" aria-labelledby="noUploadTitle">
+          <div class="ui-card-body">
+            {% call empty_state("Nothing can be uploaded for Subtask " ~ subtask ~ " right now", "A successful submission already exists or the deadline has passed for every period. To upload a replacement, ask the organizers to grant resubmission permission.") %}
+              <a class="btn btn-primary" href="/team">Back to dashboard</a>
+            {% endcall %}
+            <ul class="slot-list mt-3">
+              {% for period_state in period_states %}
+                <li class="slot-row">
+                  <div class="slot-name"><strong>{{ period_state.period.name|capitalize }}</strong> {{ period_badge(period_state.state) }}</div>
+                  <div class="slot-deadline">Deadline <span class="num">{{ period_state.period.deadline_at_jst }} JST</span></div>
+                  <div class="slot-action"><span class="slot-note">
+                    {% if period_state.is_submitted %}Already submitted. Ask the organizers for a replacement.{% else %}Closed.{% endif %}
+                  </span></div>
                 </li>
               {% endfor %}
             </ul>
           </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    {% if metric_table.rows %}
-      <div class="section-header">
-        <div>
-          <h2>Scores</h2>
-          <p>Run-level metrics persisted for this accepted submission.</p>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle metric-table">
-          <thead class="table-light">
-            <tr>
-              <th>RunID</th>
-              {% for column in metric_table.columns %}
-                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+        </section>
+      {% else %}
+      <form id="uploadForm" class="ui-card" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
+        <div class="ui-card-body">
+          <fieldset class="step-fieldset">
+            <legend class="step-head"><span class="step-num" aria-hidden="true">1</span>Choose submission period</legend>
+            <div class="period-choices">
+              {% for period_state in period_states %}
+                {% set period = period_state.period %}
+                <label class="period-choice">
+                  <input
+                    class="form-check-input"
+                    name="submission_period"
+                    type="radio"
+                    value="{{ period.name }}"
+                    {% if ns2.selected == period.name %}checked{% endif %}
+                    {% if not period_state.can_submit %}disabled{% endif %}
+                    required
+                  >
+                  <span class="period-choice-body">
+                    <span class="period-choice-title">{{ period.name|capitalize }} {{ period_badge(period_state.state) }}</span>
+                    <span class="period-choice-meta">Deadline <span class="num">{{ period.deadline_at_jst }} JST</span>{% if period.is_open_override %} &middot; reopened by organizer{% endif %}</span>
+                    {% if period_state.is_submitted and period_state.resubmission_allowed %}
+                      <span class="period-choice-reason">Replacement approved</span>
+                    {% elif period_state.is_submitted %}
+                      <span class="period-choice-reason">Already submitted. Ask the organizers for a replacement.</span>
+                    {% elif not period_state.can_submit %}
+                      <span class="period-choice-reason">Closed. This deadline has passed.</span>
+                    {% endif %}
+                  </span>
+                </label>
               {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in metric_table.rows %}
-              <tr>
-                <td>{{ row.run_id }}</td>
-                {% for column in metric_table.columns %}
-                  {% set value = row.metric_values.get(column.key) %}
-                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
-                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
-                  </td>
-                {% endfor %}
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% endif %}
+            </div>
+          </fieldset>
 
-    {% set ns = namespace(can_submit_any=false) %}
-    {% for period_state in period_states %}
-      {% if period_state.can_submit %}
-        {% set ns.can_submit_any = true %}
+          <div class="step">
+            <h2 class="step-head"><span class="step-num" aria-hidden="true">2</span><label class="form-label" for="submission_file">Choose submission file</label></h2>
+            <div class="dropzone" id="dropzone">
+              <input id="submission_file" name="file" type="file" required aria-describedby="fileHelp">
+              <span class="dropzone-title">Choose a file or drop it here</span>
+              <span class="dropzone-hint" id="fileHelp">One TREC_EVAL-format file with up to 5 RunID values. The extension is not checked.</span>
+            </div>
+            <p class="file-chosen" id="fileChosen" role="status" hidden></p>
+          </div>
+
+          <div class="step mb-0">
+            <h2 class="step-head"><span class="step-num" aria-hidden="true">3</span>Upload</h2>
+            <div class="action-row">
+              <button id="uploadSubmit" class="btn btn-primary" type="submit">Upload</button>
+              <a class="btn btn-outline-secondary" href="/team">Cancel</a>
+            </div>
+            <p class="large-file-note">Large files (about 100 MB) can take a few minutes to check. Keep this page open until it finishes.</p>
+
+            <div id="uploadStatus" class="upload-status" hidden>
+              <div id="uploadProgressPhase" class="upload-status-phase" hidden>
+                <div class="upload-status-label">
+                  <span>Uploading submission…</span>
+                  <span id="uploadPercent" class="upload-status-percent">0%</span>
+                </div>
+                <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div id="uploadBar" class="progress-bar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div id="uploadProcessingPhase" class="upload-status-phase upload-status-processing" hidden>
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span>Validating…</span>
+              </div>
+              <div id="uploadError" class="alert alert-danger mb-0" role="alert" hidden></div>
+            </div>
+          </div>
+        </div>
+      </form>
       {% endif %}
-    {% endfor %}
-
-    {% if not ns.can_submit_any %}
-      <div class="alert alert-warning mb-4" role="alert">
-        A successful submission already exists or deadlines have passed for all available periods.
-        To upload a replacement, please contact the organizers to grant resubmission permission.
-      </div>
-    {% endif %}
-
-    {% if period_states|selectattr("resubmission_allowed")|list %}
-      <div class="alert alert-warning mb-4" role="alert">
-        <strong>This is a replacement upload.</strong>
-        Your previous participant-visible scores are hidden while this permission is pending. A valid replacement becomes the current result; failed validation does not use the permission.
-      </div>
-    {% endif %}
-
-    <div class="section-header">
-      <div>
-        <h2>Submission File</h2>
-        <p>Choose normal or late submission, then upload the run file for Subtask {{ subtask }}.</p>
-      </div>
     </div>
-    <div class="upload-guidance alert alert-light border" aria-labelledby="uploadRequirementsTitle">
-      <h2 id="uploadRequirementsTitle" class="h5">Before you upload</h2>
-      <ul class="mb-0">
-        <li>Use TREC_EVAL text with six fields per non-empty line: topicID, Q0, docID, Rank, Score, RunID.</li>
-        <li>Include every required query and candidate model for Subtask {{ subtask }}.</li>
-        <li>Use no more than 5 distinct RunID values.</li>
-        <li>Filename extensions are ignored; the file content is validated.</li>
-      </ul>
-    </div>
-    <form id="uploadForm" class="form-stack" action="/team/submissions/{{ subtask }}/new" method="post" enctype="multipart/form-data">
-      <fieldset class="border rounded p-3">
-        <legend>Submission period</legend>
-        {% for period_state in period_states %}
-          {% set period = period_state.period %}
-          <label class="form-check mb-2">
-            <input
-              class="form-check-input"
-              name="submission_period"
-              type="radio"
-              value="{{ period.name }}"
-              {% if selected_period == period.name %}checked{% endif %}
-              {% if not period_state.can_submit %}disabled{% endif %}
-              required
-            >
-            <span class="form-check-label">
-              {{ period.name|capitalize }}
-              {% if period_state.state == "reopened" %}
-                <span class="badge text-bg-warning">reopened</span>
-              {% elif period_state.state == "open" %}
-                <span class="badge text-bg-success">open</span>
-              {% else %}
-                <span class="badge text-bg-dark">closed</span>
-              {% endif %}
-              {% if period_state.is_submitted and not period_state.resubmission_allowed %}
-                <span class="badge text-bg-secondary">Already submitted</span>
-              {% endif %}
-            </span>
-            <span class="form-text d-block">
-              Deadline: {{ period.deadline_at_jst }} JST{% if period.is_open_override %}; reopened by organizer{% endif %}
-            </span>
-          </label>
-        {% endfor %}
-      </fieldset>
-      <div>
-        <label class="form-label" for="submission_file">Submission file</label>
-        <input class="form-control" id="submission_file" name="file" type="file" {% if not ns.can_submit_any %}disabled{% endif %} required>
-        <div class="form-text">Upload one TREC_EVAL-format file with up to 5 RunID values. The filename extension is not checked.</div>
-      </div>
-      <div class="action-row">
-        <button id="uploadSubmit" class="btn btn-primary" type="submit" {% if not ns.can_submit_any %}disabled{% endif %}>Upload</button>
-        <a class="btn btn-outline-secondary" href="/team">Cancel</a>
-      </div>
 
-      <div id="uploadStatus" class="upload-status" hidden>
-        <div id="uploadProgressPhase" class="upload-status-phase" hidden>
-          <div class="upload-status-label">
-            <span>Uploading submission…</span>
-            <span id="uploadPercent" class="upload-status-percent">0%</span>
-          </div>
-          <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <div id="uploadBar" class="progress-bar" style="width: 0%"></div>
-          </div>
+    <aside class="upload-aside" aria-label="File requirements">
+      <section class="ui-card requirements">
+        <div class="ui-card-body">
+          <h2>Before you upload</h2>
+          {{ requirements_list(subtask) }}
         </div>
-        <div id="uploadProcessingPhase" class="upload-status-phase upload-status-processing" hidden>
-          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-          <span>Validating…</span>
-        </div>
-        <div id="uploadError" class="alert alert-danger mb-0" role="alert" hidden></div>
-      </div>
-    </form>
-  </section>
+      </section>
+    </aside>
+  </div>
 {% endblock %}
 
 {% block scripts %}
+
+  <script>
+    (function () {
+      var input = document.getElementById("submission_file");
+      var chosen = document.getElementById("fileChosen");
+      var zone = document.getElementById("dropzone");
+      if (!input || !chosen) { return; }
+      function fmt(bytes) {
+        if (bytes >= 1048576) { return (bytes / 1048576).toFixed(1) + " MB"; }
+        if (bytes >= 1024) { return Math.round(bytes / 1024) + " KB"; }
+        return bytes + " bytes";
+      }
+      input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        if (!file) { chosen.hidden = true; return; }
+        chosen.textContent = "Selected: " + file.name + " (" + fmt(file.size) + ")";
+        chosen.hidden = false;
+      });
+      ["dragenter", "dragover"].forEach(function (name) {
+        input.addEventListener(name, function () { zone.classList.add("is-dragover"); });
+      });
+      ["dragleave", "drop"].forEach(function (name) {
+        input.addEventListener(name, function () { zone.classList.remove("is-dragover"); });
+      });
+    })();
+  </script>
   <script>
     (function () {
       var form = document.getElementById("uploadForm");
