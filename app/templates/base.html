@@ -8,7 +8,23 @@
     <link rel="stylesheet" href="/static/app.css">
   </head>
   <body class="app-body">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     {% set current_path = request.url.path %}
+    {% if page_title is not defined %}
+      {% if current_path == '/admin' %}{% set page_title = 'Dashboard' %}
+      {% elif current_path.startswith('/admin/teams') %}{% set page_title = 'Teams' %}
+      {% elif current_path.startswith('/admin/users') %}{% set page_title = 'Users' %}
+      {% elif current_path.startswith('/admin/ground-truth') %}{% set page_title = 'Ground Truth' %}
+      {% elif current_path.startswith('/admin/periods') %}{% set page_title = 'Periods' %}
+      {% elif current_path.startswith('/admin/submissions/') %}{% set page_title = 'Submission detail' %}
+      {% elif current_path.startswith('/admin/submissions') %}{% set page_title = 'Submissions' %}
+      {% elif current_path.startswith('/admin/leaderboard') %}{% set page_title = 'Leaderboard' %}
+      {% elif current_path.startswith('/admin/audit-events') %}{% set page_title = 'Audit Log' %}
+      {% elif current_path.startswith('/account/password') %}{% set page_title = 'Password' %}
+      {% elif current_path == '/team' %}{% set page_title = 'Dashboard' %}
+      {% elif current_path.startswith('/team/') %}{% set page_title = 'Submission' %}
+      {% else %}{% set page_title = app_name %}{% endif %}
+    {% endif %}
     {% if account is defined and account %}
       {% macro nav_links(location) %}
         {% if account.role == "organizer" %}
@@ -45,12 +61,12 @@
       <div class="app-shell">
         <aside class="app-sidebar" aria-label="Primary navigation">
           <a class="app-brand" href="{% if account.role == 'organizer' %}/admin{% else %}/team{% endif %}">
-            <span class="app-brand-mark">MR</span>
+            <span class="app-brand-mark" aria-hidden="true">MR</span>
             <span class="app-brand-text">{{ app_name }}</span>
           </a>
           <div class="app-sidebar-section">
             <div class="app-sidebar-label">{{ account.role|capitalize }}</div>
-            <nav class="app-nav">
+            <nav class="app-nav" aria-label="{{ account.role|capitalize }} menu">
               {{ nav_links("desktop") }}
             </nav>
           </div>
@@ -59,29 +75,33 @@
               <span class="app-user-name">{{ account.display_name }}</span>
               <span class="app-user-id">{{ account.user_id }}</span>
             </div>
-            <a class="btn btn-outline-light btn-sm w-100" href="/logout">Logout</a>
+            <a class="app-logout" href="/logout">Logout</a>
           </div>
         </aside>
 
         <div class="app-workspace">
           <header class="app-topbar">
+            <a class="app-topbar-brand" href="{% if account.role == 'organizer' %}/admin{% else %}/team{% endif %}" aria-label="{{ app_name }} home">
+              <span class="app-brand-mark" aria-hidden="true">MR</span>
+            </a>
+            <div class="app-topbar-title">
+              <span class="crumb-role">{{ account.role|capitalize }}</span>
+              <span class="crumb-sep" aria-hidden="true">/</span>
+              <strong>{{ page_title }}</strong>
+            </div>
             <button
-              class="btn btn-outline-secondary btn-sm d-lg-none"
+              class="app-menu-btn"
               type="button"
               data-bs-toggle="offcanvas"
               data-bs-target="#mobileNavigation"
               aria-controls="mobileNavigation"
             >
+              <span class="bars" aria-hidden="true"></span>
               Menu
             </button>
-            <div class="app-topbar-title">
-              <span>{{ account.role|capitalize }}</span>
-              <strong>{{ account.display_name }}</strong>
-            </div>
-            <a class="btn btn-primary btn-sm" href="/logout">Logout</a>
           </header>
 
-          <main class="page app-page">
+          <main class="page app-page" id="main-content" tabindex="-1">
             {% block content %}{% endblock %}
           </main>
         </div>
@@ -89,11 +109,11 @@
 
       <div class="offcanvas offcanvas-start app-mobile-nav" tabindex="-1" id="mobileNavigation" aria-labelledby="mobileNavigationLabel">
         <div class="offcanvas-header">
-          <h2 class="offcanvas-title h5" id="mobileNavigationLabel">{{ app_name }}</h2>
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          <h2 class="offcanvas-title" id="mobileNavigationLabel">{{ app_name }}</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
         </div>
         <div class="offcanvas-body">
-          <nav class="app-nav">
+          <nav class="app-nav" aria-label="{{ account.role|capitalize }} menu">
             {{ nav_links("mobile") }}
           </nav>
           <div class="app-mobile-account">
@@ -101,17 +121,18 @@
               <span class="app-user-name">{{ account.display_name }}</span>
               <span class="app-user-id">{{ account.user_id }}</span>
             </div>
+            <a class="app-logout" href="/logout">Logout</a>
           </div>
         </div>
       </div>
     {% else %}
       <nav class="navbar app-navbar" aria-label="Public navigation">
         <div class="container-xxl">
-          <a class="navbar-brand" href="/">{{ app_name }}</a>
-          <a class="btn btn-primary btn-sm" href="/login">Sign In</a>
+          <a class="navbar-brand" href="/"><span class="app-brand-mark" aria-hidden="true">MR</span><span>{{ app_name }}</span></a>
+          {% if current_path != '/login' %}<a class="btn btn-primary btn-sm" href="/login">Sign In</a>{% endif %}
         </div>
       </nav>
-      <main class="page container-xxl">
+      <main class="page container-xxl" id="main-content" tabindex="-1">
         {{ self.content() }}
       </main>
     {% endif %}

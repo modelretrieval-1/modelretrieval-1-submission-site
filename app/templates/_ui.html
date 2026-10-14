@@ -1,0 +1,174 @@
+{#- Shared UI macros. Import with:
+    {% from "_ui.html" import status_badge, period_badge, page_header, section_card, empty_state, score_table %}
+-#}
+
+{% macro icon(name) -%}
+  {%- if name == "check" -%}
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8.5l3.2 3L13 4.5"/></svg>
+  {%- elif name == "cross" -%}
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+  {%- elif name == "alert" -%}
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 1.8L14.6 13.4H1.4z"/><path d="M8 6.4v3.2M8 11.6v.1" stroke-width="2"/></svg>
+  {%- elif name == "info" -%}
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.2v4M8 4.8v.1" stroke-width="2"/></svg>
+  {%- elif name == "lock" -%}
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.2 7V5a2.8 2.8 0 015.6 0v2"/></svg>
+  {%- elif name == "circle-x" -%}
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2"/><path d="M5.7 5.7l4.6 4.6M10.3 5.7l-4.6 4.6"/></svg>
+  {%- endif -%}
+{%- endmacro %}
+
+{#- Status vocabulary (single source of truth; never show raw codes):
+    rejected -> Rejected (danger) | accepted, queued -> Queued (neutral)
+    processing -> Evaluating (info, animated dot) | evaluated -> Evaluated (success)
+    evaluation_failed -> Evaluation failed (danger, alert icon) -#}
+{% macro status_badge(status) -%}
+  {%- if status == "rejected" -%}
+    <span class="ui-badge tone-danger" data-status="rejected">{{ icon("circle-x") }}Rejected</span>
+  {%- elif status == "accepted" or status == "queued" -%}
+    <span class="ui-badge tone-neutral" data-status="{{ status }}"><span class="dot hollow" aria-hidden="true"></span>Queued</span>
+  {%- elif status == "processing" -%}
+    <span class="ui-badge tone-info" data-status="processing"><span class="dot pulse" aria-hidden="true"></span>Evaluating</span>
+  {%- elif status == "evaluated" -%}
+    <span class="ui-badge tone-success" data-status="evaluated">{{ icon("check") }}Evaluated</span>
+  {%- elif status == "evaluation_failed" -%}
+    <span class="ui-badge tone-danger" data-status="evaluation_failed">{{ icon("alert") }}Evaluation failed</span>
+  {%- else -%}
+    <span class="ui-badge tone-neutral" data-status="{{ status }}"><span class="dot hollow" aria-hidden="true"></span>{{ (status or "Unknown")|replace("_", " ")|capitalize }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{#- state: "open" | "closed" | "reopened" -#}
+{% macro period_badge(state) -%}
+  {%- if state == "reopened" -%}
+    <span class="ui-badge tone-info" data-state="reopened"><span class="dot" aria-hidden="true"></span>Reopened</span>
+  {%- elif state == "open" -%}
+    <span class="ui-badge tone-success" data-state="open"><span class="dot" aria-hidden="true"></span>Open</span>
+  {%- else -%}
+    <span class="ui-badge tone-neutral" data-state="closed">{{ icon("lock") }}Closed</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{#- Optional {% call %} body renders as the right-aligned action area. `meta` is an optional line below the subtitle. -#}
+{% macro page_header(title, subtitle=none, eyebrow=none, meta=none) -%}
+  <header class="ui-header">
+    <div class="ui-header-main">
+      {% if eyebrow %}<p class="ui-eyebrow">{{ eyebrow }}</p>{% endif %}
+      <h1>{{ title }}</h1>
+      {% if subtitle %}<p class="ui-header-sub">{{ subtitle }}</p>{% endif %}
+      {% if meta %}{{ meta }}{% endif %}
+    </div>
+    {% if caller is defined %}
+      {% set actions = caller() %}
+      {% if actions|trim %}<div class="ui-header-actions">{{ actions }}</div>{% endif %}
+    {% endif %}
+  </header>
+{%- endmacro %}
+
+{% macro section_card(title=none, subtitle=none, id=none, level=2, flush=false, extra_class="") -%}
+  <section class="ui-card {{ extra_class }}"{% if id %} id="{{ id }}"{% endif %}{% if title and id %} aria-labelledby="{{ id }}-title"{% endif %}>
+    {% if title %}
+      <div class="ui-card-head">
+        <div>
+          <h{{ level }}{% if id %} id="{{ id }}-title"{% endif %}>{{ title }}</h{{ level }}>
+          {% if subtitle %}<p>{{ subtitle }}</p>{% endif %}
+        </div>
+      </div>
+    {% endif %}
+    <div class="ui-card-body{% if flush %} flush{% endif %}">{{ caller() }}</div>
+  </section>
+{%- endmacro %}
+
+{% macro empty_state(title, text=none) -%}
+  <div class="ui-empty">
+    <h2>{{ title }}</h2>
+    {% if text %}<p>{{ text }}</p>{% endif %}
+    {% if caller is defined %}<div class="ui-empty-actions">{{ caller() }}</div>{% endif %}
+  </div>
+{%- endmacro %}
+
+{#- Run-level score table. `table` is the pivoted metric table (columns + rows). -#}
+{% macro score_table(table) -%}
+  <div class="score-wrap">
+    <table class="table score-table align-middle">
+      <thead>
+        <tr>
+          <th scope="col">RunID</th>
+          {% for column in table.columns %}
+            <th scope="col" class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table.rows %}
+          <tr>
+            <th scope="row">{{ row.run_id }}</th>
+            {% for column in table.columns %}
+              {% set value = row.metric_values.get(column.key) %}
+              <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{%- endmacro %}
+
+{% macro requirements_list(subtask) -%}
+  <ul>
+    <li>TREC_EVAL text, six fields per non-empty line: topicID, Q0, docID, Rank, Score, RunID.</li>
+    <li>Include every required query and candidate model for Subtask {{ subtask }}.</li>
+    <li>Use no more than 5 distinct RunID values.</li>
+    <li>File extensions are ignored; the content is validated.</li>
+  </ul>
+{%- endmacro %}
+
+{#- ---- Organizer helpers (neutral tags for non-status flags) ---- -#}
+{% macro tag(label, tone="neutral") -%}
+  <span class="ui-tag tone-{{ tone }}">{{ label }}</span>
+{%- endmacro %}
+
+{% macro subtask_tag(subtask) -%}
+  <span class="ui-tag">Subtask {{ subtask }}</span>
+{%- endmacro %}
+
+{#- period *name* (normal / late), not a period state -#}
+{% macro period_tag(name) -%}
+  <span class="ui-tag">{{ name|capitalize }}</span>
+{%- endmacro %}
+
+{#- current / superseded flag of a submission -#}
+{% macro state_tag(submission) -%}
+  {%- if submission.is_current -%}
+    <span class="ui-tag tone-info">Current</span>
+  {%- elif submission.superseded_at_jst -%}
+    <span class="ui-tag">Superseded</span>
+  {%- else -%}
+    <span class="ui-tag">Attempt</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro active_badge(is_active, yes="Active", no="Disabled") -%}
+  {%- if is_active -%}
+    <span class="ui-badge tone-success"><span class="dot" aria-hidden="true"></span>{{ yes }}</span>
+  {%- else -%}
+    <span class="ui-badge tone-neutral">{{ icon("lock") }}{{ no }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{#- ground-truth validation result -#}
+{% macro validation_badge(status) -%}
+  {%- if status == "validated" -%}
+    <span class="ui-badge tone-success">{{ icon("check") }}Validated</span>
+  {%- else -%}
+    <span class="ui-badge tone-danger">{{ icon("circle-x") }}{{ (status or "Unknown")|replace("_", " ")|capitalize }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro severity_badge(severity) -%}
+  {%- if severity == "warning" -%}
+    <span class="ui-badge tone-warning">{{ icon("alert") }}Warning</span>
+  {%- else -%}
+    <span class="ui-badge tone-danger">{{ icon("circle-x") }}Error</span>
+  {%- endif -%}
+{%- endmacro %}

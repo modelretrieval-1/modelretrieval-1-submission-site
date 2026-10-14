@@ -1,207 +1,134 @@
 {% extends "base.html" %}
+{% from "_ui.html" import icon, status_badge, period_badge, page_header, empty_state, score_table %}
 
+{% set page_title = "Dashboard" %}
 {% block title %}Team Dashboard - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <div class="page-header app-page-header">
-    <div>
-      <p class="eyebrow">Participant workspace</p>
-      <h1>Team Dashboard</h1>
-      <p>{{ account.display_name }} ({{ account.user_id }})</p>
-    </div>
-    <div class="header-actions">
-      {% if available_subtasks %}
-        <div class="dropdown">
-          <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Upload submission
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            {% for subtask in available_subtasks %}
-              <li><a class="dropdown-item" href="/team/submissions/{{ subtask }}/new">Subtask {{ subtask }}</a></li>
-            {% endfor %}
-          </ul>
-        </div>
+  {#- Periods that are open right now (derived from the per-subtask slots). -#}
+  {% set ns = namespace(open_periods=[], seen=[]) %}
+  {% for slot in submission_slots %}
+    {% if slot.is_open and slot.period.name not in ns.seen %}
+      {% set ns.seen = ns.seen + [slot.period.name] %}
+      {% set ns.open_periods = ns.open_periods + [slot.period] %}
+    {% endif %}
+  {% endfor %}
+
+  {% set open_line %}
+    <p class="open-line">
+      {% if ns.open_periods %}
+        {% for period in ns.open_periods %}
+          {{ period_badge("reopened" if period.is_open_override else "open") }}
+          <span><strong>{{ period.name|capitalize }} period</strong> &middot; deadline <span class="num">{{ period.deadline_at_jst }} JST</span></span>
+        {% endfor %}
+      {% else %}
+        {{ period_badge("closed") }}
+        <span>No submission period is open.</span>
       {% endif %}
-    </div>
-  </div>
+    </p>
+  {% endset %}
+  {{ page_header(account.display_name, eyebrow="Team dashboard", meta=open_line) }}
 
-  <section class="stat-grid" aria-label="Team summary">
-    <div class="stat-card">
-      <span class="stat-label">Registered subtasks</span>
-      <strong class="stat-value">{{ subtasks|length }}</strong>
-      <span class="stat-note">
-        {% if subtasks %}Subtask {{ subtasks|join(", ") }}{% else %}No active registrations{% endif %}
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Available submissions</span>
-      <strong class="stat-value">{{ available_submission_slots }}</strong>
-      <span class="stat-note">Open slots without a successful submission</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Normal deadline</span>
-      {% set normal_period = periods|selectattr("name", "equalto", "normal")|first %}
-      <strong class="stat-value stat-date">Normal</strong>
-      <span class="stat-note">
-        {% if normal_period %}{{ normal_period.deadline_at_jst }} JST{% else %}Not configured{% endif %}
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Late deadline</span>
-      {% set late_period = periods|selectattr("name", "equalto", "late")|first %}
-      <strong class="stat-value stat-date">Late</strong>
-      <span class="stat-note">
-        {% if late_period %}{{ late_period.deadline_at_jst }} JST{% else %}Not configured{% endif %}
-      </span>
-    </div>
-  </section>
-
-  {% if submission_slots|selectattr("resubmission_allowed")|list %}
-    <div class="alert alert-warning" role="alert">
-      <strong>Replacement upload approved.</strong>
-      Your previous scores are temporarily hidden while you submit a replacement. The permission is used only after a valid replacement is accepted; failed validation does not consume it.
-      <span class="d-block mt-2">Choose the subtask:</span>
-      {% for subtask in available_subtasks %}
-        <a href="/team/submissions/{{ subtask }}/new" class="alert-link me-3">Subtask {{ subtask }}</a>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <section class="panel">
-    <div class="section-header">
-      <div>
-        <h2>Submission Status</h2>
-        <p>Each registered subtask can have one successful submission per period.</p>
-      </div>
-    </div>
-    <div class="dashboard-grid">
+  {% if subtasks %}
+    <div class="subtask-grid">
       {% for subtask in subtasks %}
-        <div class="dashboard-tile">
-          <h3>Subtask {{ subtask }}</h3>
-          <div class="slot-list">
-            {% for slot in submission_slots if slot.subtask == subtask %}
-              <div class="slot-row">
-                <div>
+        {% set summary = submission_summaries|selectattr("subtask", "equalto", subtask)|first %}
+        {% set slots = submission_slots|selectattr("subtask", "equalto", subtask)|list %}
+        {% set pending = slots|selectattr("resubmission_allowed")|list %}
+        <section class="ui-card subtask-card" aria-labelledby="subtask-{{ subtask }}-title" data-subtask="{{ subtask }}">
+          <div class="ui-card-head">
+            <h2 id="subtask-{{ subtask }}-title">Subtask {{ subtask }}</h2>
+          </div>
+
+          <ul class="slot-list">
+            {% for slot in slots %}
+              {% set current_submission = slot_submissions.get((subtask, slot.period.name)) %}
+              {% set state = "reopened" if (slot.is_open and slot.period.is_open_override) else ("open" if slot.is_open else "closed") %}
+              <li class="slot-row{% if slot.is_submitted %} is-submitted{% endif %}" data-period="{{ slot.period.name }}" data-state="{{ state }}">
+                <div class="slot-name">
                   <strong>{{ slot.period.name|capitalize }}</strong>
-                  <span class="small-muted d-block">{{ slot.period.deadline_at_jst }} JST</span>
+                  {{ period_badge(state) }}
                 </div>
+                <div class="slot-deadline">Deadline <span class="num">{{ slot.period.deadline_at_jst }} JST</span></div>
                 <div class="slot-action">
+                  {% if current_submission %}
+                    <a class="slot-status-link" href="/team/submissions/{{ current_submission.id }}" aria-label="Open status page for the Subtask {{ subtask }} {{ slot.period.name }} submission">{{ status_badge(current_submission.status) }}</a>
+                  {% endif %}
                   {% if slot.resubmission_allowed and slot.can_submit %}
                     <a class="btn btn-primary btn-sm" href="/team/submissions/{{ subtask }}/new">Upload replacement</a>
                   {% elif slot.is_submitted %}
-                    <span class="badge text-bg-success">submitted</span>
+                    {% if not current_submission %}
+                      <span class="slot-note">{{ icon("check") }}Submitted</span>
+                    {% endif %}
                   {% elif slot.can_submit %}
                     <a class="btn btn-primary btn-sm" href="/team/submissions/{{ subtask }}/new">Upload</a>
                   {% elif slot.is_open %}
-                    <span class="badge text-bg-secondary">unavailable</span>
+                    <span class="slot-note">Unavailable</span>
                   {% else %}
-                    <span class="badge text-bg-dark">closed</span>
+                    <span class="slot-note">Deadline passed</span>
                   {% endif %}
                 </div>
+              </li>
+            {% endfor %}
+          </ul>
+
+          {% if pending %}
+            <div class="card-notice" role="note">
+              {{ icon("info") }}
+              <p><strong>Replacement upload approved.</strong> Your previous scores are temporarily hidden while you submit a replacement. The permission is used only after a valid replacement is accepted; failed validation does not consume it.</p>
+            </div>
+          {% endif %}
+
+          <div class="latest">
+            {% if summary %}
+              <div class="latest-head">
+                <h3 class="latest-title">Latest result · {{ summary.period_name|capitalize }} period</h3>
+                <span class="d-inline-flex align-items-center gap-3">
+                  {{ status_badge(summary.status) }}
+                  <a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ summary.submission_id }}">View status</a>
+                </span>
               </div>
-            {% endfor %}
-          </div>
-        </div>
-      {% else %}
-        <p class="empty-state">No registered subtasks are available for this team.</p>
-      {% endfor %}
-    </div>
-  </section>
-
-  <section class="panel">
-    <div class="section-header">
-      <div>
-        <h2>Latest Submissions</h2>
-        <p>Your most recent accepted and rejected attempts.</p>
-      </div>
-    </div>
-    {% if submission_summaries %}
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Subtask</th>
-              <th>Status</th>
-              <th>File</th>
-              <th>Submitted</th>
-              <th>Scores</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for submission in submission_summaries %}
-              <tr>
-                <td>Subtask {{ submission.subtask }}</td>
-                <td>
-                  <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% elif submission.status == 'processing' %}info{% elif submission.status == 'queued' %}secondary{% else %}secondary{% endif %}">
-                    {% if submission.status == 'queued' %}Queued{% elif submission.status == 'processing' %}Evaluating{% elif submission.status == 'evaluated' %}Evaluated <span class="visually-hidden">(evaluated)</span>{% elif submission.status == 'rejected' %}Validation failed <span class="visually-hidden">(rejected)</span>{% elif submission.status == 'evaluation_failed' %}Evaluation failed{% else %}{{ submission.status }}{% endif %}
-                  </span>
-                </td>
-                <td>{{ submission.original_filename }}</td>
-                <td>{{ submission.submitted_at_jst }} JST</td>
-                <td>
-                  <a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ submission.submission_id }}">View status</a>
-                  {% if submission.metric_table.rows %}
-                    <div class="table-wrap">
-                      <table class="table table-sm align-middle metric-table compact-metric-table">
-                        <thead class="table-light">
-                          <tr>
-                            <th>RunID</th>
-                            {% for column in submission.metric_table.columns %}
-                              <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
-                            {% endfor %}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for row in submission.metric_table.rows %}
-                            <tr>
-                              <td>{{ row.run_id }}</td>
-                              {% for column in submission.metric_table.columns %}
-                                {% set value = row.metric_values.get(column.key) %}
-                                <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
-                                  {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
-                                </td>
-                              {% endfor %}
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
-                    </div>
-                  {% else %}
-                    <span class="text-muted">No scores yet</span>
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="empty-state">No submissions yet.</p>
-    {% endif %}
-  </section>
-
-  <section class="panel">
-    <div class="section-header">
-      <div>
-        <h2>Submission Periods</h2>
-        <p>Each subtask can have one successful submission per period.</p>
-      </div>
-    </div>
-    <div class="period-stack">
-      {% for period in periods %}
-        <div class="period-row">
-          <div>
-            <strong>{{ period.name|capitalize }} submission</strong>
-            <span class="small-muted d-block">{{ period.deadline_at_jst }} JST</span>
-            {% if period.starts_at_jst %}
-              <span class="small-muted d-block">Starts {{ period.starts_at_jst }} JST</span>
+              {% if summary.metric_table.rows %}
+                {{ score_table(summary.metric_table) }}
+              {% elif summary.status == 'rejected' %}
+                <p class="latest-none">No scores. This file was rejected; open the status page for details.</p>
+              {% else %}
+                <p class="latest-none">No scores yet</p>
+              {% endif %}
+            {% elif pending %}
+              <h3 class="latest-title">Latest result</h3>
+              <p class="latest-none">Hidden until your replacement is evaluated.</p>
+            {% else %}
+              <h3 class="latest-title">Latest result</h3>
+              <p class="latest-none">Nothing submitted for this subtask yet.</p>
             {% endif %}
           </div>
-          <span class="badge text-bg-{% if period.is_open_override %}warning{% elif period.name == 'normal' %}info{% else %}dark{% endif %}">
-            {% if period.is_open_override %}reopened{% else %}{{ period.name }}{% endif %}
-          </span>
-        </div>
+        </section>
       {% endfor %}
     </div>
-  </section>
+  {% else %}
+    {{ empty_state("No registered subtasks", "No registered subtasks are available for this team. Contact the organizers if this looks wrong.") }}
+  {% endif %}
+
+  <h2 class="section-title">Latest Submissions</h2>
+  {% if submission_summaries %}
+    <section class="ui-card" aria-label="Latest submissions">
+      <ul class="history-list">
+        <li class="history-row history-head" aria-hidden="true">
+          <span>Subtask</span><span>Status</span><span>File</span><span>Submitted</span><span></span>
+        </li>
+        {% for submission in submission_summaries %}
+          <li class="history-row" data-status="{{ submission.status }}">
+            <span class="history-subtask">Subtask {{ submission.subtask }}</span>
+            <span class="history-status">{{ status_badge(submission.status) }}</span>
+            <span class="history-file"><span class="history-label">File</span>{{ submission.original_filename }}</span>
+            <span class="history-time num"><span class="history-label">Submitted</span>{{ submission.submitted_at_jst }} JST</span>
+            <span class="history-link"><a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ submission.submission_id }}">View status</a></span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    {{ empty_state("No submissions yet", "Your submissions will be listed here once you upload a file.") }}
+  {% endif %}
 {% endblock %}

@@ -10,3 +10,6 @@ build/
 .env
 .env.*
 !*.env.example
+
+# Local UI demo database, uploads, and screenshots
+.ui-preview/

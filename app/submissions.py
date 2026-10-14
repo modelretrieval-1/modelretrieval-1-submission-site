@@ -1369,6 +1369,33 @@ def requeue_processing_submissions(connection: sqlite3.Connection) -> int:
     return cursor.rowcount
 
 
+def list_current_team_slot_submissions(
+    connection: sqlite3.Connection,
+    *,
+    internal_team_id: int,
+) -> dict[tuple[str, str], dict]:
+    """Return score-free current submission details keyed by (subtask, period name)."""
+    rows = connection.execute(
+        """
+        SELECT submissions.id, submissions.subtask, submission_periods.name AS period_name,
+               submissions.status, submissions.submitted_at_jst, submissions.original_filename
+        FROM submissions
+        JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
+        WHERE submissions.team_id = ? AND submissions.is_current = 1
+        """,
+        (internal_team_id,),
+    ).fetchall()
+    return {
+        (row["subtask"], row["period_name"]): {
+            "id": row["id"],
+            "status": row["status"],
+            "submitted_at_jst": row["submitted_at_jst"],
+            "original_filename": row["original_filename"],
+        }
+        for row in rows
+    }
+
+
 def get_team_submission_status(
     connection: sqlite3.Connection,
     *,

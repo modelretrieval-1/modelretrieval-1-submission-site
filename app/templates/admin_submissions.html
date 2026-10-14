@@ -1,129 +1,104 @@
 {% extends "base.html" %}
+{% from "_ui.html" import status_badge, page_header, subtask_tag, period_tag, state_tag %}
 
+{% set page_title = "Submissions" %}
 {% block title %}Submissions - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    <div class="page-header">
-      <div>
-        <h1>Submissions</h1>
-        <p>Review accepted submissions, rejected attempts, evaluation state, and retained files.</p>
-      </div>
-      <div class="header-actions">
-        <a class="btn btn-outline-primary btn-sm" href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download bundle</a>
-      </div>
-    </div>
+  {% call page_header("Submissions", "Review accepted submissions, rejected attempts, evaluation state, and retained files.") %}
+    <a class="btn btn-outline-primary" href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download bundle</a>
+  {% endcall %}
 
-    <div class="filter-panel">
-      <div class="section-header compact-section-header">
-        <div>
-          <h2>Filters</h2>
-          <p>Filter the retained submission history before review or bundle download.</p>
-        </div>
-        <div>
-          <label class="form-label" for="filter_state">Submission state</label>
-          <select class="form-select" id="filter_state" name="state">
-            <option value="">All</option>
-            <option value="current" {% if filters.state == "current" %}selected{% endif %}>Current</option>
-            <option value="superseded" {% if filters.state == "superseded" %}selected{% endif %}>Superseded</option>
-          </select>
-        </div>
-        <a class="btn btn-outline-secondary btn-sm" href="/admin/submissions">Clear filters</a>
-      </div>
-      <form method="get" action="/admin/submissions" class="form-grid">
-        <div>
-          <label class="form-label" for="filter_team_id">Team ID</label>
-          <input class="form-control" id="filter_team_id" name="team_id" type="text" value="{{ filters.team_id }}" placeholder="team-001">
-        </div>
-        <div>
-          <label class="form-label" for="filter_subtask">Subtask</label>
-          <select class="form-select" id="filter_subtask" name="subtask">
-            <option value="">All</option>
-            <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
-            <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label" for="filter_period">Period</label>
-          <select class="form-select" id="filter_period" name="period">
-            <option value="">All</option>
-            <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
-            <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label" for="filter_status">Status</label>
-          <select class="form-select" id="filter_status" name="status">
-            <option value="">All</option>
-            {% for status in ("rejected", "accepted", "evaluated", "evaluation_failed") %}
-              <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <button class="btn btn-primary" type="submit">Filter</button>
-      </form>
+  <form method="get" action="/admin/submissions" class="toolbar" aria-label="Filter submissions">
+    <div class="toolbar-field toolbar-wide">
+      <label class="form-label" for="filter_team_id">Team ID</label>
+      <input class="form-control" id="filter_team_id" name="team_id" type="text" value="{{ filters.team_id }}" placeholder="team-001">
     </div>
+    <div class="toolbar-field">
+      <label class="form-label" for="filter_subtask">Subtask</label>
+      <select class="form-select" id="filter_subtask" name="subtask">
+        <option value="">All</option>
+        <option value="A" {% if filters.subtask == "A" %}selected{% endif %}>A</option>
+        <option value="B" {% if filters.subtask == "B" %}selected{% endif %}>B</option>
+      </select>
+    </div>
+    <div class="toolbar-field">
+      <label class="form-label" for="filter_period">Period</label>
+      <select class="form-select" id="filter_period" name="period">
+        <option value="">All</option>
+        <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
+        <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
+      </select>
+    </div>
+    <div class="toolbar-field">
+      <label class="form-label" for="filter_status">Status</label>
+      <select class="form-select" id="filter_status" name="status">
+        <option value="">All</option>
+        {% for status, label in (("rejected", "Rejected"), ("accepted", "Queued"), ("evaluated", "Evaluated"), ("evaluation_failed", "Evaluation failed")) %}
+          <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="toolbar-field">
+      <label class="form-label" for="filter_state">Submission state</label>
+      <select class="form-select" id="filter_state" name="state">
+        <option value="">All</option>
+        <option value="current" {% if filters.state == "current" %}selected{% endif %}>Current</option>
+        <option value="superseded" {% if filters.state == "superseded" %}selected{% endif %}>Superseded</option>
+      </select>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-primary" type="submit">Filter</button>
+      <a class="btn btn-outline-secondary" href="/admin/submissions">Clear filters</a>
+    </div>
+  </form>
 
-    <div class="section-header">
+  <section class="ui-card" aria-labelledby="historyHeading">
+    <div class="ui-card-head">
       <div>
-        <h2>Submission History</h2>
+        <h2 id="historyHeading">Submission History</h2>
         <p>Showing {{ submissions|length }} submission{% if submissions|length != 1 %}s{% endif %}.</p>
       </div>
     </div>
-
-    <div class="table-wrap">
-      <table class="table table-sm table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th class="review-identifying">ID</th>
-            <th class="review-identifying">Team</th>
-            <th>Subtask</th>
-            <th>Period</th>
-            <th>Status</th>
-            <th>State</th>
-            <th>File</th>
-            <th>Submitted</th>
-            <th>Summary</th>
-            <th>Detail</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for submission in submissions %}
+    <div class="ui-card-body flush">
+      <div class="table-wrap">
+        <table class="table table-hover">
+          <thead>
             <tr>
-              <td class="review-identifying">{{ submission.submission_id }}</td>
-              <td class="review-identifying">{{ submission.team_public_id }}<br>{{ submission.team_display_name }}</td>
-              <td><span class="badge text-bg-info">Subtask {{ submission.subtask }}</span></td>
-              <td>
-                <span class="badge text-bg-{% if submission.period_name == 'normal' %}primary{% else %}info{% endif %}">
-                  {{ submission.period_name }}
-                </span>
-              </td>
-              <td>
-                <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'evaluation_failed' %}warning{% else %}secondary{% endif %}">
-                  {{ submission.status }}
-                </span>
-              </td>
-              <td>
-                {% if submission.is_current %}
-                  <span class="badge text-bg-primary">current</span>
-                {% elif submission.superseded_at_jst %}
-                  <span class="badge text-bg-secondary">superseded</span>
-                {% else %}
-                  <span class="badge text-bg-light text-dark">attempt</span>
-                {% endif %}
-              </td>
-              <td>{{ submission.original_filename }}</td>
-              <td>{{ submission.submitted_at_jst }} JST</td>
-              <td>{{ submission.validation_summary or "" }}</td>
-              <td><a class="btn btn-outline-primary btn-sm" href="/admin/submissions/{{ submission.submission_id }}">Open</a></td>
+              <th scope="col">ID</th>
+              <th scope="col" class="review-identifying">Team</th>
+              <th scope="col">Subtask</th>
+              <th scope="col">Period</th>
+              <th scope="col">Status</th>
+              <th scope="col">State</th>
+              <th scope="col">File</th>
+              <th scope="col">Submitted</th>
+              <th scope="col">Summary</th>
+              <th scope="col"><span class="visually-hidden">Detail</span></th>
             </tr>
-          {% else %}
-            <tr>
-              <td colspan="10"><p class="empty-state">No submissions match these filters.</p></td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for submission in submissions %}
+              <tr>
+                <td class="num">{{ submission.submission_id }}</td>
+                <td class="review-identifying"><strong>{{ submission.team_public_id }}</strong><span class="small-muted d-block">{{ submission.team_display_name }}</span></td>
+                <td>{{ subtask_tag(submission.subtask) }}</td>
+                <td>{{ period_tag(submission.period_name) }}</td>
+                <td>{{ status_badge(submission.status) }}</td>
+                <td>{{ state_tag(submission) }}</td>
+                <td class="break">{{ submission.original_filename }}</td>
+                <td class="num nowrap">{{ submission.submitted_at_jst }} JST</td>
+                <td class="summary-cell">{{ submission.validation_summary or "" }}</td>
+                <td><a class="btn btn-outline-primary btn-sm" href="/admin/submissions/{{ submission.submission_id }}" aria-label="Open submission {{ submission.submission_id }}">Open</a></td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="10"><p class="empty-state">No submissions match these filters.</p></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 {% endblock %}

@@ -72,6 +72,7 @@ class PivotedMetricTable:
 class TeamSubmissionSummary:
     submission_id: int
     subtask: str
+    period_name: str
     status: str
     original_filename: str
     submitted_at_jst: str
@@ -593,10 +594,12 @@ def list_latest_team_submission_summaries(
         SELECT
           submissions.id,
           submissions.subtask,
+          submission_periods.name AS period_name,
           submissions.status,
           submissions.original_filename,
           submissions.submitted_at_jst
         FROM submissions
+        JOIN submission_periods ON submission_periods.id = submissions.submission_period_id
         WHERE submissions.team_id = ?
           AND submissions.is_current = 1
           AND NOT EXISTS (
@@ -607,7 +610,7 @@ def list_latest_team_submission_summaries(
               AND resubmission_permissions.submission_period_id = submissions.submission_period_id
               AND resubmission_permissions.is_used = 0
           )
-        ORDER BY subtask, id DESC
+        ORDER BY submissions.subtask, submissions.id DESC
         """,
         (internal_team_id,),
     ).fetchall()
@@ -622,6 +625,7 @@ def list_latest_team_submission_summaries(
             TeamSubmissionSummary(
                 submission_id=row["id"],
                 subtask=row["subtask"],
+                period_name=row["period_name"],
                 status=row["status"],
                 original_filename=row["original_filename"],
                 submitted_at_jst=row["submitted_at_jst"],

@@ -1,13 +1,20 @@
 {% extends "base.html" %}
 
+{% block title %}{{ app_name }}{% endblock %}
+
 {% block content %}
-  <section class="panel home-panel">
-    <div class="eyebrow">NTCIR-19 · ModelRetrieval</div>
-    <h1>Submission portal</h1>
-    <p class="home-lead">Upload and track your model retrieval submissions in one place.</p>
-    <p class="home-supporting">For registered participant teams and organizers.</p>
-    <div class="action-row home-actions">
+  <div class="auth-wrap">
+    <section class="auth-card home-card" aria-labelledby="homeTitle">
+      <p class="ui-eyebrow">NTCIR-19 &middot; ModelRetrieval</p>
+      <h1 id="homeTitle">Submission portal</h1>
+      <p class="lead-sub">Upload and track your model retrieval submissions in one place.</p>
+      <ol class="home-steps">
+        <li>Sign in with the account issued to your team.</li>
+        <li>Upload your TREC_EVAL run file for each registered subtask.</li>
+        <li>Follow validation and evaluation, then see your scores.</li>
+      </ol>
       <a class="btn btn-primary" href="/login">Sign in to continue</a>
-    </div>
-  </section>
+      <p class="small-muted mt-3 mb-0">For registered participant teams and organizers.</p>
+    </section>
+  </div>
 {% endblock %}

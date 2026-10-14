@@ -1,99 +1,117 @@
 {% extends "base.html" %}
+{% from "_ui.html" import icon, status_badge, page_header, empty_state, score_table %}
 
+{% set page_title = "Subtask " ~ submission.subtask ~ " submission" %}
 {% block title %}Subtask {{ submission.subtask }} Submission - {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel">
-    <div class="page-header">
-      <div>
-        <h1>Subtask {{ submission.subtask }} Submission</h1>
-        <p>{{ submission.original_filename }} · submitted {{ submission.submitted_at_jst }} JST</p>
-      </div>
-      <div class="header-actions">
-        <a class="btn btn-outline-secondary btn-sm" href="/team">Team dashboard</a>
-      </div>
-    </div>
+  {% call page_header("Subtask " ~ submission.subtask ~ " Submission", eyebrow="Submission status") %}
+    <a class="btn btn-outline-secondary" href="/team">Back to dashboard</a>
+  {% endcall %}
 
-    <div
-      id="submissionStatus"
-      class="submission-status"
-      data-submission-id="{{ submission.submission_id }}"
-      data-status="{{ submission.status }}"
-      data-terminal="{{ 'true' if is_terminal else 'false' }}"
-    >
-      {% set lifecycle = ("Uploaded", "Validating", "Queued", "Evaluating", "Evaluated") %}
-      <p class="mb-2"><strong>Current status:</strong>
-        <span class="badge status-badge text-bg-{% if submission.status == 'evaluated' %}success{% elif submission.status == 'rejected' or submission.status == 'evaluation_failed' %}danger{% elif submission.status == 'processing' %}info{% else %}secondary{% endif %}">
-          {% if submission.status == 'queued' %}Queued for evaluation{% elif submission.status == 'processing' %}Evaluating{% elif submission.status == 'evaluation_failed' %}Evaluation failed{% elif submission.status == 'rejected' %}Validation failed{% elif submission.status == 'evaluated' %}Evaluated{% else %}{{ submission.status }}{% endif %}
-        </span>
-      </p>
-      {% if submission.status in ('queued', 'processing', 'evaluated') %}
-        <ol class="submission-lifecycle{% if submission.status == 'evaluated' %} is-finished{% endif %}" aria-label="Submission progress">
-          {% for step in lifecycle %}
-            <li class="{% if (submission.status == 'queued' and loop.index <= 3) or (submission.status == 'processing' and loop.index <= 4) or (submission.status == 'evaluated' and loop.index == 5) %}is-current{% elif (submission.status == 'processing' and loop.index < 4) or (submission.status == 'evaluated' and loop.index < 5) %}is-complete{% endif %}">{{ step }}</li>
-          {% endfor %}
-        </ol>
-      {% endif %}
+  {% set status = submission.status %}
+  {% set lifecycle = ("Uploaded", "Validating", "Queued", "Evaluating", "Evaluated") %}
+  {#- Step index (1-based) reached for each status; failures stop at the step that failed. -#}
+  {% if status == 'rejected' %}{% set current = 2 %}{% set failed = true %}
+  {% elif status == 'evaluation_failed' %}{% set current = 4 %}{% set failed = true %}
+  {% elif status == 'processing' %}{% set current = 4 %}{% set failed = false %}
+  {% elif status == 'evaluated' %}{% set current = 6 %}{% set failed = false %}
+  {% else %}{% set current = 3 %}{% set failed = false %}{% endif %}
+  {% set tone = 'success' if status == 'evaluated' else ('danger' if failed else ('info' if status == 'processing' else 'neutral')) %}
 
-      {% if submission.status == 'evaluated' %}
-        <div class="alert alert-success" role="status">Submission accepted and evaluated. Your scores are shown below.</div>
-      {% elif submission.status == 'evaluation_failed' %}
-        <div class="alert alert-danger" role="alert">
-          Evaluation failed. Please contact the organizers.
-          {% if submission.validation_summary %}<span class="d-block small">{{ submission.validation_summary }}</span>{% endif %}
+  <section
+    id="submissionStatus"
+    class="ui-card submission-status"
+    aria-label="Submission progress"
+    data-submission-id="{{ submission.submission_id }}"
+    data-status="{{ submission.status }}"
+    data-terminal="{{ 'true' if is_terminal else 'false' }}"
+  >
+    <div class="status-hero tone-bar-{{ tone }}">
+      {{ status_badge(status) }}
+      {% if status == 'evaluated' %}
+        <h2>Submission accepted and evaluated.</h2>
+        <p>Your scores are shown below.</p>
+      {% elif status == 'evaluation_failed' %}
+        <h2>Evaluation failed.</h2>
+        <p class="hero-next"><strong>Next:</strong> your file passed validation, but scoring did not complete. Please contact the organizers and mention this submission.</p>
+        {% if submission.validation_summary %}<p>{{ submission.validation_summary }}</p>{% endif %}
+      {% elif status == 'rejected' %}
+        <h2>Rejected — {{ error_count }} {{ "issue" if error_count == 1 else "issues" }}</h2>
+        <p class="hero-next"><strong>Next:</strong> fix the problems in your file and upload a corrected version. A rejected file does not count as a successful submission.</p>
+        {% if submission.validation_summary and not error_groups %}<p>{{ submission.validation_summary }}</p>{% endif %}
+        <div class="action-row">
+          <a class="btn btn-primary" href="/team/submissions/{{ submission.subtask }}/new">Upload a corrected file</a>
+          <a class="btn btn-outline-secondary" href="/team/submissions/{{ submission.submission_id }}">Refresh status</a>
         </div>
-      {% elif submission.status == 'rejected' %}
-        <div class="alert alert-danger" role="alert">Submission rejected.</div>
+      {% elif status == 'processing' %}
+        <h2 role="status" aria-live="polite">Evaluating your submission…</h2>
+        <p>This page updates automatically; you can also leave and return later.</p>
       {% else %}
-        <div class="alert alert-info d-flex align-items-center gap-2" role="status" aria-live="polite">
-          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-          <span>
-            {% if submission.status == 'processing' %}
-              Evaluating your submission…
-            {% else %}
-              Queued for evaluation…
-            {% endif %}
-            This page updates automatically; you can also leave and return later.
-          </span>
-        </div>
+        <h2 role="status" aria-live="polite">Queued for evaluation…</h2>
+        <p>This page updates automatically; you can also leave and return later.</p>
       {% endif %}
-      {% if is_terminal %}<a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ submission.submission_id }}">Refresh status</a>{% endif %}
+      {% if is_terminal and status != 'rejected' %}<div><a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ submission.submission_id }}">Refresh status</a></div>{% endif %}
     </div>
 
-    {% if metric_table.rows %}
-      <div class="section-header">
+    <ol class="stepper{% if status == 'evaluated' %} is-done{% endif %}" aria-label="Submission progress">
+      {% for step in lifecycle %}
+        {% set idx = loop.index %}
+        {% if failed and idx == current %}{% set cls = 'is-failed' %}{% set label = 'Failed' %}
+        {% elif idx < current %}{% set cls = 'is-complete' %}{% set label = 'Done' %}
+        {% elif idx == current %}{% set cls = 'is-current' %}{% set label = 'In progress' if status == 'processing' else 'Waiting' %}
+        {% else %}{% set cls = '' %}{% set label = 'Pending' %}{% endif %}
+        <li class="{{ cls }}"{% if cls == 'is-current' %} aria-current="step"{% endif %}>
+          <span class="step-mark" aria-hidden="true">
+            {% if cls == 'is-complete' %}{{ icon("check") }}{% elif cls == 'is-failed' %}{{ icon("cross") }}{% else %}{{ idx }}{% endif %}
+          </span>
+          <span class="step-label">{{ step }}</span>
+          <span class="step-state">{{ label }}</span>
+        </li>
+      {% endfor %}
+    </ol>
+
+    <dl class="status-meta">
+      <div><dt>File</dt><dd>{{ submission.original_filename }}</dd></div>
+      <div><dt>Submitted</dt><dd class="num">{{ submission.submitted_at_jst }} JST</dd></div>
+    </dl>
+  </section>
+
+  {% if status == 'rejected' and error_groups %}
+    <div class="error-summary" role="alert" aria-labelledby="validationSummaryTitle">
+      <div class="error-summary-head">
+        {{ icon("circle-x") }}
         <div>
-          <h2>Scores</h2>
+          <h2 id="validationSummaryTitle">Issues to fix</h2>
+        </div>
+      </div>
+      {% for group in error_groups %}
+        <div class="error-group">
+          <h3>{{ group.label }} <span class="num">({{ group.errors|length }})</span></h3>
+          <ul>
+            {% for error in group.errors %}
+              <li>
+                {% if error.line_number %}<span class="error-loc">Line {{ error.line_number }}</span>{% endif %}
+                <span>{% if error.field_name %}<strong>{{ error.field_name }}:</strong> {% endif %}{{ error.message }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if metric_table.rows %}
+    <section class="ui-card" aria-labelledby="scores-title">
+      <div class="ui-card-head">
+        <div>
+          <h2 id="scores-title">Scores</h2>
           <p>Run-level metrics persisted for this accepted submission.</p>
         </div>
       </div>
-      <div class="table-wrap">
-        <table class="table table-sm table-hover align-middle metric-table">
-          <thead class="table-light">
-            <tr>
-              <th>RunID</th>
-              {% for column in metric_table.columns %}
-                <th class="metric-value {% if column.is_primary %}metric-primary{% endif %}">{{ column.label }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in metric_table.rows %}
-              <tr>
-                <td>{{ row.run_id }}</td>
-                {% for column in metric_table.columns %}
-                  {% set value = row.metric_values.get(column.key) %}
-                  <td class="metric-value {% if column.is_primary %}metric-primary{% endif %}">
-                    {% if value is not none %}{{ "%.4f"|format(value) }}{% else %}-{% endif %}
-                  </td>
-                {% endfor %}
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% endif %}
-  </section>
+      <div class="ui-card-body">{{ score_table(metric_table) }}</div>
+    </section>
+  {% endif %}
 {% endblock %}
 
 {% block scripts %}
