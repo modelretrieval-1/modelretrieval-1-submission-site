@@ -110,9 +110,14 @@
     {{ empty_state("No registered subtasks", "No registered subtasks are available for this team. Contact the organizers if this looks wrong.") }}
   {% endif %}
 
-  <h2 class="section-title">Latest Submissions</h2>
   {% if submission_summaries %}
-    <section class="ui-card" aria-label="Latest submissions">
+    <section class="ui-card" aria-labelledby="latestSubmissionsTitle">
+      <div class="ui-card-head">
+        <div>
+          <h2 id="latestSubmissionsTitle">Latest Submissions</h2>
+          <p>The current attempt for each subtask and period.</p>
+        </div>
+      </div>
       <ul class="history-list">
         <li class="history-row history-head" aria-hidden="true">
           <span>Subtask</span><span>Status</span><span>File</span><span>Submitted</span><span></span>
@@ -129,6 +134,7 @@
       </ul>
     </section>
   {% else %}
+    <h2 class="section-title">Latest Submissions</h2>
     {{ empty_state("No submissions yet", "Your submissions will be listed here once you upload a file.") }}
   {% endif %}
 {% endblock %}

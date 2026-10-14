@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_ui.html" import page_header, period_badge, period_tag %}
+{% from "_ui.html" import notice, page_header, period_badge, period_tag %}
 
 {% set page_title = "Periods" %}
 {% block title %}Submission Periods - {{ app_name }}{% endblock %}
@@ -8,11 +8,11 @@
   {{ page_header("Submission Periods", "Configure JST start times, deadlines, and organizer reopen overrides.") }}
 
   {% if error %}
-    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% call notice("danger", "alert") %}{{ error }}{% endcall %}
   {% endif %}
 
   {% if success %}
-    <div class="alert alert-success" role="status">{{ success }}</div>
+    {% call notice("success", "status") %}{{ success }}{% endcall %}
   {% endif %}
 
   <div class="section-intro">
@@ -24,7 +24,7 @@
     {% for period in periods %}
       <section class="ui-card mb-0" aria-labelledby="period-{{ period.name }}-title">
         <div class="ui-card-head">
-          <h3 id="period-{{ period.name }}-title">{{ period.name|capitalize }} period</h3>
+          <h3 id="period-{{ period.name }}-title">{{ period.name|capitalize }} Period</h3>
           {% if period.is_open_override %}{{ period_badge("reopened") }}{% endif %}
         </div>
         <div class="ui-card-body">

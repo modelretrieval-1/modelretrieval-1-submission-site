@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_ui.html" import page_header, section_card, subtask_tag, active_badge %}
+{% from "_ui.html" import notice, page_header, section_card, subtask_tag, active_badge %}
 
 {% set page_title = "Teams" %}
 {% block title %}Teams - {{ app_name }}{% endblock %}
@@ -8,7 +8,7 @@
   {{ page_header("Teams", "Register participant teams, assign eligible subtasks, and rotate team passwords.") }}
 
   {% if error %}
-    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% call notice("danger", "alert") %}{{ error }}{% endcall %}
   {% endif %}
 
   {% if generated_password %}
@@ -41,7 +41,7 @@
         </label>
       </fieldset>
       <div class="form-submit">
-        <button class="btn btn-primary" type="submit">Add Team</button>
+        <button class="btn btn-primary" type="submit">Add team</button>
       </div>
     </form>
   {% endcall %}

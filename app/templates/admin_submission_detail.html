@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% from "_ui.html" import status_badge, page_header, section_card, subtask_tag, period_tag, state_tag, tag, severity_badge %}
+{% from "_ui.html" import notice, status_badge, page_header, section_card, subtask_tag, period_tag, state_tag, tag, severity_badge %}
 {% set page_title = "Submission " ~ submission.submission_id %}
 {% block title %}Submission {{ submission.submission_id }} - {{ app_name }}{% endblock %}
 
 {% block content %}
   {% if success %}
-    <div class="alert alert-success" role="status">{{ success }}</div>
+    {% call notice("success", "status") %}{{ success }}{% endcall %}
   {% endif %}
   {% if error %}
-    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% call notice("danger", "alert") %}{{ error }}{% endcall %}
   {% endif %}
 
-  {% call page_header("Submission " ~ submission.submission_id, submission.team_display_name ~ " (" ~ submission.team_public_id ~ ")", eyebrow="Organizer console") %}
+  {% call page_header("Submission " ~ submission.submission_id, submission.team_display_name ~ " (" ~ submission.team_public_id ~ ")", eyebrow="Submission detail") %}
     <a class="btn btn-outline-secondary" href="/admin/submissions">Back to submissions</a>
   {% endcall %}
 
@@ -225,7 +225,7 @@
                   <td>{{ state_tag(item) }}</td>
                   <td class="break">{{ item.original_filename }}</td>
                   <td class="num nowrap">{{ item.submitted_at_jst }} JST</td>
-                  <td><a class="btn btn-outline-primary btn-sm" href="/admin/submissions/{{ item.submission_id }}" aria-label="Open submission {{ item.submission_id }}">Open</a></td>
+                  <td><a class="btn btn-outline-secondary btn-sm" href="/admin/submissions/{{ item.submission_id }}" aria-label="Open submission {{ item.submission_id }}">Open</a></td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -283,13 +283,13 @@
   {% call section_card("Replacement Upload", "Grant a one-time permission for this team, subtask, and period.", id="replacementCard", extra_class="action-card") %}
     {% set pending_permission = resubmission_permissions|selectattr("is_used", "equalto", false)|first %}
     {% if pending_permission %}
-      <p class="alert alert-info mb-0">
+      {% call notice("info", "status") %}
         One-time replacement permission is already pending. Previous participant-visible scores are hidden until the replacement is completed. Granted by {{ pending_permission.granted_by_display_name }} at {{ pending_permission.granted_at_jst }} JST.
-      </p>
+      {% endcall %}
     {% elif submission.is_current and submission.status in ("accepted", "evaluated", "evaluation_failed") %}
-      <div class="alert alert-warning" role="alert">
+      {% call notice("warning", "alert") %}
         This is a one-time replacement permission. Once granted, the participant’s previous scores are hidden while they prepare a replacement. A failed validation does not consume the permission; a successful replacement supersedes this submission.
-      </div>
+      {% endcall %}
       <form method="post" action="/admin/submissions/{{ submission.submission_id }}/resubmission" class="stacked-form" onsubmit="return window.confirm('Grant one replacement upload for this team, subtask, and period? Their previous scores will be hidden while the replacement is pending.');">
         <div>
           <label class="form-label" for="resubmission_reason">Reason</label>

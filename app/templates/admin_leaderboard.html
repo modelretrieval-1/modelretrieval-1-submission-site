@@ -6,7 +6,7 @@
 
 {% block content %}
   {% call page_header("Leaderboard", "Private organizer view of evaluated run-level metrics.") %}
-    <a class="btn btn-outline-primary" href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
+    <a class="btn btn-outline-secondary" href="/admin/leaderboard.csv{% if export_query %}?{{ export_query }}{% endif %}">Export CSV</a>
   {% endcall %}
 
   <form method="get" action="/admin/leaderboard" class="toolbar" aria-label="Filter leaderboard">
@@ -31,8 +31,8 @@
       <label class="form-label" for="leaderboard_period">Period</label>
       <select class="form-select" id="leaderboard_period" name="period">
         <option value="">All</option>
-        <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
-        <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
+        <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>Normal</option>
+        <option value="late" {% if filters.period == "late" %}selected{% endif %}>Late</option>
       </select>
     </div>
     <div class="toolbar-actions">

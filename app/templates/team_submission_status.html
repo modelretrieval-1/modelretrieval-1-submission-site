@@ -5,7 +5,7 @@
 {% block title %}Subtask {{ submission.subtask }} Submission - {{ app_name }}{% endblock %}
 
 {% block content %}
-  {% call page_header("Subtask " ~ submission.subtask ~ " Submission", eyebrow="Submission status") %}
+  {% call page_header("Subtask " ~ submission.subtask ~ " Submission") %}
     <a class="btn btn-outline-secondary" href="/team">Back to dashboard</a>
   {% endcall %}
 
@@ -51,7 +51,7 @@
         <h2 role="status" aria-live="polite">Queued for evaluation…</h2>
         <p>This page updates automatically; you can also leave and return later.</p>
       {% endif %}
-      {% if is_terminal and status != 'rejected' %}<div><a class="btn btn-outline-secondary btn-sm" href="/team/submissions/{{ submission.submission_id }}">Refresh status</a></div>{% endif %}
+      {% if is_terminal and status != 'rejected' %}<div class="action-row"><a class="btn btn-outline-secondary" href="/team/submissions/{{ submission.submission_id }}">Refresh status</a></div>{% endif %}
     </div>
 
     <ol class="stepper{% if status == 'evaluated' %} is-done{% endif %}" aria-label="Submission progress">

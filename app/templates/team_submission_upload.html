@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_ui.html" import icon, status_badge, period_badge, page_header, empty_state, score_table, requirements_list %}
+{% from "_ui.html" import notice, icon, status_badge, period_badge, page_header, empty_state, score_table, requirements_list %}
 
 {% set page_title = "Upload Subtask " ~ subtask %}
 {% block title %}Upload Subtask {{ subtask }} Submission - {{ app_name }}{% endblock %}
@@ -25,7 +25,7 @@
   {% endcall %}
 
   {% if success %}
-    <div class="alert alert-success" role="status">{{ success }}</div>
+    {% call notice("success", "status") %}{{ success }}{% endcall %}
   {% endif %}
 
   {% if errors %}
@@ -66,10 +66,10 @@
   {% endif %}
 
   {% if period_states|selectattr("resubmission_allowed")|list %}
-    <div class="alert alert-warning" role="alert">
+    {% call notice("warning", "alert") %}
       <strong>This is a replacement upload.</strong>
       Your previous participant-visible scores are hidden while this permission is pending. A valid replacement becomes the current result; failed validation does not use the permission.
-    </div>
+    {% endcall %}
   {% endif %}
 
   <div class="upload-layout">

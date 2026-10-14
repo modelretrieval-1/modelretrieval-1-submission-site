@@ -2802,3 +2802,43 @@ tr.is-self > * {
     animation-iteration-count: infinite !important;
   }
 }
+
+/* 10. Consistency pass ----------------------------------------------------- */
+/* One inline notice structure: tone icon + message (see `notice` macro). */
+.ui-notice {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+  font-size: var(--fs-small);
+}
+
+.ui-notice > svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.ui-notice-body {
+  min-width: 0;
+}
+
+.ui-card-body > .ui-notice:last-child,
+.ui-notice:last-child {
+  margin-bottom: 0;
+}
+
+.auth-card .ui-notice {
+  margin-bottom: var(--space-4);
+}
+
+/* Header actions never differ in height from page to page. */
+.ui-header-actions .btn {
+  white-space: nowrap;
+}
+
+/* Event/error codes stay on one line inside table cells (the table scrolls instead). */
+.table td > code:not(.meta-json):not(.hash) {
+  white-space: nowrap;
+}

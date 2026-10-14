@@ -6,7 +6,7 @@
 
 {% block content %}
   {% call page_header("Submissions", "Review accepted submissions, rejected attempts, evaluation state, and retained files.") %}
-    <a class="btn btn-outline-primary" href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download bundle</a>
+    <a class="btn btn-outline-secondary" href="/admin/submissions/bundle.zip{% if bundle_query %}?{{ bundle_query }}{% endif %}">Download bundle</a>
   {% endcall %}
 
   <form method="get" action="/admin/submissions" class="toolbar" aria-label="Filter submissions">
@@ -26,8 +26,8 @@
       <label class="form-label" for="filter_period">Period</label>
       <select class="form-select" id="filter_period" name="period">
         <option value="">All</option>
-        <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>normal</option>
-        <option value="late" {% if filters.period == "late" %}selected{% endif %}>late</option>
+        <option value="normal" {% if filters.period == "normal" %}selected{% endif %}>Normal</option>
+        <option value="late" {% if filters.period == "late" %}selected{% endif %}>Late</option>
       </select>
     </div>
     <div class="toolbar-field">
@@ -40,7 +40,7 @@
       </select>
     </div>
     <div class="toolbar-field">
-      <label class="form-label" for="filter_state">Submission state</label>
+      <label class="form-label" for="filter_state">Submission State</label>
       <select class="form-select" id="filter_state" name="state">
         <option value="">All</option>
         <option value="current" {% if filters.state == "current" %}selected{% endif %}>Current</option>
@@ -89,7 +89,7 @@
                 <td class="break">{{ submission.original_filename }}</td>
                 <td class="num nowrap">{{ submission.submitted_at_jst }} JST</td>
                 <td class="summary-cell">{{ submission.validation_summary or "" }}</td>
-                <td><a class="btn btn-outline-primary btn-sm" href="/admin/submissions/{{ submission.submission_id }}" aria-label="Open submission {{ submission.submission_id }}">Open</a></td>
+                <td><a class="btn btn-outline-secondary btn-sm" href="/admin/submissions/{{ submission.submission_id }}" aria-label="Open submission {{ submission.submission_id }}">Open</a></td>
               </tr>
             {% else %}
               <tr>

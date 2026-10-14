@@ -5,7 +5,7 @@
 {% block title %}Organizer Dashboard - {{ app_name }}{% endblock %}
 
 {% block content %}
-  {% call page_header("Organizer Dashboard", "Monitor task readiness, submissions, periods, and evaluation outputs.", eyebrow="Organizer console") %}
+  {% call page_header("Organizer Dashboard", "Monitor task readiness, submissions, periods, and evaluation outputs.") %}
     <a class="btn btn-primary" href="/admin/submissions">Review submissions</a>
     <a class="btn btn-outline-secondary" href="/admin/leaderboard">Leaderboard</a>
   {% endcall %}
@@ -29,7 +29,7 @@
   </section>
 
   <div class="summary-grid">
-    {% call section_card("Submission periods", "JST deadlines and reopen state.", id="periodsCard", extra_class="mb-0") %}
+    {% call section_card("Submission Periods", "JST deadlines and reopen state.", id="periodsCard", extra_class="mb-0") %}
       <ul class="summary-list">
         {% for period_state in period_states %}
           {% set period = period_state.period %}
@@ -45,7 +45,7 @@
       <a class="card-link" href="/admin/periods">Manage periods</a>
     {% endcall %}
 
-    {% call section_card("Ground truth", "Active evaluation versions.", id="gtCard", extra_class="mb-0") %}
+    {% call section_card("Ground Truth", "Active evaluation versions.", id="gtCard", extra_class="mb-0") %}
       <ul class="summary-list">
         {% for subtask in ["A", "B"] %}
           {% set version = active_ground_truth[subtask] %}

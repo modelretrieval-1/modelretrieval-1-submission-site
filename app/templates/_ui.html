@@ -114,6 +114,14 @@
   </div>
 {%- endmacro %}
 
+{#- Inline message. tone: success | danger | warning | info. Same structure + icon everywhere. -#}
+{% macro notice(tone="info", live="status") -%}
+  <div class="alert alert-{{ tone }} ui-notice" role="{{ live }}">
+    {{ icon({"success": "check", "danger": "circle-x", "warning": "alert", "info": "info"}[tone]) }}
+    <div class="ui-notice-body">{{ caller() }}</div>
+  </div>
+{%- endmacro %}
+
 {% macro requirements_list(subtask) -%}
   <ul>
     <li>TREC_EVAL text, six fields per non-empty line: topicID, Q0, docID, Rank, Score, RunID.</li>

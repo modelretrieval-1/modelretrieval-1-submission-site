@@ -9,15 +9,15 @@
 
   <form method="get" class="toolbar" aria-label="Filter audit events">
     <div class="toolbar-field">
-      <label class="form-label" for="audit_event_type">Event type</label>
+      <label class="form-label" for="audit_event_type">Event Type</label>
       <input class="form-control" id="audit_event_type" name="event_type" placeholder="Event type" value="{{ filters.event_type }}">
     </div>
     <div class="toolbar-field">
       <label class="form-label" for="audit_actor_type">Actor</label>
-      <select class="form-select" id="audit_actor_type" name="actor_type"><option value="">All actors</option>{% for value in ("organizer", "team", "system", "anonymous") %}<option value="{{ value }}" {% if filters.actor_type == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+      <select class="form-select" id="audit_actor_type" name="actor_type"><option value="">All</option>{% for value in ("organizer", "team", "system", "anonymous") %}<option value="{{ value }}" {% if filters.actor_type == value %}selected{% endif %}>{{ value|capitalize }}</option>{% endfor %}</select>
     </div>
     <div class="toolbar-field">
-      <label class="form-label" for="audit_entity_type">Entity type</label>
+      <label class="form-label" for="audit_entity_type">Entity Type</label>
       <input class="form-control" id="audit_entity_type" name="entity_type" placeholder="Entity type" value="{{ filters.entity_type }}">
     </div>
     <div class="toolbar-field">
@@ -34,7 +34,7 @@
     </div>
     <div class="toolbar-actions">
       <button class="btn btn-primary" type="submit">Filter</button>
-      <a class="btn btn-outline-secondary" href="/admin/audit-events">Clear</a>
+      <a class="btn btn-outline-secondary" href="/admin/audit-events">Clear filters</a>
     </div>
   </form>
 
