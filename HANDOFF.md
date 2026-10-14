@@ -291,7 +291,7 @@ Key decisions already made:
 - Subtask A and Subtask B submissions are uploaded separately.
 - Subtask B query image IDs match ground truth with or without a trailing `.png` suffix on either side.
 - Subtask B numeric model IDs match ground truth with or without left zero-padding on either side.
-- Upload format is one TREC_EVAL-format file, any filename extension, maximum 50 MB.
+- Upload format is one TREC_EVAL-format file, any filename extension, maximum 500 MB.
 - Each subtask allows up to 5 runs.
 - One current successful submission per team/subtask/period, with organizer-approved one-time replacement upload support.
 - Failed validation attempts do not count.
@@ -360,7 +360,7 @@ Nginx templates added:
 - `deployment/nginx/staging.conf.example`
 - `deployment/nginx/production.conf.example`
 
-The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 60m`, proxy timeouts, forwarded headers, and localhost upstreams for staging and production.
+The templates include HTTP-to-HTTPS redirect blocks, Let's Encrypt certificate paths, `client_max_body_size 500m`, proxy timeouts, forwarded headers, and localhost upstreams for staging and production.
 
 ## Backup Deployment Files
 

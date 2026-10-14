@@ -34,7 +34,8 @@ This checklist is used before launch and before each production deployment.
 - [ ] Certbot is installed.
 - [ ] Staging Nginx config has real hostname and proxies to `127.0.0.1:8001`.
 - [x] Production Nginx config has real hostname and proxies to `127.0.0.1:8002`.
-- [ ] Nginx config includes `client_max_body_size 60m` or larger.
+- [ ] Nginx config includes `client_max_body_size 500m` or larger.
+- [ ] Server `.env` sets `MAX_UPLOAD_BYTES=524288000` (an older `.env` copied before 2026-07-14 may still say `52428800`).
 - [ ] Nginx `server_names_hash_bucket_size` is increased if long hostnames make `nginx -t` fail.
 - [x] `sudo nginx -t` passes for the production HTTPS configuration.
 - [ ] `/opt/modelretrieval/staging` exists.

@@ -262,7 +262,7 @@ If `128` is still too small, use `256`.
 
 Keep these settings in both final configs:
 
-- `client_max_body_size 60m`
+- `client_max_body_size 500m`
 - proxy headers
 - proxy timeouts
 - upstream ports `8001` and `8002`
