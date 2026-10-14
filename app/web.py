@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -7,9 +9,21 @@ from fastapi.templating import Jinja2Templates
 from app.accounts import get_organizer_account, get_team_account
 from app.config import Settings
 from app.db import connect
+from app.ground_truth import JST
 from app.sessions import SESSION_COOKIE, parse_session_value
 
 templates = Jinja2Templates(directory="app/templates")
+
+
+def format_jst_datetime(value: str) -> str:
+    """Format stored JST timestamps without duplicating the template's JST label."""
+    timestamp = datetime.fromisoformat(value)
+    if timestamp.tzinfo is not None:
+        timestamp = timestamp.astimezone(JST)
+    return timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+
+templates.env.filters["jst_datetime"] = format_jst_datetime
 
 
 def redirect(path: str) -> RedirectResponse:

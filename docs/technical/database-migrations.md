@@ -25,6 +25,7 @@ The app now manages SQLite schema changes with Alembic:
 
 - `alembic.ini` and `migrations/` define the migration environment.
 - Revision `20260706_0001` creates the baseline schema.
+- Revision `20261014_0004` is the current head and repairs stale evaluation lifecycle summaries.
 - Default submission periods are inserted by the baseline revision.
 - `initialize_database()` is migration-backed for local development and tests.
 - `python -m app.cli migrate` applies migrations using the app settings.
@@ -97,7 +98,8 @@ If non-disposable data exists before the migration plan is implemented:
 
 1. Back up the database.
 2. Compare the live schema with the initial revision.
-3. If equivalent, run `alembic stamp head`.
+3. If equivalent, stamp the matching schema revision, then run `alembic upgrade head`
+   so later data migrations are applied as well.
 4. If not equivalent, create a transitional revision or manual repair plan before stamping.
 
 ## Application Startup Policy
@@ -218,6 +220,15 @@ Completed implementation:
 9. Updated deployment runbook and handoff.
 10. Added revision `20260706_0002` for organizer-approved replacement submissions, current/superseded submission state, and one-time resubmission permissions.
 11. Ran full tests and lint.
+12. Added data-only revision `20261014_0004` after `20260708_0003`. It replaces
+    "Queued for evaluation." / "Preparing for evaluation." with "Evaluated." for
+    evaluated submissions and "Evaluating." for processing submissions. Other
+    summaries and statuses are preserved. Downgrade intentionally retains the
+    repair because the original stale text cannot be recovered reliably.
+13. Unversioned databases with resubmission tables/columns are stamped at
+    `20260706_0002`, then upgraded, so later index and data migrations are executed
+    rather than skipped. Head verification remains derived from the Alembic scripts;
+    the compatibility `SCHEMA` string needs no change for this data-only revision.
 
 ## Acceptance Criteria
 

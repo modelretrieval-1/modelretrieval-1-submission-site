@@ -87,3 +87,59 @@ def test_list_audit_events_filters_and_paginates(tmp_path):
         )
     assert total == 2
     assert len(rows) == 1
+
+
+def test_audit_page_formats_timestamps_and_filters_full_jst_days(tmp_path):
+    settings = Settings(
+        app_name="Audit Test",
+        environment="test",
+        database_path=tmp_path / "app.sqlite3",
+        storage_root=tmp_path / "storage",
+        secret_key="test-secret",
+        max_upload_bytes=50 * 1024 * 1024,
+    )
+    initialize_database(settings.database_path)
+    timestamps = {
+        "previous_day": "2026-10-13 23:59:59+09:00",
+        "day_start": "2026-10-14 00:00:00+09:00",
+        "during_day": "2026-10-14 23:20:24+09:00",
+        "day_end": "2026-10-14 23:59:59+09:00",
+        "next_day": "2026-10-15 00:00:00+09:00",
+    }
+    with connect(settings.database_path) as connection:
+        organizer = create_organizer(connection, username="admin", display_name="Admin User")
+        connection.executemany(
+            "INSERT INTO audit_events (actor_type, event_type, created_at_jst) "
+            "VALUES ('system', ?, ?)",
+            timestamps.items(),
+        )
+
+    client = TestClient(create_app(settings))
+    client.post("/login", data={"user_id": "admin", "password": organizer.password})
+    response = client.get("/admin/audit-events")
+    assert response.status_code == 200
+    assert "2026-10-14 23:20:24 JST" in response.text
+    assert "+09:00" not in response.text
+
+    for filters, expected_events in (
+        ({"date_from": "2026-10-14"}, set(timestamps) - {"previous_day"}),
+        ({"date_to": "2026-10-14"}, set(timestamps) - {"next_day"}),
+        (
+            {"date_from": "2026-10-14", "date_to": "2026-10-14"},
+            {"day_start", "during_day", "day_end"},
+        ),
+    ):
+        response = client.get("/admin/audit-events", params=filters)
+        assert response.status_code == 200
+        for event_type in timestamps:
+            is_rendered = f"<code>{event_type}</code>" in response.text
+            assert is_rendered == (event_type in expected_events)
+        assert "+09:00" not in response.text
+
+    with connect(settings.database_path) as connection:
+        stored = dict(
+            connection.execute(
+                "SELECT event_type, created_at_jst FROM audit_events WHERE actor_type = 'system'"
+            ).fetchall()
+        )
+    assert stored == timestamps

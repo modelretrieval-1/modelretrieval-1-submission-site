@@ -1349,7 +1349,7 @@ def claim_next_queued_submission(connection: sqlite3.Connection) -> int | None:
     cursor = connection.execute(
         """
         UPDATE submissions
-        SET status = 'processing'
+        SET status = 'processing', validation_summary = 'Evaluating.'
         WHERE id = ? AND status = 'queued'
         """,
         (row["id"],),
@@ -1363,7 +1363,8 @@ def claim_next_queued_submission(connection: sqlite3.Connection) -> int | None:
 def requeue_processing_submissions(connection: sqlite3.Connection) -> int:
     """Return interrupted ``processing`` submissions to ``queued`` on startup."""
     cursor = connection.execute(
-        "UPDATE submissions SET status = 'queued' WHERE status = 'processing'"
+        "UPDATE submissions SET status = 'queued', validation_summary = 'Queued for evaluation.' "
+        "WHERE status = 'processing'"
     )
     connection.commit()
     return cursor.rowcount

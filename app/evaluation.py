@@ -503,7 +503,7 @@ def persist_evaluation_results(
     connection.execute(
         """
         UPDATE submissions
-        SET status = 'evaluated'
+        SET status = 'evaluated', validation_summary = 'Evaluated.'
         WHERE id = ?
         """,
         (submission_id,),

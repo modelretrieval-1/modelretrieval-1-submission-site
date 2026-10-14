@@ -54,7 +54,7 @@
           <tbody>
             {% for event in events %}
               <tr>
-                <td class="num nowrap">{{ event.created_at_jst }} JST</td>
+                <td class="num nowrap">{{ event.created_at_jst|jst_datetime }} JST</td>
                 <td class="nowrap">{{ event.actor_type }}{% if event.actor_id %} #{{ event.actor_id }}{% endif %}</td>
                 <td><code>{{ event.event_type }}</code></td>
                 <td class="nowrap">{{ event.entity_type or "" }}{% if event.entity_id %} #{{ event.entity_id }}{% endif %}</td>
